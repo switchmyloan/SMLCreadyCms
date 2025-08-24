@@ -3,14 +3,14 @@
 import { useForm } from 'react-hook-form'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import ValidatedTextField from '@/components/forms/ValidatedTextField'
-import ValidatedSearchableSelectField from '@/components/forms/ValidatedSearchableSelectField'
-import ValidatedSearchMultiSelect from '@/components/forms/ValidatedSearchMultiSelect'
-import ValidatedLabel from '@/components/forms/ValidatedLabel'
-import SubmitBtn from '@/components/forms/SubmitBtn'
-import ToastNotification from '@/components/forms/ToastNotification'
-import CreateAuthorTagModal from '@/components/forms/CreateAuthorTagModal'
-import { AddAuthor, AddTag, getTags, AddBlog } from '@/api-services/cms-service'
+import ValidatedTextField from '../../components/Form/ValidatedTextField'
+import ValidatedSearchableSelectField from '../../components/Form/ValidatedSearchableSelectField'
+import ValidatedSearchMultiSelect from '../../components/Form/ValidatedSearchMultiSelect'
+import ValidatedLabel from '../../components/Form/ValidatedLabel'
+import SubmitBtn from '../../components/Form/SubmitBtn'
+import ToastNotification from '../../components/Notification/ToastNotification'
+import CreateAuthorTagModal from '../../components/Modal/CreateAuthorTagModal'
+// import { AddAuthor, AddTag, getTags, AddBlog } from '@/api-services/cms-service'
 
 export default function BlogCreate() {
   const navigate = useNavigate();
@@ -109,6 +109,10 @@ export default function BlogCreate() {
             globalFilter={globalFilter}
           />
 
+          <ValidatedTextField name="metaTitle" control={control} label="Meta Title" errors={errors} />
+          <ValidatedTextField name="metadata.level" control={control} label="Level" errors={errors} />
+          <ValidatedTextField name="metaImage" control={control} label="Meta Image URL" errors={errors} />
+          <ValidatedTextField name="metadata.category" control={control} label="Category" errors={errors} />
           <ValidatedTextField name="metaTitle" control={control} label="Meta Title" errors={errors} />
           <ValidatedTextField name="metadata.level" control={control} label="Level" errors={errors} />
           <ValidatedTextField name="metaImage" control={control} label="Meta Image URL" errors={errors} />

@@ -9,6 +9,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import About from './pages/About'
 import Blogs from './pages/Blogs/Blogs'
 import DefaultLayout from './layouts/DefaultLayout'
+import BlogCreate from './pages/Blogs/BlogsCreate'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -20,6 +21,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/blogs" element={<Blogs />} />
+              <Route path="/blog-create" element={<BlogCreate />} />
             </Routes>
          </DefaultLayout>
       </BrowserRouter>
