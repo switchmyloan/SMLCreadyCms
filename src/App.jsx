@@ -5,19 +5,33 @@ import './App.css'
 import Sidebar from './components/Sidebar/Sidebar'
 import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import About from './pages/About'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex-1 flex flex-col ml-64"> {/* ml-64 to offset the sidebar width */}
-        <Navbar />
-        <Home />
-      </div>
-    </div>
+      <BrowserRouter>
+        <div className="flex h-screen overflow-hidden">
+          <Sidebar />
+          <div className="flex-1 flex flex-col ml-64">
+
+             <div className="fixed top-0 left-64 right-0 z-50">
+            <Navbar />
+          </div>
+             {/* <div className="flex-1 p-4 mt-16 overflow-y-auto"> */}
+             <main className="flex-1 p-4 mt-16 overflow-y-auto ">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+            </main>
+          {/* </div> */}
+          </div>
+        </div>
+      </BrowserRouter>
     </>
   )
 }
