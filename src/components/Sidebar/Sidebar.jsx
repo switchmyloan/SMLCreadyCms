@@ -24,7 +24,7 @@ function Sidebar() {
       </div>
       <ul className="mt-4">
         <li className="p-4 hover:bg-gray-700 cursor-pointer"><Link to="/">Dashboard</Link></li>
-        <li className="p-4 hover:bg-gray-700 cursor-pointer"><Link to="/about">About</Link></li>
+        <li className="p-4 hover:bg-gray-700 cursor-pointer"><Link to="/blogs">Blogs</Link></li>
       </ul>
     </div>
   );

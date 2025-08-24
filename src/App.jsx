@@ -7,6 +7,7 @@ import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import About from './pages/About'
+import Blogs from './pages/Blogs/Blogs'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,7 +26,7 @@ function App() {
              <main className="flex-1 p-4 mt-16 overflow-y-auto ">
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/about" element={<About />} />
+              <Route path="/blogs" element={<Blogs />} />
             </Routes>
             </main>
           {/* </div> */}
