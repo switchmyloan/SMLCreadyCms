@@ -2,7 +2,7 @@ import { Menu } from "lucide-react";
 
 function Navbar({ onToggleSidebar }) {
   return (
-    <nav className="bg-white text-white px-4 py-2 shadow-md fixed top-0 left-0 w-full z-10 flex justify-between items-center transition-all duration-300 ease-in-out">
+    <nav className="bg-white text-white px-4 py-2 border-b fixed top-0 left-0 w-full z-10 flex justify-between items-center transition-all duration-300 ease-in-out">
       {/* Left section */}
       <div className="flex items-center gap-2 sm:gap-4">
         {/* Sidebar toggle (optional) */}

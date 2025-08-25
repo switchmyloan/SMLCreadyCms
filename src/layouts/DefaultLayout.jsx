@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "../components/Navbar/Navbar";
+import Breadcrumb from "../components/BreadCrumb/BreadCrumb";
 
 function DefaultLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -35,8 +36,12 @@ function DefaultLayout({ children }) {
           <Navbar onToggleSidebar={toggleSidebar} />
         </div>
 
-        {/* Content (scrollable area) */}
-        <main className="flex-1 p-4 mt-16  overflow-y-auto">
+         {/* Fixed Breadcrumb */}
+        <div className="fixed top-12 left-0 right-0 z-20 md:left-64 md:w-[calc(100%-16rem)]">
+          <Breadcrumb />
+        </div>
+        <main className="flex-1 p-4 mt-24  overflow-y-auto">
+
           {children}
         </main>
       </div>

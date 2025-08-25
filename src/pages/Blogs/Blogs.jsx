@@ -4,68 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
 import { getBlogs } from '../../api-services/cms-services';
 import ToastNotification from '../../components/Notification/ToastNotification';
-
-
-const columns = [
-  {
-    header: 'Title',
-    accessorKey: 'title',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
-  {
-    header: 'Description',
-    accessorKey: 'description',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
-  {
-    header: 'Status',
-    accessorKey: 'status',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
-];
-
-
-// const data = [
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-//   { name: "Amit", email: "amit@test.com", role: "Admin" },
-//   { name: "Rahul", email: "rahul@test.com", role: "Editor" },
-//   { name: "Sneha", email: "sneha@test.com", role: "Viewer" },
-// ];
+import { blogColumn } from '../../components/TableHeader';
 
 
 const Blogs = () => {
@@ -85,8 +24,8 @@ const Blogs = () => {
 
       console.log('Response:', response.data.data);
       if (response?.data?.success) {
-        setData(response?.data?.data || []);
-        setTotalDataCount(response?.data?.pagination?.total || 0);
+        setData(response?.data?.data?.data || []);
+        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
@@ -103,16 +42,17 @@ const Blogs = () => {
     fetchBlogs();
   }, []);
   return (
-    <div>
+    <>
       <Toaster />
       <h1 className="text-2xl font-bold mb-4">Blogs</h1>
       <DataTable
-        columns={columns}
+        columns={blogColumn}
         data={data}
+        totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Add Blog"
       />
-    </div>
+    </>
   )
 }
 
