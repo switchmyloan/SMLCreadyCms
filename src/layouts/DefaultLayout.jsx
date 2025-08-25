@@ -40,7 +40,7 @@ function DefaultLayout({ children }) {
         <div className="fixed top-12 left-0 right-0 z-20 md:left-64 md:w-[calc(100%-16rem)]">
           <Breadcrumb />
         </div>
-        <main className="flex-1 p-4 mt-24  overflow-y-auto">
+        <main className="flex-1 p-4 mt-20  overflow-y-auto">
 
           {children}
         </main>

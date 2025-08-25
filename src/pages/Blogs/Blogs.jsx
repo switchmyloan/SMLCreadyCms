@@ -44,7 +44,6 @@ const Blogs = () => {
   return (
     <>
       <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Blogs</h1>
       <DataTable
         columns={blogColumn}
         data={data}
