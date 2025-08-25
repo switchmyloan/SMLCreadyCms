@@ -1,13 +1,221 @@
+// import { useState } from "react";
+// import { useForm } from "react-hook-form";
+// import { Dialog } from "@headlessui/react";
+// import ImageUploadField from "../Form/ImageUploadField";
+
+// const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
+//   const {
+//     register,
+//     handleSubmit,
+//     reset,
+//     formState: { errors },
+//   } = useForm({
+//     defaultValues: {
+//       name: "",
+//       email: "",
+//       description: "",
+//       designation: "",
+//       socialLink: "",
+//       file: ''
+//     },
+//   });
+
+//   const [imagePreview, setImagePreview] = useState(null);
+
+//   const handleFormSubmit = (data) => {
+//     onSubmit({
+//       ...data
+//     });
+//     reset();
+//     setImagePreview(null);
+//     handleClose();
+//   };
+
+//   const handleImageChange = (e) => {
+//     const file = e.target.files[0];
+//     if (file) setImagePreview(URL.createObjectURL(file));
+//   };
+
+//   return (
+//     <Dialog
+//       open={open}
+//       onClose={handleClose}
+//       className="fixed inset-0 z-50 flex items-center justify-center"
+//     >
+//       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+//       <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
+//         {/* Title */}
+//         <Dialog.Title className="text-lg font-semibold mb-4">
+//           {type === "author" ? "Create Author" : "Create Tag"}
+//         </Dialog.Title>
+
+//         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+//           {type === "author" ? (
+//             <>
+//               {/* Name + Designation */}
+//               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700">
+//                     Author Name
+//                   </label>
+//                   <input
+//                     type="text"
+//                     {...register("name", { required: "Author Name is required" })}
+//                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+//                       }`}
+//                   />
+//                   {errors.name && (
+//                     <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+//                   )}
+//                 </div>
+//                 <div>
+//                   <label className="block text-sm font-medium text-gray-700">
+//                     Designation
+//                   </label>
+//                   <input
+//                     type="text"
+//                     {...register("designation", { required: "Designation is required" })}
+//                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+//                       }`}
+//                   />
+//                   {errors.designation && (
+//                     <p className="text-red-500 text-xs mt-1">{errors.designation.message}</p>
+//                   )}
+//                 </div>
+//               </div>
+
+//               {/* Social Link */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Social Link
+//                 </label>
+//                 <input
+//                   type="text"
+//                   {...register("socialLink", { required: "Social Link is required" })}
+//                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.socialLink ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+//                     }`}
+//                 />
+//                 {errors.socialLink && (
+//                   <p className="text-red-500 text-xs mt-1">{errors.socialLink.message}</p>
+//                 )}
+//               </div>
+
+//               {/* Description */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Description
+//                 </label>
+//                 <textarea
+//                   rows={3}
+//                   {...register("description", { required: "Description is required" })}
+//                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.description ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+//                     }`}
+//                 />
+//                 {errors.description && (
+//                   <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+//                 )}
+//               </div>
+
+//               {/* Image Upload */}
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Profile Image
+//                 </label>
+//                 {/* <input
+//                   type="file"
+//                   accept="image/*"
+//                   onChange={handleImageChange}
+//                   className="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+//                 /> */}
+//                 <ImageUploadField
+//                   name="file"
+//                   control={control}
+//                   label="Upload Image"
+//                   errors={errors}
+//                   rules={{ required: "Image is required" }}
+//                 />
+//               </div>
+
+//               {imagePreview && (
+//                 <div className="flex justify-center mt-3">
+//                   <img
+//                     src={imagePreview}
+//                     alt="Preview"
+//                     className="w-24 h-24 rounded-full object-cover"
+//                   />
+//                 </div>
+//               )}
+//             </>
+//           ) : (
+//             <>
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Tag Name
+//                 </label>
+//                 <input
+//                   type="text"
+//                   {...register("name", { required: "Tag Name is required" })}
+//                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+//                     }`}
+//                 />
+//                 {errors.name && (
+//                   <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+//                 )}
+//               </div>
+
+//               <div>
+//                 <label className="block text-sm font-medium text-gray-700">
+//                   Tag Description
+//                 </label>
+//                 <textarea
+//                   rows={3}
+//                   {...register("description")}
+//                   className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                 />
+//               </div>
+//             </>
+//           )}
+
+//           {/* Actions */}
+//           <div className="flex justify-end space-x-3 pt-4">
+//             <button
+//               type="button"
+//               onClick={handleClose}
+//               className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 text-sm"
+//             >
+//               Cancel
+//             </button>
+//             <button
+//               type="submit"
+//               className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm"
+//             >
+//               Save
+//             </button>
+//           </div>
+//         </form>
+//       </div>
+//     </Dialog>
+//   );
+// };
+
+// export default CreateAuthorTagModal;
+
+
+
+'use client'
+
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { Dialog } from "@headlessui/react";
+import ImageUploadField from "../Form/ImageUploadField";
 
 const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
-  const { 
-    register, 
-    handleSubmit, 
-    reset ,
-     formState: { errors },
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
   } = useForm({
     defaultValues: {
       name: "",
@@ -15,24 +223,22 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
       description: "",
       designation: "",
       socialLink: "",
+      file: null, // Use null for file input
     },
   });
 
   const [imagePreview, setImagePreview] = useState(null);
 
   const handleFormSubmit = (data) => {
-    onSubmit({
+    // Transform the file data to match the expected API payload
+    const payload = {
       ...data,
-      profileImageUrl: imagePreview,
-    });
+      profileImageUrl: data.file ? data.file[0] : null, // Extract the first file from FileList
+    };
+    onSubmit(payload);
     reset();
     setImagePreview(null);
     handleClose();
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) setImagePreview(URL.createObjectURL(file));
   };
 
   return (
@@ -43,7 +249,6 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
     >
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-        {/* Title */}
         <Dialog.Title className="text-lg font-semibold mb-4">
           {type === "author" ? "Create Author" : "Create Tag"}
         </Dialog.Title>
@@ -59,9 +264,11 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                   </label>
                   <input
                     type="text"
-                 {...register("name", { required: "Author Name is required" })}
+                    {...register("name", { required: "Author Name is required" })}
                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                      errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                      errors.name
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   />
                   {errors.name && (
@@ -76,7 +283,9 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                     type="text"
                     {...register("designation", { required: "Designation is required" })}
                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                      errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                      errors.designation
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   />
                   {errors.designation && (
@@ -94,10 +303,12 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                   type="text"
                   {...register("socialLink", { required: "Social Link is required" })}
                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                    errors.socialLink ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                    errors.socialLink
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                 />
-                 {errors.socialLink && (
+                {errors.socialLink && (
                   <p className="text-red-500 text-xs mt-1">{errors.socialLink.message}</p>
                 )}
               </div>
@@ -111,10 +322,12 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                   rows={3}
                   {...register("description", { required: "Description is required" })}
                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                    errors.description ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                    errors.description
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                 />
-                 {errors.description && (
+                {errors.description && (
                   <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
                 )}
               </div>
@@ -124,12 +337,27 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                 <label className="block text-sm font-medium text-gray-700">
                   Profile Image
                 </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="mt-1 block w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                <Controller
+                  name="file"
+                  control={control}
+                  rules={{ required: "Image is required" }}
+                  render={({ field }) => (
+                    <ImageUploadField
+                      name="file"
+                      control={control}
+                      label="Upload Image"
+                      errors={errors}
+                      rules={{ required: "Image is required" }}
+                      onChange={(file) => {
+                        field.onChange(file); // Update form state
+                        setImagePreview(file ? URL.createObjectURL(file[0]) : null); // Update preview
+                      }}
+                    />
+                  )}
                 />
+                {errors.file && (
+                  <p className="text-red-500 text-xs mt-1">{errors.file.message}</p>
+                )}
               </div>
 
               {imagePreview && (
@@ -150,12 +378,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                 </label>
                 <input
                   type="text"
-                   {...register("name", { required: "Tag Name is required" })}
+                  {...register("name", { required: "Tag Name is required" })}
                   className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
-                    errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                    errors.name
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
                   }`}
                 />
-                 {errors.name && (
+                {errors.name && (
                   <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
                 )}
               </div>
