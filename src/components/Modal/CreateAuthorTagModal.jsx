@@ -3,7 +3,12 @@ import { useForm } from "react-hook-form";
 import { Dialog } from "@headlessui/react";
 
 const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
-  const { register, handleSubmit, reset } = useForm({
+  const { 
+    register, 
+    handleSubmit, 
+    reset ,
+     formState: { errors },
+  } = useForm({
     defaultValues: {
       name: "",
       email: "",
@@ -54,9 +59,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                   </label>
                   <input
                     type="text"
-                    {...register("name", { required: true })}
-                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 {...register("name", { required: "Author Name is required" })}
+                    className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                      errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {errors.name && (
+                    <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -64,9 +74,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                   </label>
                   <input
                     type="text"
-                    {...register("designation", { required: true })}
-                    className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    {...register("designation", { required: "Designation is required" })}
+                    className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                      errors.designation ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {errors.designation && (
+                    <p className="text-red-500 text-xs mt-1">{errors.designation.message}</p>
+                  )}
                 </div>
               </div>
 
@@ -77,9 +92,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                 </label>
                 <input
                   type="text"
-                  {...register("socialLink", { required: true })}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  {...register("socialLink", { required: "Social Link is required" })}
+                  className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                    errors.socialLink ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                  }`}
                 />
+                 {errors.socialLink && (
+                  <p className="text-red-500 text-xs mt-1">{errors.socialLink.message}</p>
+                )}
               </div>
 
               {/* Description */}
@@ -89,9 +109,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                 </label>
                 <textarea
                   rows={3}
-                  {...register("description", { required: true })}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  {...register("description", { required: "Description is required" })}
+                  className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                    errors.description ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                  }`}
                 />
+                 {errors.description && (
+                  <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+                )}
               </div>
 
               {/* Image Upload */}
@@ -125,9 +150,14 @@ const CreateAuthorTagModal = ({ open, handleClose, type, onSubmit }) => {
                 </label>
                 <input
                   type="text"
-                  {...register("name", { required: true })}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   {...register("name", { required: "Tag Name is required" })}
+                  className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                    errors.name ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                  }`}
                 />
+                 {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                )}
               </div>
 
               <div>

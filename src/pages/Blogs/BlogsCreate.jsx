@@ -86,22 +86,22 @@ export default function BlogCreate() {
 
   const handleTagSubmit = async (data) => {
     console.log("Tag Data", data)
-    // try {
-    //   const response = await AddTag({
-    //     name: data.name,
-    //     description: data.description,
-    //   });
+    try {
+      const response = await AddTag({
+        name: data.name,
+        description: data.description,
+      });
 
-    //   if (response) {
-    //     ToastNotification.success("Tag added successfully!");
-    //     fetchTags();   // ✅ naya tag reload karega
-    //     handleClose();
-    //   } else {
-    //     ToastNotification.error("Failed to add tag.");
-    //   }
-    // } catch (err) {
-    //   ToastNotification.error("Something went wrong!");
-    // }
+      if (response) {
+        ToastNotification.success("Tag added successfully!");
+        fetchTags();   // ✅ naya tag reload karega
+        handleClose();
+      } else {
+        ToastNotification.error("Failed to add tag.");
+      }
+    } catch (err) {
+      ToastNotification.error("Something went wrong!");
+    }
   };
 
   const handleAuthorSubmit = async (data) => {
