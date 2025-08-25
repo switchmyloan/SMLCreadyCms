@@ -10,7 +10,8 @@ import { blogColumn } from '../../components/TableHeader';
 const Blogs = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-    const [totalDataCount, setTotalDataCount] = useState(0);
+  const [totalDataCount, setTotalDataCount] = useState(0);
+ const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 })
 
   const handleCreate = () => {
 
@@ -41,6 +42,10 @@ const Blogs = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
+
+  useEffect(() => {
+    fetchBlogs(pagination);
+  }, [pagination]);
   return (
     <>
       <Toaster />
@@ -50,6 +55,7 @@ const Blogs = () => {
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Add Blog"
+        onPageChange={(pagination) => setPagination(pagination)}
       />
     </>
   )
