@@ -1,10 +1,10 @@
 'use client'
 import axios from 'axios'
-import { TokenService } from '@/custom-hooks/index.js'
+import { TokenService } from '../custom-hooks/index'
 
 const createAxiosInstance = () => {
   const instance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || '',
+    baseURL: import.meta.env.VITE_API_URL || '',
     params: {
       
     }

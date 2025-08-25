@@ -20,7 +20,8 @@ body {
 }
 
 #root {
-  height: 100vh;
+  min-height: 100vh;  /* ✅ fixed height ki jagah min-height */
+  height: auto;       /* ✅ body expand kar sake */
 }
 
 .content {

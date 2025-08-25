@@ -167,7 +167,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-function DataTable({ columns, data }) {
+function DataTable({ columns, data, onCreate, createLabel = "Create" }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState({
@@ -208,7 +208,17 @@ function DataTable({ columns, data }) {
           className="p-2 border rounded w-1/3"
         />
         
-      </div>
+     
+        {/* ✅ Create button */}
+        {onCreate && (
+          <button
+            onClick={onCreate}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            {createLabel}
+          </button>
+        )}
+         </div>
 
       <table className="min-w-full border border-gray-200">
         <thead className="bg-gray-100">

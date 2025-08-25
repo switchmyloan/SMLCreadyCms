@@ -1,49 +1,36 @@
-// import { Link } from 'react-router-dom';
-// function Sidebar() {
-//   return (
-//     <div className="w-64 h-screen bg-gray-800 text-white fixed top-0 left-0">
-//       <div className="p-4">
-//         <h2 className="text-xl font-bold">Menu</h2>
-//       </div>
-//       <ul className="mt-4">
-//         <li className="p-4 hover:bg-gray-700 cursor-pointer"><Link to="/">Dashboard</Link></li>
-//         <li className="p-4 hover:bg-gray-700 cursor-pointer"><Link to="/blogs">Blogs</Link></li>
-//       </ul>
-//     </div>
-//   );
-// }
-
-// export default Sidebar;
-
-
 import { NavLink } from 'react-router-dom';
+import logo from '../../assets/cready.webp'
 
 function Sidebar() {
   return (
-    <div className="w-64 h-screen bg-gray-800 text-white fixed top-0 left-0">
-      <div className="p-4">
-        <h2 className="text-xl font-bold">Menu</h2>
+    <div className="w-64 h-screen bg-gray-800 text-white fixed top-0 left-0 ">
+      <div className="p-4  flex justify-center items-center border-b bottom-1 border-gray-700">
+        <img src={logo} alt="Logo" className="w-32 h-auto text-center " />
       </div>
-      <ul className="mt-4">
-        <li>
+      <ul className="mt-4 flex-1">
+        <li className="px-4 mb-2">
           <NavLink
             to="/"
             end
-            className={({ isActive }) =>
-              `block p-4 cursor-pointer ${
-                isActive ? "bg-gray-600 font-semibold" : "hover:bg-gray-700"
+             className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg px-3 py-2 ${isActive
+                ? "bg-indigo-600 text-white font-medium"
+                : "text-gray-300 hover:bg-gray-700"
               }`
             }
           >
             Dashboard
           </NavLink>
         </li>
-        <li>
+        <li className="px-4 mb-2">
           <NavLink
             to="/blogs"
-            className={({ isActive }) =>
-              `block p-4 cursor-pointer ${
-                isActive ? "bg-gray-600 font-semibold" : "hover:bg-gray-700"
+           
+
+             className={({ isActive }) =>
+              `flex items-center gap-3 rounded-lg px-3 py-2 ${isActive
+                ? "bg-indigo-600 text-white font-medium"
+                : "text-gray-300 hover:bg-gray-700"
               }`
             }
           >
