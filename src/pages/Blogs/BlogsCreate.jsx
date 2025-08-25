@@ -245,12 +245,7 @@ export default function BlogCreate() {
               placeholder={"Enter level (e.g., Beginner, Intermediate)"}
             />
 
-
-
             {/* Category (half) */}
-         
-
-
              <div>
               <ValidatedLabel label="Select Category" />
               <ValidatedSearchableSelectField

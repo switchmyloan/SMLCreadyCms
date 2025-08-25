@@ -14,16 +14,25 @@ import BlogCreate from './pages/Blogs/BlogsCreate'
 function App() {
   const [count, setCount] = useState(0)
 
+
+  // Dynamic routes array
+  const routes = [
+    { path: '/', element: <Home /> },
+    { path: '/about', element: <About /> },
+    { path: '/blogs', element: <Blogs /> },
+    { path: '/blogs/create', element: <BlogCreate /> }
+  ];
+
   return (
     <>
       <BrowserRouter>
-          <DefaultLayout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/blogs" element={<Blogs />} />
-              <Route path="/blogs/create" element={<BlogCreate />} />
-            </Routes>
-         </DefaultLayout>
+        <DefaultLayout>
+          <Routes>
+            {routes.map((route, idx) => (
+              <Route key={idx} path={route.path} element={route.element} />
+            ))}
+          </Routes>
+        </DefaultLayout>
       </BrowserRouter>
     </>
   )
