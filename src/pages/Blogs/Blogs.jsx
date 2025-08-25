@@ -75,7 +75,7 @@ const Blogs = () => {
 
   const handleCreate = () => {
 
-    navigate("/blog-create");
+    navigate("/blogs/create");
   }
 
   const fetchBlogs = async () => {
@@ -105,7 +105,7 @@ const Blogs = () => {
   return (
     <div>
       <Toaster />
-      <h1 className="text-2xl font-bold mb-4">Users</h1>
+      <h1 className="text-2xl font-bold mb-4">Blogs</h1>
       <DataTable
         columns={columns}
         data={data}
