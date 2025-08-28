@@ -56,7 +56,7 @@ const Blogs = () => {
         data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
-        createLabel="Add Blog"
+        createLabel="Create"
         onPageChange={(pagination) => setPagination(pagination)}
       />
     </>

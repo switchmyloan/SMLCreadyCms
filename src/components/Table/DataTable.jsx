@@ -299,24 +299,24 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
   );
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 rounded-lg shadow-sm overflow-x-auto">
+    <div className="p-3 md:p-4 md:pb-3 bg-gray-50 rounded-lg shadow-sm overflow-x-auto pt-0 pb-0">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h1 className="text-2xl md:text-3xl font-semibold text-gray-800">Blogs</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Blogs</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
           <input
             type="text"
             placeholder="Search..."
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full sm:w-64 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 shadow-sm"
+            className="w-full sm:w-52 p-2 pt-1 pb-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 shadow-sm"
           />
           {onCreate && (
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 hover:shadow-lg transition-all duration-200"
+              className="flex items-center gap-2 px-4 py-[5px] bg-gradient-to-r from-primary-light to-primary-dark text-white font-medium rounded-lg shadow-md hover:from-primary-dark hover:to-primary-light hover:shadow-lg transition-all duration-300"
             >
-              <Plus size={16} />
+              {/* <Plus size={16} /> */}
               {createLabel}
             </button>
           )}
@@ -332,7 +332,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
                 <th
                   key={header.id}
                   onClick={header.column.getToggleSortingHandler()}
-                  className="px-4 py-2 text-left cursor-pointer select-none hover:bg-gray-200 transition-colors duration-200"
+                  className="px-4 py-3 text-left cursor-pointer select-none hover:bg-gray-200 transition-colors duration-200"
                 >
                   <div className="flex items-center gap-1">
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -363,7 +363,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
                   } hover:bg-gray-100`}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-0 border-b border-gray-200">
+                  <td key={cell.id} className="px-3 py-0 border-b border-gray-200 text-sm">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}
@@ -374,7 +374,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
       </table>
 
       {/* Pagination */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-4 p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-1 p-1 bg-white border-gray-200 rounded-lg shadow-sm">
         <span className="text-gray-600 text-sm">
           Showing {totalDataCount === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1} to{' '}
           {Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalDataCount)} of {totalDataCount} entries
@@ -387,7 +387,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
             <select
               value={pagination.pageSize}
               onChange={(e) => setPagination({ ...pagination, pageSize: Number(e.target.value), pageIndex: 0 })}
-              className="p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
+              className="p-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200"
             >
               <option value={10}>10</option>
               <option value={20}>20</option>
