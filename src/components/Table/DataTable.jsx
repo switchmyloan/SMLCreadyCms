@@ -299,7 +299,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
   );
 
   return (
-    <div className="p-3 md:p-4 md:pb-3 bg-gray-50 rounded-lg shadow-sm overflow-x-auto pt-0 pb-0">
+    <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm overflow-x-auto pt-0 pb-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Blogs</h1>
