@@ -11,12 +11,17 @@ export const DeleteTag = async id => Api().delete(`/tag/${id}`)
 export const getBlogs = async (pageNo, limit, globalFilter) => {
   return Api().get(`/blog?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
 }
+export const getBlogById = async id => Api().get(`/blog/${id}`)
 export const AddBlog = async (formData) => {
   return Api().post('/blog', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   });
+}
+export const UpdateBlog = async payload => {
+  const { id, ...data } = payload
+  return Api().patch(`/blog/${id}`, data)
 }
 
 

@@ -20,7 +20,8 @@ function App() {
     { path: '/', element: <Home /> },
     { path: '/about', element: <About /> },
     { path: '/blogs', element: <Blogs /> },
-    { path: '/blogs/create', element: <BlogCreate /> }
+    { path: '/blogs/create', element: <BlogCreate /> },
+    { path: '/blog/:id', element: <BlogCreate /> }
   ];
 
   return (

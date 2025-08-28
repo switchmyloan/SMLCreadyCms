@@ -1,6 +1,6 @@
 import { Edit2, Trash2 } from 'lucide-react';
 
-export const blogColumn = [
+export const blogColumn = ({handleEdit}) => [
   {
     header: 'Title',
     accessorKey: 'title',
@@ -28,7 +28,7 @@ export const blogColumn = [
       return (
         <div className="flex space-x-3">
           <button
-            onClick={() => console.log('Edit', row.original)}
+            onClick={() => handleEdit(row.original)}
             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
           >
             <Edit2 size={20} />

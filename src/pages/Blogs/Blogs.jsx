@@ -39,9 +39,9 @@ const Blogs = () => {
     }
   };
 
-  useEffect(() => {
-    fetchBlogs();
-  }, []);
+   const handleEdit = (data) => {
+        navigate(`/blog/${data?.id}`)
+    }
 
   useEffect(() => {
     fetchBlogs(pagination);
@@ -50,7 +50,9 @@ const Blogs = () => {
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn}
+        columns={blogColumn({
+          handleEdit
+        })}
         data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
