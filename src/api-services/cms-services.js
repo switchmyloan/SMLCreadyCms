@@ -41,3 +41,9 @@ export const getAuthor = async (pageNo, limit, globalFilter) => {
 export const getFaq = async (pageNo, limit, globalFilter) => {
   return Api().get(`/faq?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
 }
+export const AddFaq = async payload => Api().post(`/faq`, payload)
+
+// Category APIS
+export const getCategory = async (pageNo, limit, globalFilter) => {
+  return Api().get(`/category?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
+}
