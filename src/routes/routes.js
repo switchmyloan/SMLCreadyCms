@@ -19,7 +19,7 @@ export const routes = [
   { 
     path: "/press", 
     label: "Press Room", 
-    icon: "HelpCircle",
-    showInSidebar: true 
+    icon: "Newspaper",
+    showInSidebar: true,
   },
 ];

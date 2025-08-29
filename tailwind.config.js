@@ -1,18 +1,18 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: "class", // ✅ manual toggle ke liye
+  darkMode: "class", 
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {}, // ✅ ab yaha extra colors ki zaroorat nahi
+    extend: {}, 
   },
   plugins: [require("daisyui")],
   daisyui: {
     themes: [
       {
-        mytheme: { // ✅ apna custom DaisyUI theme
+        mytheme: { 
           "primary": "#4B49AC",
           "secondary": "#F3797E",
           "accent": "#7DA0FA",
