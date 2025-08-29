@@ -169,7 +169,7 @@ const Faq = () => {
                 })}
                 title="FAQ"
                 data={data}
-                totalDataCount={totalDataCount}
+                totalDataCount={100}
                 onCreate={handleCreate}
                 createLabel="Create"
                 onPageChange={onPageChange}

@@ -15,5 +15,11 @@ export const routes = [
     label: "FAQ", 
     icon: "HelpCircle",
     showInSidebar: true 
-  } 
+  },
+  { 
+    path: "/press", 
+    label: "Press Room", 
+    icon: "HelpCircle",
+    showInSidebar: true 
+  },
 ];

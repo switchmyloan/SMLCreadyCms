@@ -11,6 +11,7 @@ import Blogs from './pages/Blogs/Blogs'
 import DefaultLayout from './layouts/DefaultLayout'
 import BlogCreate from './pages/Blogs/BlogsCreate'
 import Faq from './pages/FAQ/Faq'
+import Press from './pages/PressRoom/Press'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,6 +25,7 @@ function App() {
     { path: '/blogs/create', element: <BlogCreate /> },
     { path: '/blog/:id', element: <BlogCreate /> },
     { path: '/faq', element: <Faq /> },
+    { path: '/press', element: <Press /> },
   ];
 
   return (

@@ -54,3 +54,8 @@ export const updateFaq = async payload => {
 export const getCategory = async (pageNo, limit, globalFilter) => {
   return Api().get(`/category?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
 }
+
+// Press Room
+export const getPress = async (pageNo = 1, limit =10, globalFilter='') => {
+  return Api().get(`/press?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
+}
