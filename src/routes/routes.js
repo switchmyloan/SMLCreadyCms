@@ -11,8 +11,9 @@ export const routes = [
     showInSidebar: true 
   },
   { 
-    path: "/blogs/create", 
-    label: "Create Blog", 
-    showInSidebar: false 
-  } // backend menu me nahi
+    path: "/faq", 
+    label: "FAQ", 
+    icon: "HelpCircle",
+    showInSidebar: true 
+  } 
 ];

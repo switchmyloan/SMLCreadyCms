@@ -44,3 +44,38 @@ export const blogColumn = ({handleEdit}) => [
     },
   },
 ];
+export const faqColumn = ({handleEdit}) => [
+  {
+    header: 'Questions',
+    accessorKey: 'question',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Answers',
+    accessorKey: 'answer',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Edit2 size={20} />
+          </button>
+          <button
+            onClick={() => console.log('Delete', row.original)}
+            className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];

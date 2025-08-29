@@ -36,3 +36,8 @@ export const AddAuthor = async (formData) => {
 export const getAuthor = async (pageNo, limit, globalFilter) => {
   return Api().get(`/author?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
 }
+
+// FAQ API
+export const getFaq = async (pageNo, limit, globalFilter) => {
+  return Api().get(`/faq?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
+}

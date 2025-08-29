@@ -4,9 +4,9 @@
   import { routes } from "../../routes/routes";
   import { X } from "lucide-react";
 
-  import { Home, FileText, Users } from "lucide-react";
+  import { Home, FileText, Users, HelpCircle  } from "lucide-react";
 
-  const ICONS = { Home, FileText, Users };
+  const ICONS = { Home, FileText, Users, HelpCircle };
 
 
   function Sidebar({ onClose }) {

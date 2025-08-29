@@ -9,7 +9,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataCount, onPageChange }) {
+function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataCount, onPageChange, title="Page" }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
@@ -79,7 +79,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
     <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm overflow-x-auto pt-0 pb-0">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">Blogs</h1>
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-800">{title}</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
           <input
             type="text"
