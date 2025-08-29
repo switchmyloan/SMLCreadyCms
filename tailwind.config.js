@@ -1,28 +1,31 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class", // ✅ manual toggle ke liye
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: "#4B49AC", // main
-          light: "#7DA0FA",  // lighter
-          dark: "#7978E9",   // darker
-        },
-        secondary: {
-          DEFAULT: "#F3797E",
-          light: "#FF6584",
-        },
-        neutral: {
-          bg: "#F9FAFB",    // background
-          text: "#111827",  // main text
-          subtext: "#6B7280", // secondary text
-        }
-      },
-    },
+    extend: {}, // ✅ ab yaha extra colors ki zaroorat nahi
   },
-  plugins: [],
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: [
+      {
+        mytheme: { // ✅ apna custom DaisyUI theme
+          "primary": "#4B49AC",
+          "secondary": "#F3797E",
+          "accent": "#7DA0FA",
+          "neutral": "#111827",
+          "base-100": "#F9FAFB",
+          "info": "#3ABFF8",
+          "success": "#36D399",
+          "warning": "#FBBD23",
+          "error": "#F87272",
+        },
+      },
+      "light",
+      "dark",
+    ],
+  },
 }

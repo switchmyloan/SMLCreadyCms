@@ -91,7 +91,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
           {onCreate && (
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-[5px] bg-gradient-to-r from-primary-light to-primary-dark text-white font-medium rounded-lg shadow-md hover:from-primary-dark hover:to-primary-light hover:shadow-lg transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-[5px] bg-gradient-to-r from-primary to-primary text-white font-medium rounded-lg shadow-md hover:from-primary hover:to-accent hover:shadow-lg transition-all duration-300"
             >
               {/* <Plus size={16} /> */}
               {createLabel}

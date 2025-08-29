@@ -1,4 +1,5 @@
 import { Menu } from "lucide-react";
+import Pratham from "../../assets/pratham.png"
 
 function Navbar({ onToggleSidebar }) {
   return (
@@ -19,16 +20,18 @@ function Navbar({ onToggleSidebar }) {
 
       {/* Right section */}
       <div className="flex items-center gap-2 sm:gap-4">
-        <a href="#" className="text-xs sm:text-sm hover:text-gray-300">
+        <a href="#" className="text-xs sm:text-sm hover:text-gray-300 text-black">
           Login
         </a>
-        <a href="#" className="text-xs sm:text-sm hover:text-gray-300">
+        <a href="#" className="text-xs sm:text-sm hover:text-gray-300 text-black">
           Signup
         </a>
         <img
-          src="https://via.placeholder.com/35"
+        
+          // src="https://avatar.iran.liara.run/public/18"
+          src={Pratham}
           alt="profile"
-          className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-white"
+          className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-gray-600"
         />
       </div>
     </nav>

@@ -39,7 +39,7 @@
                     `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
                       isActive
                         ? "bg-primary text-white shadow"
-                        : "text-gray-600 hover:bg-primary-light hover:text-white"
+                        : "text-gray-600 hover:bg-neutral hover:text-white"
                     }`
                   }
                 >
