@@ -1,5 +1,4 @@
 import { Menu } from "lucide-react";
-import Pratham from "../../assets/pratham.png"
 
 function Navbar({ onToggleSidebar }) {
   return (
@@ -28,8 +27,7 @@ function Navbar({ onToggleSidebar }) {
         </a>
         <img
         
-          // src="https://avatar.iran.liara.run/public/18"
-          src={Pratham}
+          src="https://avatar.iran.liara.run/public/25"
           alt="profile"
           className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 rounded-full border-2 border-gray-600"
         />
