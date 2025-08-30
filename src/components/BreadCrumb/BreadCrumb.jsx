@@ -92,7 +92,7 @@ export default function Breadcrumb() {
   }));
 
   return (
-    <nav className="flex items-center text-sm bg-white  rounded-lg px-4 py-2 shadow-sm border border-gray-100">
+    <nav className="flex items-center text-sm bg-white px-4 py-2 shadow-sm border border-gray-100 pt-4">
       <ol className="flex items-center space-x-2">
         {/* Home */}
         <li>

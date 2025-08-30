@@ -104,12 +104,15 @@ export default function BlogCreate() {
             setValue('status', blog.status)
             setValue('metadata.level', blog.metadata.level)
             setValue('metadata.category', blog.metadata.category)
-            setValue('author_xid', blog.author?.id || '')
+            setValue('author_xid', blog.author_xid || '')
             setValue('tags', blog.tags?.map(t => t.id) || [])
 
             // Convert string to array for keywords
-            const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',') : []
-            setKeywords(keywordArray)
+            // const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',') : []
+            // setKeywords(keywordArray)
+            const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',').filter(keyword => keyword.trim() !== '') : [];
+          setKeywords(keywordArray);
+          setValue('metaKeywords', keywordArray.join(', '), { shouldValidate: true });
           } else {
             ToastNotification.error("Failed to load blog")
           }
@@ -120,7 +123,7 @@ export default function BlogCreate() {
       fetchBlog()
     }
 
-  }, [id])
+  }, [id, setValue])
 
   // Modal submissions
   const handleTagSubmit = async (data) => {

@@ -13,7 +13,7 @@
     return (
       <div className="w-64 h-full bg-white text-gray-700 flex flex-col shadow-lg">
         {/* Header / Logo */}
-        <div className="p-3 flex justify-between items-center border-b border-gray-200 text-center">
+        <div className="p-[15px] flex justify-between items-center border-b border-gray-200 text-center">
           <img src={logo} alt="Logo" className="w-28 h-auto text-center" />
         
           <button

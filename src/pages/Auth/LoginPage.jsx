@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import logo from "../../assets/cready.webp"
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../custom-hooks/useAuth"
 
 function LoginPage() {
+
+  const { login, logout } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -15,13 +21,34 @@ function LoginPage() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
+
+    // 🔹 Dummy user and token
+    const dummyToken = "dummy_access_token_12345";
+    const dummyUser = {
+      id: 1,
+      name: "John Doe",
+      email: formData.email,
+    };
+
+    // save in storage via useAuth
+    login(dummyToken, dummyUser);
+
+    // redirect to home page
+    navigate("/");
   };
 
+  useEffect(() => {
+    logout();
+  }, []);
+
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen 
+                    bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 px-4">
       <div className="w-full max-w-md shadow-2xl bg-white rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+        <div className="mb-6 flex justify-center">
+          <img src={logo} alt="" />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email */}
@@ -36,7 +63,7 @@ function LoginPage() {
               onChange={handleChange}
               placeholder="Enter your email"
               className="input input-bordered w-full"
-              required
+
             />
           </div>
 
@@ -52,13 +79,13 @@ function LoginPage() {
               onChange={handleChange}
               placeholder="Enter your password"
               className="input input-bordered w-full"
-              required
+
             />
-            <label className="label">
+            {/* <label className="label">
               <a href="#" className="label-text-alt link link-hover">
                 Forgot password?
               </a>
-            </label>
+            </label> */}
           </div>
 
           {/* Remember me */}
@@ -76,12 +103,12 @@ function LoginPage() {
         </form>
 
         {/* Signup link */}
-        <p className="mt-6 text-center text-sm">
+        {/* <p className="mt-6 text-center text-sm">
           Don’t have an account?{" "}
           <a href="#" className="link link-primary">
             Sign up
           </a>
-        </p>
+        </p> */}
       </div>
     </div>
   );
