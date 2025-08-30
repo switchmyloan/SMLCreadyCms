@@ -19,7 +19,7 @@ function Navbar({ onToggleSidebar }) {
         {/* Sidebar toggle (optional) */}
         <button
           onClick={onToggleSidebar}
-          className="p-1 sm:p-2 rounded-md hover:bg-blue-700 focus:outline-none"
+          className="p-1 sm:p-2 rounded-md hover:bg-blue-700 focus:outline-none text-blue-500"
           aria-label="Toggle sidebar"
         >
           <Menu size={18} sm:size={22} />

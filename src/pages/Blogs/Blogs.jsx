@@ -72,6 +72,7 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
+        title='Blogs'
         data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
