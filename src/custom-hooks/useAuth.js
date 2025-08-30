@@ -1,17 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { TokenService, UserService } from ".";
 
-
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    const storedToken = TokenService.getToken();
-    const storedUser = UserService.getUser();
-    if (storedToken) setToken(storedToken);
-    if (storedUser) setUser(storedUser);
-  }, []);
+  const [token, setToken] = useState(() => TokenService.getToken());
+  const [user, setUser] = useState(() => UserService.getUser());
 
   const login = (accessToken, userData) => {
     TokenService.saveToken(accessToken);
@@ -28,8 +20,8 @@ export function useAuth() {
   };
 
   return {
-    user,
     token,
+    user,
     isAuthenticated: !!token,
     login,
     logout,

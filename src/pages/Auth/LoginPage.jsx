@@ -5,7 +5,7 @@ import { useAuth } from "../../custom-hooks/useAuth"
 
 function LoginPage() {
 
-  const { login, logout } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
@@ -37,9 +37,9 @@ function LoginPage() {
     navigate("/");
   };
 
-  useEffect(() => {
-    logout();
-  }, []);
+  // useEffect(() => {
+  //   logout();
+  // }, []);
 
 
   return (

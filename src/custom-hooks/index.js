@@ -6,6 +6,7 @@ const TokenService = {
         if(!ISSERVER){
             return localStorage.getItem(TOKEN_KEY) || ''
         }
+        return null;
     },
 
     saveToken: (accessToken) => {
@@ -33,6 +34,7 @@ const UserService = {
         if (!ISSERVER) {
             return JSON.parse(localStorage.getItem('USER_DATA')) || ''
         }
+        return null
     },
 
     saveUser(user_data) {
