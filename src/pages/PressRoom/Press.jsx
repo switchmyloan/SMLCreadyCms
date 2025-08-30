@@ -68,7 +68,7 @@ const Press = () => {
         try {
             const response = await getPress(query.page_no, query.limit, '');
             if (response?.data?.success) {
-                setData(response?.data?.data || []); // Adjust based on actual response
+                setData(response?.data?.data?.data || []); // Adjust based on actual response
                 setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
             } else {
                 ToastNotification.error('Error fetching data');
@@ -169,7 +169,7 @@ const Press = () => {
                 })}
                 title="Press Room"
                 data={data}
-                totalDataCount={100}
+                totalDataCount={totalDataCount}
                 onCreate={handleCreate}
                 createLabel="Create"
                 onPageChange={onPageChange}

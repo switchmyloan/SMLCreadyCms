@@ -69,7 +69,7 @@ const Faq = () => {
             const response = await getFaq(query.page_no, query.limit, '');
             if (response?.data?.success) {
                 setData(response?.data?.data?.data || []); // Adjust based on actual response
-                setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+                setTotalDataCount(response?.data?.data?.pagination?.total || 0);
             } else {
                 ToastNotification.error('Error fetching data');
             }
@@ -169,7 +169,7 @@ const Faq = () => {
                 })}
                 title="FAQ"
                 data={data}
-                totalDataCount={100}
+                totalDataCount={totalDataCount}
                 onCreate={handleCreate}
                 createLabel="Create"
                 onPageChange={onPageChange}
