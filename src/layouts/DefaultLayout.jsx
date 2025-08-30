@@ -2,6 +2,7 @@ import { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "../components/Navbar/Navbar";
 import Breadcrumb from "../components/BreadCrumb/BreadCrumb";
+import { Outlet } from "react-router-dom";
 
 function DefaultLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,7 +42,8 @@ function DefaultLayout({ children }) {
           <Breadcrumb />
         </div>
         <main className="flex-1 p-4 mt-20 overflow-y-auto">
-          {children}
+          {/* {children} */}
+          <Outlet /> 
         </main>
       </div>
     </div>

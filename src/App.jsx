@@ -1,9 +1,4 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import Sidebar from './components/Sidebar/Sidebar'
-import Navbar from './components/Navbar/Navbar'
 import Home from './pages/Home'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import About from './pages/About'
@@ -12,32 +7,24 @@ import DefaultLayout from './layouts/DefaultLayout'
 import BlogCreate from './pages/Blogs/BlogsCreate'
 import Faq from './pages/FAQ/Faq'
 import Press from './pages/PressRoom/Press'
+import LoginPage from './pages/Auth/LoginPage'
 
 function App() {
-  const [count, setCount] = useState(0)
-
-
-  // Dynamic routes array
-  const routes = [
-    { path: '/', element: <Home /> },
-    { path: '/about', element: <About /> },
-    { path: '/blogs', element: <Blogs /> },
-    { path: '/blogs/create', element: <BlogCreate /> },
-    { path: '/blog/:id', element: <BlogCreate /> },
-    { path: '/faq', element: <Faq /> },
-    { path: '/press', element: <Press /> },
-  ];
-
   return (
     <>
       <BrowserRouter>
-        <DefaultLayout>
-          <Routes>
-            {routes.map((route, idx) => (
-              <Route key={idx} path={route.path} element={route.element} />
-            ))}
-          </Routes>
-        </DefaultLayout>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route element={<DefaultLayout />}>
+            <Route index element={<Home />} />   {/* path="/" */}
+            <Route path="about" element={<About />} />
+            <Route path="blogs" element={<Blogs />} />
+            <Route path="blogs/create" element={<BlogCreate />} />
+            <Route path="blog/:id" element={<BlogCreate />} />
+            <Route path="faq" element={<Faq />} />
+            <Route path="press" element={<Press />} />
+          </Route>
+        </Routes>
       </BrowserRouter>
     </>
   )
