@@ -1,22 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from '../../components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
-import { AddFaq, getCategory, getFaq, getPress, updateFaq } from '../../api-services/cms-services'; // Added updateFaq
+import { AddFaq, AddPress, getCategory, getFaq, getPress, updateFaq } from '../../api-services/cms-services'; // Added updateFaq
 import ToastNotification from '../../components/Notification/ToastNotification';
-import { faqColumn, pressColumn } from '../../components/TableHeader';
+import { pressColumn } from '../../components/TableHeader';
 import { useForm } from 'react-hook-form';
-import ValidatedTextField from '../../components/Form/ValidatedTextField';
-import ValidatedTextArea from '../../components/Form/ValidatedTextArea';
-import ValidatedLabel from '../../components/Form/ValidatedLabel';
-import ValidatedSearchableSelectField from '../../components/Form/ValidatedSearchableSelectField';
+import PressModal from '../Modals/PressModal';
 
 const Press = () => {
-    const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [totalDataCount, setTotalDataCount] = useState(0);
-    const [globalFilter, setGlobalFilter] = useState('');
-    const [categoryData, setCategoryData] = useState([]);
+    const [globalFilter, setGlobalFilter] = useState('')
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -28,7 +22,7 @@ const Press = () => {
     });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false); // Track create vs edit mode
-    const [selectedFaq, setSelectedFaq] = useState(null); // Store FAQ for editing
+    const [selectedPress, setSelectedPress] = useState(null); // Store FAQ for editing
 
     const {
         control,
@@ -36,26 +30,28 @@ const Press = () => {
         handleSubmit,
         formState: { errors },
         reset,
-        setValue, // Added to set form values for editing
+        setValue,
     } = useForm({
         defaultValues: {
-            category_xid: '',
-            question: '',
-            answer: '',
-            isFeatured: false,
+            title: "",
+            description: "",
+            image: "",
+            sourceLogo: "",
+            redirectLink: "",
+            status: "",
         },
     });
 
     const handleCreate = () => {
         setIsModalOpen(true);
-        setIsEditMode(false); // Set to create mode
-        reset(); // Reset form for creating new FAQ
+        setIsEditMode(false);
+        reset();
     };
 
     const handleEdit = (faq) => {
         console.log(faq, "faqqq")
         setIsEditMode(true); // Set to edit mode
-        setSelectedFaq(faq?.id); // Store the FAQ data
+        setSelectedPress(faq?.id); // Store the FAQ data
         setIsModalOpen(true);
         // Populate form with FAQ data
         setValue('question', faq.question);
@@ -79,26 +75,19 @@ const Press = () => {
         }
     };
 
-    const fetchCategory = async () => {
-        try {
-            const response = await getCategory(query.page_no, query.limit, '');
-            if (response?.data?.success) {
-                const mapped = response?.data?.data?.map((item) => ({
-                    label: item?.name?.toUpperCase(),
-                    value: item?.id,
-                }));
-                setCategoryData(mapped);
-            } else {
-                ToastNotification.error('Error fetching categories');
-            }
-        } catch (error) {
-            console.error('Error fetching categories:', error);
-            ToastNotification.error('Failed to fetch categories');
-        }
-    };
-
     const onSubmit = async (formData) => {
         try {
+            console.log(formData, "formdata")
+            console.table(
+                {
+                     title: formData?.title,
+                    description: formData?.description,
+                    image: formData?.image,
+                    sourceLogo: formData?.sourceLogo,
+                    redirectLink: formData?.redirectLink,
+                    status: formData?.status
+                }
+            )
             if (isEditMode) {
                 const data = {
                     question: formData.question,
@@ -106,24 +95,26 @@ const Press = () => {
                     category_xid: formData.category_xid,
                     isFeatured: formData.isFeatured,
                 }
-                const response = await updateFaq({ id: selectedFaq, ...data });
+                const response = await updateFaq({ id: selectedPress, ...data });
                 if (response?.data?.success) {
-                    ToastNotification.success('FAQ updated successfully!');
-                    fetchFaqs();
+                    ToastNotification.success('Press updated successfully!');
+                    fetchPress();
                     setIsModalOpen(false);
                     setIsEditMode(false);
-                    setSelectedFaq(null);
+                    setSelectedPress(null);
                     reset();
                 } else {
-                    ToastNotification.error('Failed to update FAQ.');
+                    ToastNotification.error('Failed to update Press.');
                 }
             } else {
                 // Create FAQ
-                const response = await AddFaq({
-                    question: formData.question,
-                    answer: formData.answer,
-                    category_xid: formData.category_xid,
-                    isFeatured: formData.isFeatured,
+                const response = await AddPress({
+                    title: formData?.title,
+                    description: formData?.description,
+                    image: formData?.image,
+                    sourceLogo: formData?.sourceLogo,
+                    redirectLink: formData?.redirectLink,
+                    status: formData?.status
                 });
                 if (response?.data?.success) {
                     ToastNotification.success('FAQ added successfully!');
@@ -152,11 +143,7 @@ const Press = () => {
         fetchPress();
     }, [query.page_no, query.limit]);
 
-    useEffect(() => {
-        if (isModalOpen) {
-            fetchCategory();
-        }
-    }, [isModalOpen]);
+
 
 
     console.log(data, "data???")
@@ -177,8 +164,20 @@ const Press = () => {
                 pagination={pagination}
             />
 
-           
-
+            {/* Modal */}
+            <PressModal
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                isEditMode={isEditMode}
+                setIsEditMode={setIsEditMode}
+                reset={reset}
+                handleSubmit={handleSubmit}
+                onSubmit={onSubmit}
+                control={control}
+                register={register}
+                errors={errors}
+                setGlobalFilter={setGlobalFilter}
+            />
         </>
     );
 };

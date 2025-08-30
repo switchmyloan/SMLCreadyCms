@@ -44,7 +44,7 @@ const ImageUploadField = ({
 
           {/* Preview image */}
           {preview && (
-            <div className="flex justify-center">
+            <div className="flex justify-left">
               <img
                 src={preview}
                 alt="Preview"
@@ -52,8 +52,8 @@ const ImageUploadField = ({
                 style={{
                   maxWidth: maxWidth,
                   maxHeight: maxHeight,
-                  width: "auto",
-                  height: "auto",
+                  width: "40%",
+                  height: "40%",
                 }}
               />
             </div>

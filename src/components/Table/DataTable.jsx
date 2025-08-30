@@ -159,7 +159,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
 
         <div className="flex flex-wrap items-center gap-3">
           {/* Rows per page */}
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <span className="text-gray-600 text-sm">Rows per page:</span>
             <select
               value={pagination.pageSize}
@@ -170,7 +170,7 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
               <option value={20}>20</option>
               <option value={50}>50</option>
             </select>
-          </div>
+          </div> */}
 
           {/* Go to page */}
           <div className="flex items-center gap-2">
