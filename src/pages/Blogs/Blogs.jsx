@@ -49,7 +49,7 @@ const Blogs = () => {
   };
 
   const handleEdit = (data) => {
-    navigate(`/blog/${data?.id}`)
+    navigate(`/blogs/${data?.id}`)
   }
 
   useEffect(() => {
