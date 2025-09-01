@@ -54,7 +54,7 @@ const Testimonials = () => {
     };
 
     const handleEdit = (testimonial) => {
-        console.log('Editing Testimonial:', testimonial);
+        console.log('Editing Testimonial:', testimonial?.id);
         setIsEditMode(true);
         setSelectedTestimonial(testimonial?.id);
         setIsModalOpen(true);
@@ -84,51 +84,52 @@ const Testimonials = () => {
     };
 
     const handleAddTestimonial = async (formData) => {
-    try {
-        const sanitizedData = {
-            name: formData.name?.trim() || '',
-            designation: formData.designation?.trim() || '',
-            company: formData.company?.trim() || '',
-            testimonial: formData.testimonial?.trim() || '',
-            image: typeof formData.image === 'string' ? formData.image : '', // Expect a URL string
-            isActive: formData.isActive ?? true,
-            order: Number(formData.order) || 1,
-        };
+        try {
+            const sanitizedData = {
+                name: formData.name?.trim() || '',
+                designation: formData.designation?.trim() || '',
+                company: formData.company?.trim() || '',
+                testimonial: formData.testimonial?.trim() || '',
+                image: typeof formData.image === 'string' ? formData.image : '',
+                isActive: formData.isActive ?? true,
+                order: Number(formData.order) || 1,
+            };
 
-        if (!sanitizedData.name) {
-            ToastNotification.error('Name is required');
-            return;
+            if (!sanitizedData.name) {
+                ToastNotification.error('Name is required');
+                return;
+            }
+
+            console.log('Add Testimonial Payload:', sanitizedData);
+
+            const response = await addTestimonial(sanitizedData);
+            if (response?.data?.success) {
+                ToastNotification.success('Testimonial added successfully!');
+                await fetchTestimonials();
+                setIsModalOpen(false);
+                reset();
+            } else {
+                ToastNotification.error(response?.data?.message || 'Failed to add testimonial.');
+            }
+        } catch (error) {
+            console.error('Error adding testimonial:', error);
+            ToastNotification.error(error.message || 'Something went wrong!');
         }
-
-        console.log('Add Testimonial Payload:', sanitizedData);
-
-        const response = await addTestimonial(sanitizedData);
-        if (response?.data?.success) {
-            ToastNotification.success('Testimonial added successfully!');
-            await fetchTestimonials();
-            setIsModalOpen(false);
-            reset();
-        } else {
-            ToastNotification.error(response?.data?.message || 'Failed to add testimonial.');
-        }
-    } catch (error) {
-        console.error('Error adding testimonial:', error);
-        ToastNotification.error(error.message || 'Something went wrong!');
-    }
-};
+    };
 
     const handleUpdateTestimonial = async (formData) => {
         try {
+            console.log(selectedTestimonial, "formdata update")
             const formDataToSend = new FormData();
             formDataToSend.append('name', formData.name?.trim() || '');
             formDataToSend.append('designation', formData.designation?.trim() || '');
             formDataToSend.append('company', formData.company?.trim() || '');
             formDataToSend.append('testimonial', formData.testimonial?.trim() || '');
             if (formData.image instanceof File) {
-                formDataToSend.append('image', formData.image);
-            } else if (formData.image && typeof formData.image === 'string') {
-                formDataToSend.append('image', formData.image);
-            }
+            formDataToSend.append('image', formData.image);
+        } else {
+            formDataToSend.append('image', formData.image || ''); // Send existing URL or empty string
+        }
             formDataToSend.append('isActive', String(formData.isActive ?? true));
             formDataToSend.append('order', String(Number(formData.order) || 1));
 

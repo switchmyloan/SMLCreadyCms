@@ -86,7 +86,12 @@ export const addTestimonial = async (data) => {
 };
 
 
-export const updateTestimonial = async payload => {
-  const { id, ...data } = payload
-  return Api().put(`/testimonial/${id}`, data)
+export const updateTestimonial = async (id, formData) => {
+  console.log(id?.id, "id?????????????")
+  return Api().put(`/testimonial/${id?.id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  })
 }
+

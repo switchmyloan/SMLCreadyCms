@@ -1,11 +1,11 @@
+// export default LoginPage;
 import { useEffect, useState } from "react";
-import logo from "../../assets/cready.webp"
+import logo from "../../assets/cready.webp";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../custom-hooks/useAuth"
+import { useAuth } from "../../custom-hooks/useAuth";
 
 function LoginPage() {
-
-  const { login , logout} = useAuth();
+  const { login, logout } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "deepak@gmail.com",
@@ -41,20 +41,24 @@ function LoginPage() {
     logout();
   }, []);
 
-
   return (
-    <div className="flex items-center justify-center min-h-screen 
-                    bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-800 px-4">
-      <div className="w-full max-w-md shadow-2xl bg-white rounded-2xl p-8">
+    <div
+      className="flex items-center justify-center min-h-screen 
+      bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 px-4"
+    >
+      {/* Login Card */}
+      <div className="w-full max-w-md shadow-xl bg-white/80 backdrop-blur-xl border border-white/40 rounded-2xl p-8">
+        {/* Logo */}
         <div className="mb-6 flex justify-center">
-          <img src={logo} alt="" />
+          <img src={logo} alt="Logo" className="w-32" />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Email */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Email</span>
+              <span className="label-text font-medium text-gray-700">Email</span>
             </label>
             <input
               type="email"
@@ -62,15 +66,14 @@ function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="input input-bordered w-full"
-
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
             />
           </div>
 
           {/* Password */}
           <div className="form-control">
             <label className="label">
-              <span className="label-text">Password</span>
+              <span className="label-text font-medium text-gray-700">Password</span>
             </label>
             <input
               type="password"
@@ -78,34 +81,29 @@ function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="input input-bordered w-full"
-
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
             />
-            {/* <label className="label">
-              <a href="#" className="label-text-alt link link-hover">
-                Forgot password?
-              </a>
-            </label> */}
           </div>
 
           {/* Remember me */}
-          <div className="form-control">
-            <label className="cursor-pointer flex items-center gap-2">
-              <input type="checkbox" className="checkbox checkbox-primary" />
-              <span className="label-text">Remember me</span>
-            </label>
-          </div>
+          {/* <div className="form-control flex items-center gap-2">
+            <input type="checkbox" className="w-4 h-4 text-indigo-500 border-gray-300 rounded focus:ring-indigo-400" />
+            <span className="text-gray-700">Remember me</span>
+          </div> */}
 
           {/* Login Button */}
-          <button type="submit" className="btn btn-primary w-full">
+          <button
+            type="submit"
+            className="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold transition duration-200 shadow-md"
+          >
             Login
           </button>
         </form>
 
         {/* Signup link */}
-        {/* <p className="mt-6 text-center text-sm">
+        {/* <p className="mt-6 text-center text-sm text-gray-600">
           Don’t have an account?{" "}
-          <a href="#" className="link link-primary">
+          <a href="#" className="text-indigo-600 font-medium hover:underline">
             Sign up
           </a>
         </p> */}
