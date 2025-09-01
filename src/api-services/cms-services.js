@@ -19,10 +19,14 @@ export const AddBlog = async (formData) => {
     }
   });
 }
-export const UpdateBlog = async payload => {
-  const { id, ...data } = payload
-  return Api().patch(`/blog/${id}`, data)
-}
+export const UpdateBlog = async (id, formData) => {
+  return Api().patch(`/blog/${id}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
+
 
 
 // Author
