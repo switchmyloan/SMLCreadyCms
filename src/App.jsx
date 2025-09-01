@@ -9,6 +9,7 @@ import Faq from './pages/FAQ/Faq'
 import Press from './pages/PressRoom/Press'
 import LoginPage from './pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
+import Testimonials from './pages/Testimonials/Testimonial';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="blog/:id" element={<BlogCreate />} />
             <Route path="faq" element={<Faq />} />
             <Route path="press" element={<Press />} />
+            <Route path="testimonials" element={<Testimonials />} />
           </Route>
           </Route>
         </Routes>

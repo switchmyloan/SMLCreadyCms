@@ -68,9 +68,9 @@ import { NavLink } from "react-router-dom";
 import logo from "../../assets/cready.webp";
 import shortLogo from "../../assets/shortLogo.svg"
 import { routes } from "../../routes/routes";
-import { Home, FileText, Users, HelpCircle, Newspaper } from "lucide-react";
+import { Home, FileText, Users, HelpCircle, Newspaper, MessageSquare } from "lucide-react";
 
-const ICONS = { Home, FileText, Users, HelpCircle, Newspaper };
+const ICONS = { Home, FileText, Users, HelpCircle, Newspaper, MessageSquare };
 
 function Sidebar({ onClose, collapsed, onToggleCollapse }) {
   return (

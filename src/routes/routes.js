@@ -22,4 +22,10 @@ export const routes = [
     icon: "Newspaper",
     showInSidebar: true,
   },
+  { 
+    path: "/testimonials", 
+    label: "Testimonials", 
+    icon: "MessageSquare",
+    showInSidebar: true,
+  },
 ];

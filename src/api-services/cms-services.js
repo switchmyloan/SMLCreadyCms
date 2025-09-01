@@ -66,3 +66,23 @@ export const AddPress = async (formData) => {
     }
   });
 }
+
+// Testimonials
+export const getTestimonials = async (pageNo, limit, globalFilter) => {
+  return Api().get(`/testimonial?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
+}
+
+export const addTestimonial = async (data) => {
+    console.log('Sending to API:', data);
+    return Api().post('/testimonial', data, {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+};
+
+
+export const updateTestimonial = async payload => {
+  const { id, ...data } = payload
+  return Api().patch(`/testimoial/${id}`, data)
+}
