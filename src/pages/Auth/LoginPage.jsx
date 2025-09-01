@@ -8,7 +8,7 @@ function LoginPage() {
   const { login , logout} = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    email: "deepak@gmail.com",
     password: "",
   });
 

@@ -88,5 +88,5 @@ export const addTestimonial = async (data) => {
 
 export const updateTestimonial = async payload => {
   const { id, ...data } = payload
-  return Api().patch(`/testimoial/${id}`, data)
+  return Api().put(`/testimonial/${id}`, data)
 }
