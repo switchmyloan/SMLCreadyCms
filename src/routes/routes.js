@@ -1,55 +1,184 @@
 export const routes = [
+  // --- Non-grouped ---
   {
     path: "/",
     label: "Dashboard",
     icon: "Home",
     showInSidebar: false,
-    order: 5
+    order: 0,
   },
+
+  // --- Lead Management ---
+  {
+    path: "/signin-user",
+    label: "Signin user (in app)",
+    icon: "UserCheck", // ✅ login-related
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1, 
+    order: 1,
+  },
+  {
+    path: "/leads",
+    label: "Leads",
+    icon: "ClipboardList", // ✅ leads list
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1, 
+    order: 2,
+  },
+  {
+    path: "/archive-users",
+    label: "Archive users",
+    icon: "UserMinus", // ✅ archived users
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1, 
+    order: 3,
+  },
+
+  // --- Lender Management ---
+  {
+    path: "/on-borde-lender-from",
+    label: "Onboard Lender",
+    icon: "UserPlus", // ✅ add new lender
+    showInSidebar: true,
+    group: "Lender Management",
+    groupOrder: 2, 
+    order: 1,
+  },
+  {
+    path: "/list-of-lenders",
+    label: "List of Lenders",
+    icon: "Building2", // ✅ lenders
+    showInSidebar: true,
+    group: "Lender Management",
+    groupOrder: 2, 
+    order: 2,
+  },
+
+  // --- Blogs ---
   {
     path: "/blogs",
-    label: "Blogs",
-    icon: "FileText",
+    label: "Blogs View",
+    icon: "FileText", // ✅ blog/articles
     showInSidebar: true,
-    order: 2
+    order: 1,
+    group: "Blogs",
+    groupOrder: 3, 
   },
+  {
+    path: "/blog/create",
+    label: "Blog Create",
+    icon: "BookOpen", // ✅ writing blogs
+    showInSidebar: true,
+    order: 2,
+    group: "Blogs",
+    groupOrder: 3, 
+  },
+
+  // --- FAQ ---
   {
     path: "/faq",
-    label: "FAQ",
+    label: "FAQ View",
     icon: "HelpCircle",
     showInSidebar: true,
-    order: 3
+    order: 1,
+    group: "FAQ",
+    groupOrder: 4, 
   },
-  {
-    path: "/users",
-    label: "Users",
-    icon: "Users",
-    showInSidebar: true,
-    group: "Admin Management",
-    order: 4
-  },
-  {
-    path: "/roles",
-    label: "Roles",
-    icon: "Users",
-    showInSidebar: true,
-    group: "Admin Management",
-    order: 1
-  },
+
+  // --- CMS Management ---
   {
     path: "/press",
     label: "Press Room",
     icon: "Newspaper",
     showInSidebar: true,
-    group: "CMS",
-    order: 6
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 1,
   },
   {
     path: "/testimonials",
     label: "Testimonials",
     icon: "MessageSquare",
     showInSidebar: true,
-    group: "CMS",
-    order: 7
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 2,
+  },
+  {
+    path: "/social-icons",
+    label: "Social Icons",
+    icon: "Settings", // ✅ generic icons/social
+    showInSidebar: true,
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 3,
+  },
+  {
+    path: "/offer",
+    label: "Offers",
+    icon: "ClipboardList", // ✅ offers list
+    showInSidebar: true,
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 4,
+  },
+  {
+    path: "/banners",
+    label: "Banners",
+    icon: "FileText", // ✅ banners/files
+    showInSidebar: true,
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 5,
+  },
+  {
+    path: "/terms-conditions",
+    label: "Terms & Conditions",
+    icon: "ShieldCheck", // ✅ policies/security
+    showInSidebar: true,
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 6,
+  },
+  {
+    path: "/privacy-policy",
+    label: "Privacy Policy",
+    icon: "ShieldCheck", // ✅ security/privacy
+    showInSidebar: true,
+    group: "CMS Management",
+    groupOrder: 5,
+    order: 7,
+  },
+
+  // --- Admin Management ---
+  {
+    path: "/users",
+    label: "Users",
+    icon: "Users",
+    showInSidebar: true,
+    group: "Admin Management",
+    groupOrder: 6,
+    order: 2,
+  },
+  {
+    path: "/roles",
+    label: "Roles",
+    icon: "ShieldCheck", // ✅ roles/permissions
+    showInSidebar: true,
+    group: "Admin Management",
+    groupOrder: 6,
+    order: 1,
+  },
+  {
+    path: "/push-notification",
+    label: "Push Notification",
+    icon: "ShieldCheck", // ✅ roles/permissions
+    showInSidebar: true,
+    group: "Push Notification",
+    groupOrder: 7,
+    order: 1,
   },
 ];

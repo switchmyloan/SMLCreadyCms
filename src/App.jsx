@@ -10,6 +10,7 @@ import Press from './pages/PressRoom/Press'
 import LoginPage from './pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
 import Testimonials from './pages/Testimonials/Testimonial';
+import NotFound from './pages/NotFound';
 
 function App() {
   return (
@@ -22,11 +23,12 @@ function App() {
             <Route index element={<Home />} />   {/* path="/" */}
             <Route path="about" element={<About />} />
             <Route path="blogs" element={<Blogs />} />
-            <Route path="blogs/create" element={<BlogCreate />} />
+            <Route path="blog/create" element={<BlogCreate />} />
             <Route path="blogs/:id" element={<BlogCreate />} />
             <Route path="faq" element={<Faq />} />
             <Route path="press" element={<Press />} />
             <Route path="testimonials" element={<Testimonials />} />
+          <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
         </Routes>
