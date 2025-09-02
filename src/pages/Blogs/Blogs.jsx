@@ -11,6 +11,7 @@ const Blogs = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
+  const [loading, setLoading] = useState(false); // N
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -29,7 +30,7 @@ const Blogs = () => {
 
   const fetchBlogs = async () => {
     try {
-      // setLoadingData(true);
+     setLoading(true); 
       const response = await getBlogs(query.page_no, query.limit, '');
 
       console.log('Response:', response.data.data);
@@ -44,7 +45,7 @@ const Blogs = () => {
       ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
-      // setLoadingData(false);
+      setLoading(false);
     }
   };
 
@@ -80,6 +81,7 @@ const Blogs = () => {
         onPageChange={onPageChange}
         setPagination={setPagination}
         pagination={pagination}
+        loading={loading}
       />
     </>
   )

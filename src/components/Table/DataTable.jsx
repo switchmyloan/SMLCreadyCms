@@ -9,7 +9,16 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataCount, onPageChange, title="Page" }) {
+function DataTable({ 
+  columns, 
+  data, 
+  onCreate, 
+  createLabel = 'Create', 
+  totalDataCount,
+   onPageChange, 
+   title="Page",
+   loading = false, 
+  }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
@@ -75,6 +84,17 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
     label: `Page ${index + 1}`,
   }));
 
+  // Skeleton Loader Component
+  const SkeletonRow = () => (
+    <tr className="animate-pulse">
+      {columns.map((_, index) => (
+        <td key={index} className="px-3 py-4 border-b border-gray-200">
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+        </td>
+      ))}
+    </tr>
+  );
+
   return (
     <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm overflow-x-auto pt-0 pb-0">
       {/* Header */}
@@ -87,11 +107,13 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full sm:w-52 p-2 pt-1 pb-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 shadow-sm"
+            disabled={loading}
           />
           {onCreate && (
             <button
               onClick={onCreate}
               className="flex items-center gap-2 px-4 py-[5px] bg-gradient-to-r from-primary to-primary text-white font-medium rounded-lg shadow-md hover:from-primary hover:to-accent hover:shadow-lg transition-all duration-300"
+              disabled={loading}
             >
               {/* <Plus size={16} /> */}
               {createLabel}
@@ -126,7 +148,14 @@ function DataTable({ columns, data, onCreate, createLabel = 'Create', totalDataC
           ))}
         </thead>
         <tbody className="text-gray-700 text-sm">
-          {table.getRowModel().rows.length === 0 ? (
+          {
+            loading ? (
+            // Render skeleton rows when loading
+            Array.from({ length: pagination.pageSize }).map((_, idx) => (
+              <SkeletonRow key={idx} />
+            ))
+          ) :
+          table.getRowModel().rows.length === 0 ? (
             <tr>
               <td colSpan={table.getVisibleFlatColumns().length} className="text-center py-6 text-gray-500">
                 No data available
