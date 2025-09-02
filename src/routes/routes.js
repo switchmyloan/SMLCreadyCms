@@ -160,7 +160,7 @@ export const routes = [
     icon: "Users",
     showInSidebar: true,
     group: "Admin Management",
-    groupOrder: 6,
+    groupOrder: 7,
     order: 2,
   },
   {
@@ -169,7 +169,7 @@ export const routes = [
     icon: "ShieldCheck", // ✅ roles/permissions
     showInSidebar: true,
     group: "Admin Management",
-    groupOrder: 6,
+    groupOrder: 7,
     order: 1,
   },
   {
@@ -178,7 +178,7 @@ export const routes = [
     icon: "ShieldCheck", // ✅ roles/permissions
     showInSidebar: true,
     group: "Push Notification",
-    groupOrder: 7,
+    groupOrder: 6,
     order: 1,
   },
 ];
