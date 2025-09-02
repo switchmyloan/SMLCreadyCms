@@ -10,6 +10,11 @@ import Press from './pages/PressRoom/Press'
 import LoginPage from './pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
 import Testimonials from './pages/Testimonials/Testimonial';
+import SigninUser from "./pages/SigninUser/SigninUser"
+import Leads from "./pages/Leads/Leads"
+import ArchiveUsers from "./pages/ArchiveUsers/ArchiveUsers"
+import OnBoardLender from "./pages/OnBoardLender/OnBoardLender"
+import ListOfLender from "./pages/ListOfLenders/ListOfLenders"
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -28,6 +33,11 @@ function App() {
             <Route path="faq" element={<Faq />} />
             <Route path="press" element={<Press />} />
             <Route path="testimonials" element={<Testimonials />} />
+            <Route path="signin-user" element={<SigninUser />} />
+            <Route path="leads" element={<Leads />} />
+            <Route path="archive-users" element={<ArchiveUsers />} />
+            <Route path="on-borde-lender-from" element={<OnBoardLender />} />
+            <Route path="list-of-lenders" element={<ListOfLender />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

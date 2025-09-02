@@ -617,7 +617,7 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
                   className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all duration-200 font-medium ${
                     openGroup === key && !collapsed
                       ? "bg-gray-600 text-white shadow"
-                      : "text-gray-600 hover:bg-gray-600 hover:text-white"
+                      : "text-gray-600 hover:bg-gray-200 hover:text-black"
                   }`}
                   title={collapsed ? `${key} (${itemCount})` : ""}
                 >
@@ -640,7 +640,7 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
                               `flex items-center gap-3 px-3 py-1.5 rounded-md text-sm ${
                                 isActive
                                   ? "bg-primary text-white"
-                                  : "text-gray-600 hover:bg-gray-600 hover:text-white"
+                                  : "text-gray-600 hover:bg-gray-200 hover:text-black"
                               }`
                             }
                           >
@@ -666,7 +666,7 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
                     `flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 font-medium ${
                       isActive
                         ? "bg-primary text-white shadow"
-                        : "text-gray-600 hover:bg-gray-600 hover:text-white"
+                        : "text-gray-600 hover:bg-gray-200 hover:text-black"
                     }`
                   }
                   title={collapsed ? value.label : ""}
@@ -708,7 +708,7 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
                       `flex items-center gap-2 px-2 py-1 rounded-md text-sm ${
                         isActive
                           ? "bg-primary text-white"
-                          : "text-gray-600 hover:bg-gray-600 hover:text-white"
+                          : "text-gray-600 hover:bg-gray-200 hover:text-black"
                       }`
                     }
                     onClick={() => setDropdownData(null)}
