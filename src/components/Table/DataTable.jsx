@@ -106,13 +106,18 @@ function DataTable({
             placeholder="Search..."
             value={globalFilter ?? ''}
             onChange={(e) => setGlobalFilter(e.target.value)}
-            className="w-full sm:w-52 p-2 pt-1 pb-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 shadow-sm"
+            className="w-full sm:w-52 p-2 border border-gray-300 rounded-lg 
+             focus:outline-none focus:ring-2 focus:ring-purple-400 
+             transition-all duration-200 shadow-sm text-sm"
             disabled={loading}
           />
           {onCreate && (
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-[5px] bg-gradient-to-r from-primary to-primary text-white font-medium rounded-lg shadow-md hover:from-primary hover:to-accent hover:shadow-lg transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-[6px] bg-gradient-to-r 
+             from-purple-600 to-purple-700 text-white font-medium 
+             rounded-lg shadow-md hover:from-purple-700 hover:to-purple-800 
+             hover:shadow-lg transition-all duration-300"
               disabled={loading}
             >
               {/* <Plus size={16} /> */}
@@ -124,7 +129,7 @@ function DataTable({
 
       {/* Table */}
       <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <thead className="bg-gray-100 text-gray-700 text-sm font-medium uppercase tracking-wide">
+        <thead className="bg-gray-100 text-gray-700 text-sm font-semibold uppercase tracking-wide border-b border-gray-200">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
@@ -157,7 +162,7 @@ function DataTable({
           ) :
           table.getRowModel().rows.length === 0 ? (
             <tr>
-              <td colSpan={table.getVisibleFlatColumns().length} className="text-center py-6 text-gray-500">
+              <td colSpan={table.getVisibleFlatColumns().length} className="text-center py-6 text-gray-500 italic">
                 No data available
               </td>
             </tr>
@@ -166,7 +171,7 @@ function DataTable({
               <tr
                 key={row.id}
                 className={`transition-colors duration-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } hover:bg-gray-100`}
+                  } hover:bg-purple-50`}
               >
                 {row.getVisibleCells().map((cell) => (
                   <td key={cell.id} className="px-3 py-0 border-b border-gray-200 text-sm">
@@ -222,14 +227,20 @@ function DataTable({
             <button
               onClick={() => setPagination((prev) => ({ ...prev, pageIndex: 0 }))}
               disabled={!table.getCanPreviousPage()}
-              className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
+             bg-white hover:bg-purple-50 hover:text-purple-700 
+             disabled:opacity-50 disabled:cursor-not-allowed 
+             transition-all duration-200"
             >
               <ChevronsLeft size={16} />
             </button>
             <button
               onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
               disabled={!table.getCanPreviousPage()}
-              className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+              className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
+             bg-white hover:bg-purple-50 hover:text-purple-700 
+             disabled:opacity-50 disabled:cursor-not-allowed 
+             transition-all duration-200"
             >
               <ChevronLeft size={16} />
             </button>
