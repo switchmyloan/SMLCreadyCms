@@ -76,7 +76,7 @@ const Blogs = () => {
         title='Archive Users'
         data={[]}
         totalDataCount={totalDataCount}
-        onCreate={handleCreate}
+        // onCreate={handleCreate}
         createLabel="Create"
         onPageChange={onPageChange}
         setPagination={setPagination}

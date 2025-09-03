@@ -7,7 +7,7 @@ import ToastNotification from '@components/Notification/ToastNotification';
 import { blogColumn } from '@components/TableHeader';
 
 
-const Blogs = () => {
+const Leads = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -76,7 +76,7 @@ const Blogs = () => {
         title='Leads'
         data={[]}
         totalDataCount={totalDataCount}
-        onCreate={handleCreate}
+        // onCreate={handleCreate}
         createLabel="Create"
         onPageChange={onPageChange}
         setPagination={setPagination}
@@ -87,4 +87,4 @@ const Blogs = () => {
   )
 }
 
-export default Blogs
+export default Leads
