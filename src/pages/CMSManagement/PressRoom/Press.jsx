@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import DataTable from '../../components/Table/DataTable';
+import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
-import { AddFaq, AddPress, getCategory, getFaq, getPress, updateFaq } from '../../api-services/cms-services'; // Added updateFaq
-import ToastNotification from '../../components/Notification/ToastNotification';
-import { pressColumn } from '../../components/TableHeader';
+import { AddFaq, AddPress, getCategory, getFaq, getPress, updateFaq } from '@api/cms-services'; // Added updateFaq
+import ToastNotification from '@components/Notification/ToastNotification';
+import { pressColumn } from '@components/TableHeader';
 import { useForm } from 'react-hook-form';
-import PressModal from '../Modals/PressModal';
+import PressModal from '@pages/Modals/PressModal';
 
 const Press = () => {
     const [data, setData] = useState([]);

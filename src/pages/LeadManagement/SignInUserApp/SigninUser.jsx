@@ -42,7 +42,7 @@ const Blogs = () => {
       }
     } catch (error) {
       console.error('Error fetching:', error);
-      ToastNotification.error('Failed to fetch data');
+    //   ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
       setLoading(false);
@@ -73,8 +73,8 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
-        title='Blogs'
-        data={data}
+        title='Sign In Users'
+        data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"

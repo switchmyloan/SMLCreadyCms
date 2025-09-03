@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import DataTable from '../../components/Table/DataTable';
+import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '../../api-services/cms-services';
-import ToastNotification from '../../components/Notification/ToastNotification';
-import { blogColumn } from '../../components/TableHeader';
+import { getBlogs } from '@api/cms-services';
+import ToastNotification from '@components/Notification/ToastNotification';
+import { blogColumn } from '@components/TableHeader';
 
 
 const Blogs = () => {

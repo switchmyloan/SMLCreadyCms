@@ -73,8 +73,8 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
-        title='Blogs'
-        data={data}
+        title='Leads'
+        data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"

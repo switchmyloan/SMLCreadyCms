@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import DataTable from '../../components/Table/DataTable';
+import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { AddFaq, getCategory, getFaq, updateFaq } from '../../api-services/cms-services'; // Added updateFaq
-import ToastNotification from '../../components/Notification/ToastNotification';
-import { faqColumn } from '../../components/TableHeader';
+import { AddFaq, getCategory, getFaq, updateFaq } from '@api/cms-services'; // Added updateFaq
+import ToastNotification from '@components/Notification/ToastNotification';
+import { faqColumn } from '@components/TableHeader';
 import { useForm } from 'react-hook-form';
-import ValidatedTextField from '../../components/Form/ValidatedTextField';
-import ValidatedTextArea from '../../components/Form/ValidatedTextArea';
-import ValidatedLabel from '../../components/Form/ValidatedLabel';
-import ValidatedSearchableSelectField from '../../components/Form/ValidatedSearchableSelectField';
+import ValidatedTextField from '@components/Form/ValidatedTextField';
+import ValidatedTextArea from '@components/Form/ValidatedTextArea';
+import ValidatedLabel from '@components/Form/ValidatedLabel';
+import ValidatedSearchableSelectField from '@components/Form/ValidatedSearchableSelectField';
 
 const Faq = () => {
     const navigate = useNavigate();

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import DataTable from '@components/Table/DataTable';
+import DataTable from '../../../components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/cms-services';
-import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
+import { getBlogs } from '../../../api-services/cms-services';
+import ToastNotification from '../../../components/Notification/ToastNotification';
+import { blogColumn } from '../../../components/TableHeader';
 
 
-const Blogs = () => {
+const Users = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -42,7 +42,7 @@ const Blogs = () => {
       }
     } catch (error) {
       console.error('Error fetching:', error);
-      ToastNotification.error('Failed to fetch data');
+    //   ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
       setLoading(false);
@@ -73,8 +73,8 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
-        title='Blogs'
-        data={data}
+        title='Users'
+        data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"
@@ -87,4 +87,4 @@ const Blogs = () => {
   )
 }
 
-export default Blogs
+export default Users

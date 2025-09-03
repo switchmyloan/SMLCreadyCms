@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import DataTable from '../../components/Table/DataTable';
+import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { getTestimonials, addTestimonial, updateTestimonial } from '../../api-services/cms-services';
-import ToastNotification from '../../components/Notification/ToastNotification';
-import { testimonialsColumn } from '../../components/TableHeader';
+import { getTestimonials, addTestimonial, updateTestimonial } from '@api/cms-services';
+import ToastNotification from '@components/Notification/ToastNotification';
+import { testimonialsColumn } from '@components/TableHeader';
 import { useForm } from 'react-hook-form';
-import ValidatedTextField from '../../components/Form/ValidatedTextField';
-import ValidatedTextArea from '../../components/Form/ValidatedTextArea';
-import ValidatedLabel from '../../components/Form/ValidatedLabel';
-import ImageUploadField from '../../components/Form/ImageUploadField';
+import ValidatedTextField from '@components/Form/ValidatedTextField';
+import ValidatedTextArea from '@components/Form/ValidatedTextArea';
+import ValidatedLabel from '@components/Form/ValidatedLabel';
+import ImageUploadField from '@components/Form/ImageUploadField';
 
 const Testimonials = () => {
     const navigate = useNavigate();

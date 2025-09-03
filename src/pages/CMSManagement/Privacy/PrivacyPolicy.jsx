@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import DataTable from '../../components/Table/DataTable';
+import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '../../api-services/cms-services';
-import ToastNotification from '../../components/Notification/ToastNotification';
-import { blogColumn } from '../../components/TableHeader';
+import { getBlogs } from '@api/cms-services';
+import ToastNotification from '@components/Notification/ToastNotification';
+import { blogColumn } from '@components/TableHeader';
 
 
-const Blogs = () => {
+const PrivacyPolicy = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -73,7 +73,7 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
-        title='On Board Lender'
+        title='Privacy Policy'
         data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
@@ -87,4 +87,4 @@ const Blogs = () => {
   )
 }
 
-export default Blogs
+export default PrivacyPolicy

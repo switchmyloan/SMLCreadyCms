@@ -1,21 +1,29 @@
 import './App.css'
-import Home from './pages/Home'
+import Home from '@pages/Home'
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import About from './pages/About'
-import Blogs from './pages/Blogs/Blogs'
+import About from '@pages/About'
+import Blogs from '@pages/Blogs/Blogs'
 import DefaultLayout from './layouts/DefaultLayout'
-import BlogCreate from './pages/Blogs/BlogsCreate'
-import Faq from './pages/FAQ/Faq'
-import Press from './pages/PressRoom/Press'
-import LoginPage from './pages/Auth/LoginPage'
+import BlogCreate from '@pages/Blogs/BlogsCreate'
+import Faq from '@pages/FAQ/Faq'
+import Press from '@pages/CMSManagement/PressRoom/Press'
+import LoginPage from '@pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
-import Testimonials from './pages/Testimonials/Testimonial';
-import SigninUser from "./pages/SigninUser/SigninUser"
-import Leads from "./pages/Leads/Leads"
-import ArchiveUsers from "./pages/ArchiveUsers/ArchiveUsers"
-import OnBoardLender from "./pages/OnBoardLender/OnBoardLender"
-import ListOfLender from "./pages/ListOfLenders/ListOfLenders"
-import NotFound from './pages/NotFound';
+import Testimonials from '@pages/CMSManagement/Testimonials/Testimonial';
+import SigninUser from "@pages/LeadManagement/SignInUserApp/SigninUser"
+import Leads from "@pages/LeadManagement/Leads/Leads"
+import ArchiveUsers from "@pages/LeadManagement/ArchiveUsers/ArchiveUsers"
+import OnBoardLender from "@pages/LenderManagement/OnBoardLender/OnBoardLender"
+import ListOfLender from "@pages/LenderManagement/ListOfLenders/ListOfLenders"
+import SocialIcons from "@pages/CMSManagement/Social/SocialIcons"
+import Offers from "@pages/CMSManagement/Offers/Offers"
+import Banner from "@pages/CMSManagement/Banners/Banner"
+import TermsAndConditions from '@pages/CMSManagement/T&C/TermsAndConditions';
+import NotFound from '@pages/NotFound';
+import PrivacyPolicy from '@pages/CMSManagement/Privacy/PrivacyPolicy';
+import Roles from "@pages/AdminManagement/Roles/Roles"
+import Users from '@pages/AdminManagement/Users/Users';
+import PushNotification from '@pages/PushNotification/PushNotification';
 
 function App() {
   return (
@@ -38,6 +46,14 @@ function App() {
             <Route path="archive-users" element={<ArchiveUsers />} />
             <Route path="on-borde-lender-from" element={<OnBoardLender />} />
             <Route path="list-of-lenders" element={<ListOfLender />} />
+            <Route path="social-icons" element={<SocialIcons />} />
+            <Route path="offer" element={<Offers />} />
+            <Route path="banners" element={<Banner />} />
+            <Route path="terms-conditions" element={<TermsAndConditions />} />
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="roles" element={<Roles />} />
+            <Route path="users" element={<Users />} />
+            <Route path="push-notification" element={<PushNotification />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

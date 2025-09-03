@@ -7,7 +7,7 @@ import ToastNotification from '@components/Notification/ToastNotification';
 import { blogColumn } from '@components/TableHeader';
 
 
-const Blogs = () => {
+const Offers = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -42,7 +42,7 @@ const Blogs = () => {
       }
     } catch (error) {
       console.error('Error fetching:', error);
-      ToastNotification.error('Failed to fetch data');
+    //   ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
       setLoading(false);
@@ -73,8 +73,8 @@ const Blogs = () => {
         columns={blogColumn({
           handleEdit
         })}
-        title='Blogs'
-        data={data}
+        title='Offers'
+        data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"
@@ -87,4 +87,4 @@ const Blogs = () => {
   )
 }
 
-export default Blogs
+export default Offers
