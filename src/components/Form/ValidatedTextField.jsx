@@ -11,13 +11,15 @@ const ValidatedTextField = ({
   helperText,
   disable = false,
   value,
-  type = "text"
+  type = "text",
+  required = false
 }) => {
   return (
     <div className="w-full">
       {label && (
         <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-1">
-          {label}
+          {label}{" "}
+           {required && <span className="text-red-500">*</span>}
         </label>
       )}
 

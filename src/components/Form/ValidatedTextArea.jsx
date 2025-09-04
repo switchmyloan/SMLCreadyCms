@@ -11,6 +11,7 @@ const ValidatedTextArea = ({
   helperText,
   disable = false,
   rows = 4,
+  required = false
 }) => {
   return (
     <div className="w-full">
@@ -19,7 +20,8 @@ const ValidatedTextArea = ({
           htmlFor={name}
           className="block mb-1 text-sm font-medium text-gray-900"
         >
-          {label}
+          {label}{" "}
+           {required && <span className="text-red-500">*</span>}
         </label>
       )}
 

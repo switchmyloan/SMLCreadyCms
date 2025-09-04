@@ -1,6 +1,6 @@
 import React from "react";
 
-function ValidatedLabel({ label, id }) {
+function ValidatedLabel({ label, id, required = false }) {
   const mode = "light"; // replace with context/prop if needed
 
   return (
@@ -10,7 +10,8 @@ function ValidatedLabel({ label, id }) {
         mode !== "light" ? "text-white" : "text-black"
       }`}
     >
-      {label}
+      {label}{" "}
+       {required && <span className="text-red-500">*</span>}
     </label>
   );
 }

@@ -88,6 +88,7 @@ export default function LenderCreate() {
               errors={errors}
               rules={{ required: true }}
               helperText='Lender name required!'
+                required={true}
             />
 
             <ValidatedTextField
@@ -97,6 +98,7 @@ export default function LenderCreate() {
               errors={errors}
               rules={{ required: true }}
               helperText='Slug required!'
+               required={true}
             />
 
             <ValidatedTextField
@@ -106,6 +108,7 @@ export default function LenderCreate() {
               errors={errors}
               rules={{ required: true }}
               helperText='Website required!'
+               required={true}
             />
           </FormRow>
 
@@ -117,6 +120,7 @@ export default function LenderCreate() {
               errors={errors}
               rules={{ required: true }}
               helperText='App Store Link required!'
+               required={true}
             />
 
             <ValidatedTextField
@@ -126,6 +130,7 @@ export default function LenderCreate() {
               errors={errors}
               rules={{ required: true }}
               helperText='Play Store Link required!'
+               required={true}
             />
 
           </FormRow>
@@ -136,7 +141,10 @@ export default function LenderCreate() {
           </FormRow>
           <FormRow cols={3}>
             <div>
-              <ValidatedLabel label="Select Logo" />
+              <ValidatedLabel 
+              label="Select Logo" 
+              required={true}
+              />
               <ImageUploadField
                 name="logo"
                 control={control}
@@ -144,6 +152,7 @@ export default function LenderCreate() {
                 errors={errors}
                 rules={{ required: "Logo required!" }}
                 helperText='Logo required!'
+                 
               />
             </div>
 
@@ -155,6 +164,7 @@ export default function LenderCreate() {
               rows={3}
               rules={{ required: "Description required!" }}
               helperText=''
+               required={true}
             />
           </FormRow>
         </div>
