@@ -179,75 +179,75 @@ const Faq = () => {
             />
 
             <Drawer
-  isOpen={isModalOpen}
-  onClose={() => {
-    setIsModalOpen(false);
-    setIsEditMode(false);
-    setSelectedFaq(null);
-    reset();
-  }}
-  title={isEditMode ? "Update FAQ" : "Create FAQ"}
->
-  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-    {/* Question */}
-    <ValidatedTextField
-      name="question"
-      control={control}
-      rules={{ required: true }}
-      label="Question"
-      placeholder="Write a Question!"
-      errors={errors}
-      helperText="Question is required!"
-    />
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setIsEditMode(false);
+                    setSelectedFaq(null);
+                    reset();
+                }}
+                title={isEditMode ? "Update FAQ" : "Create FAQ"}
+            >
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    {/* Question */}
+                    <ValidatedTextField
+                        name="question"
+                        control={control}
+                        rules={{ required: true }}
+                        label="Question"
+                        placeholder="Write a Question!"
+                        errors={errors}
+                        helperText="Question is required!"
+                    />
 
-    {/* Answer */}
-    <ValidatedTextArea
-      name="answer"
-      control={control}
-      label="Answer"
-      errors={errors}
-      placeholder="Write Answer"
-      rows={4}
-      rules={{ required: "Answer is required" }}
-    />
+                    {/* Answer */}
+                    <ValidatedTextArea
+                        name="answer"
+                        control={control}
+                        label="Answer"
+                        errors={errors}
+                        placeholder="Write Answer"
+                        rows={4}
+                        rules={{ required: "Answer is required" }}
+                    />
 
-    {/* Is Featured */}
-    <div className="flex items-center">
-      <input
-        id="isFeatured"
-        type="checkbox"
-        {...register("isFeatured")}
-        className="checkbox checkbox-primary"
-      />
-      <label htmlFor="isFeatured" className="ml-2 block text-sm">
-        Is Featured
-      </label>
-    </div>
+                    {/* Is Featured */}
+                    <div className="flex items-center">
+                        <input
+                            id="isFeatured"
+                            type="checkbox"
+                            {...register("isFeatured")}
+                            className="checkbox checkbox-primary"
+                        />
+                        <label htmlFor="isFeatured" className="ml-2 block text-sm">
+                            Is Featured
+                        </label>
+                    </div>
 
-    {/* Category */}
-    <ValidatedLabel label="Select category" />
-    <ValidatedSearchableSelectField
-      name="category_xid"
-      control={control}
-      options={categoryData}
-      errors={errors}
-      rules={{ required: "Category is required" }}
-      setGlobalFilter={setGlobalFilter}
-      globalFilter={globalFilter}
-      placeholder="Select category"
-    />
+                    {/* Category */}
+                    <ValidatedLabel label="Select category" />
+                    <ValidatedSearchableSelectField
+                        name="category_xid"
+                        control={control}
+                        options={categoryData}
+                        errors={errors}
+                        rules={{ required: "Category is required" }}
+                        setGlobalFilter={setGlobalFilter}
+                        globalFilter={globalFilter}
+                        placeholder="Select category"
+                    />
 
-    {/* Actions */}
-    <div className="flex justify-end gap-2 pt-4">
-      <button type="button" onClick={() => onClose()} className="btn">
-        Cancel
-      </button>
-      <button type="submit" className="btn btn-primary">
-        {isEditMode ? "Update" : "Create"}
-      </button>
-    </div>
-  </form>
-</Drawer>
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2 pt-4">
+                        <button type="button" onClick={() => onClose()} className="btn">
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn btn-primary">
+                            {isEditMode ? "Update" : "Create"}
+                        </button>
+                    </div>
+                </form>
+            </Drawer>
 
 
 
