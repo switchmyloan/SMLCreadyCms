@@ -30,18 +30,27 @@ const createAxiosInstance = () => {
     }
   )
 
-  instance.interceptors.request.use(function (config) {
-    if (
-      config.url != '/auth/login' &&
-      config.url != '/upload/image' &&
-      config.url != '/auth/register' &&
-      config.url != '/auth/change-password' &&
-      config.url !== '/auth/email-verification-otp' &&
-      config.url !== '/auth/verify-email-otp' &&
-      config.url !== '/home/nationalities'
-    ) {
-      config.url =  config.url
+  // Request interceptor
+  instance.interceptors.request.use((config) => {
+    const token = TokenService.getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
     }
+    
+    if (config.url !== '/auth/login') {
+      // split URL (in case query params exist)
+      const [path, query] = config.url.split('?')
+      // Always append /admin to path
+      let newUrl = `${path}/admin`
+
+      // Re-attach query params if they exist
+      if (query) {
+        newUrl += `?${query}`
+      }
+
+      config.url = newUrl
+    }
+
     return config
   })
 
