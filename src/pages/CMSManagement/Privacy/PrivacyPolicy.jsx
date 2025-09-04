@@ -5,49 +5,49 @@ import { useNavigate } from "react-router-dom";
 import { getBlogs } from "@api/cms-services";
 import ToastNotification from "@components/Notification/ToastNotification";
 import { blogColumn } from "@components/TableHeader";
+import { Editor, EditorState, RichUtils, convertToRaw } from "draft-js";
+import "draft-js/dist/Draft.css"; // default styles import
 
-
-// ------------------- Privacy Policy Modal -------------------
 const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
   const [form, setForm] = useState({
     title: "",
     lastUpdated: "",
-    sections: [{ title: "", content: "" }],
+    sections: [{ title: "", content: EditorState.createEmpty() }],
   });
 
   if (!isOpen) return null;
 
-  // Handle input change
-  const handleChange = (e, idx, field) => {
-    if (field) {
-      // For sections
-      const updatedSections = [...form.sections];
-      updatedSections[idx][field] = e.target.value;
-      setForm({ ...form, sections: updatedSections });
-    } else {
-      setForm({ ...form, [e.target.name]: e.target.value });
-    }
+  // Handle Editor change
+  const handleEditorChange = (editorState, idx) => {
+    const updatedSections = [...form.sections];
+    updatedSections[idx].content = editorState;
+    setForm({ ...form, sections: updatedSections });
   };
 
-  // Add new section
-  const addSection = () => {
-    setForm({
-      ...form,
-      sections: [...form.sections, { title: "", content: "" }],
-    });
-  };
-
-  // Submit
+  // Save form (convert DraftJS content → raw JSON or HTML)
   const handleSubmit = () => {
-    onSave(form);
+    const finalData = {
+      ...form,
+      sections: form.sections.map((s) => ({
+        title: s.title,
+        content: JSON.stringify(convertToRaw(s.content.getCurrentContent())), // save as raw JSON
+      })),
+    };
+    onSave(finalData);
     onClose();
+  };
+
+  // Toggle inline styles (bold, italic etc.)
+  const toggleInlineStyle = (idx, style) => {
+    handleEditorChange(
+      RichUtils.toggleInlineStyle(form.sections[idx].content, style),
+      idx
+    );
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-gray-50 w-[90%] max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg p-6 relative">
-
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -57,7 +57,7 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
 
         <h2 className="text-2xl font-semibold mb-4">Create Privacy Policy</h2>
 
-        {/* Title */}
+        {/* Page Title + Last Updated */}
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">Page Title</label>
@@ -65,14 +65,15 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
               type="text"
               name="title"
               value={form.title}
-              onChange={handleChange}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
               className="w-full border rounded-lg px-3 py-2 bg-gray-50"
               placeholder="Enter Privacy Policy Title"
             />
           </div>
 
-          {/* Last Updated */}
-          <div className="mb-4">
+          <div>
             <label className="block text-sm font-medium mb-1">
               Last Updated Date
             </label>
@@ -80,11 +81,14 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
               type="date"
               name="lastUpdated"
               value={form.lastUpdated}
-              onChange={handleChange}
+              onChange={(e) =>
+                setForm({ ...form, [e.target.name]: e.target.value })
+              }
               className="w-full border rounded-lg px-3 py-2 bg-gray-50"
             />
           </div>
         </div>
+
         {/* Sections */}
         <h3 className="text-lg font-semibold mt-6 mb-2">Sections</h3>
         {form.sections.map((section, idx) => (
@@ -95,7 +99,11 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
             <input
               type="text"
               value={section.title}
-              onChange={(e) => handleChange(e, idx, "title")}
+              onChange={(e) => {
+                const updated = [...form.sections];
+                updated[idx].title = e.target.value;
+                setForm({ ...form, sections: updated });
+              }}
               className="w-full border rounded-lg px-3 py-2 mb-3 bg-gray-50"
               placeholder="Enter Section Title"
             />
@@ -103,24 +111,59 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
             <label className="block text-sm font-medium mb-1">
               Section Content
             </label>
-            <textarea
-              value={section.content}
-              onChange={(e) => handleChange(e, idx, "content")}
-              rows={4}
-              className="w-full border rounded-lg px-3 py-2 bg-gray-50"
-              placeholder="Write section details here..."
-            />
+
+            {/* Toolbar */}
+            <div className="flex gap-2 mb-2">
+              <button
+                type="button"
+                onClick={() => toggleInlineStyle(idx, "BOLD")}
+                className="px-2 py-1 border rounded"
+              >
+                B
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleInlineStyle(idx, "ITALIC")}
+                className="px-2 py-1 border rounded italic"
+              >
+                I
+              </button>
+              <button
+                type="button"
+                onClick={() => toggleInlineStyle(idx, "UNDERLINE")}
+                className="px-2 py-1 border rounded underline"
+              >
+                U
+              </button>
+            </div>
+
+            <div className="border rounded-lg p-2 bg-white min-h-[120px]">
+              <Editor
+                editorState={section.content}
+                onChange={(state) => handleEditorChange(state, idx)}
+                placeholder="Write section details..."
+              />
+            </div>
           </div>
         ))}
 
+        {/* Add Section */}
         <button
-          onClick={addSection}
+          onClick={() =>
+            setForm({
+              ...form,
+              sections: [
+                ...form.sections,
+                { title: "", content: EditorState.createEmpty() },
+              ],
+            })
+          }
           className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
         >
           + Add Section
         </button>
 
-        {/* Save Button */}
+        {/* Save + Cancel */}
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}

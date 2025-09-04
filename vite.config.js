@@ -6,7 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   resolve: {
-  alias: {
+    alias: {
       '@': path.resolve(__dirname, './src'),
       '@assets': path.resolve(__dirname, './src/assets'),
       '@components': path.resolve(__dirname, './src/components'),
@@ -17,7 +17,10 @@ export default defineConfig({
       '@routes': path.resolve(__dirname, './src/routes'),
       '@api': path.resolve(__dirname, './src/api-services'),
     },
-},
+  },
+  define: {
+    global: {},
+  },
   build: {
     chunkSizeWarningLimit: 1000, // 1MB
   },
