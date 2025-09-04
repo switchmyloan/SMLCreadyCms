@@ -1,128 +1,141 @@
-import React, { useState } from "react";
-import { Toaster } from "react-hot-toast";
-import ToastNotification from "@components/Notification/ToastNotification";
-import { useNavigate } from "react-router-dom";
-// import { createBlog } from "@api/cms-services"; // <-- API call create blog ke liye
+import { useForm } from 'react-hook-form'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import ValidatedTextField from '@components/Form/ValidatedTextField'
+import ValidatedTextArea from '@components/Form/ValidatedTextArea'
+import ValidatedLabel from '@components/Form/ValidatedLabel'
+import SubmitBtn from '@components/Form/SubmitBtn'
+import ToastNotification from '@components/Notification/ToastNotification'
+import ImageUploadField from '@components/Form/ImageUploadField'
+import FormRow from '@components/Form/FormRow'
+// import { AddLender, UpdateLender, getLenderById } from '@api/cms-services'
 
-const BlogForm = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    author: "",
-    status: "draft",
-  });
-  const [loading, setLoading] = useState(false);
+export default function LenderCreate() {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const isEdit = Boolean(id)
 
-  // Handle Input Change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const [loading, setLoading] = useState(false)
 
-  // Handle Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // try {
-    //   setLoading(true);
-    //   const response = await createBlog(formData); // API call
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { errors }
+  } = useForm({
+    defaultValues: {
+      name: '',
+      slug: '',
+      description: '',
+      logo: '',
+      website: '',
+      playStoreLink: '',
+      appStoreLink: '',
+      startingInterestRate: '',
+      maximumLoanAmount: '',
+      minimumLoanAmount: '',
+      maximumTenure: '',
+      minimumTenure: '',
+      processingFee: '',
+      prepaymentCharges: '',
+      latePaymentCharges: '',
+      foreclosureCharges: '',
+      eligibilityCriteria: '',
+      customerSupportNumber: '',
+      customerSupportEmail: '',
+      termsAndConditionsLink: ''
+    }
+  })
 
-    //   if (response?.data?.success) {
-    //     ToastNotification.success("Blog created successfully!");
-    //     navigate("/blogs"); // list page par redirect
-    //   } else {
-    //     ToastNotification.error("Failed to create blog");
-    //   }
-    // } catch (error) {
-    //   console.error("Error creating blog:", error);
-    //   ToastNotification.error("Something went wrong");
-    // } finally {
-    //   setLoading(false);
-    // }
-  };
+  const onSubmit = async (data) => {
+    console.log("Form Data:", data)
+  }
 
   return (
-    <div className=" mx-auto bg-white shadow-lg rounded-lg p-6">
-      <Toaster />
-      <h2 className="text-2xl font-bold mb-6">On Board Lender</h2>
+    <div>
+      <h2 className="text-2xl font-bold mb-6">{isEdit ? 'Edit Lender' : 'Create Lender'}</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Title */}
-        <div>
-          <label className="block text-sm font-medium">Title</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+
+        {/* Basic Info */}
+        <div className="bg-white shadow p-6 rounded-xl space-y-4">
+          <FormRow cols={3}>
+            <ValidatedTextField 
+            name="name"
+             control={control} 
+             label="Lender Name" 
+             errors={errors} 
+             rules={{required : true}}
+             helperText='Lender name required!'
+             />
+            <ValidatedTextField name="slug" control={control} label="Slug" errors={errors} />
+            <ValidatedTextField name="website" control={control} label="Website" errors={errors} />
+          </FormRow>
+          <FormRow cols={3}>
+            <ValidatedTextField name="appStoreLink" control={control} label="App Store Link" errors={errors} />
+            <ValidatedTextField name="playStoreLink" control={control} label="Play Store Link" errors={errors} />
+
+          </FormRow>
+
+          <FormRow cols={3}>
+
+
+          </FormRow>
+          <FormRow cols={3}>
+            <div>
+              <ValidatedLabel label="Select Category" />
+              <ImageUploadField name="logo" control={control} label="Logo" errors={errors} />
+            </div>
+            <ValidatedTextArea name="description" control={control} label="Description" errors={errors} rows={3} />
+
+          </FormRow>
+
+
         </div>
 
-        {/* Content */}
-        <div>
-          <label className="block text-sm font-medium">Content</label>
-          <textarea
-            name="content"
-            value={formData.content}
-            onChange={handleChange}
-            required
-            rows="5"
-            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
-          ></textarea>
+
+
+        <div className="w-full join join-vertical bg-base-100">
+          <div className="collapse collapse-arrow join-item border-base-300 border">
+            <input type="checkbox" />
+            <div className="collapse-title font-semibold">Advanced Fields</div>
+            <div className="collapse-content text-sm">
+              {/* Financial Details */}
+              <div className="space-y-4">
+                <FormRow cols={3}>
+                  <ValidatedTextField name="startingInterestRate" control={control} label="Starting Interest Rate" errors={errors} />
+                  <ValidatedTextField name="processingFee" control={control} label="Processing Fee" errors={errors} />
+                  <ValidatedTextField name="maximumLoanAmount" control={control} label="Maximum Loan Amount" errors={errors} />
+                  <ValidatedTextField name="minimumLoanAmount" control={control} label="Minimum Loan Amount" errors={errors} />
+                  <ValidatedTextField name="maximumTenure" control={control} label="Maximum Tenure" errors={errors} />
+                  <ValidatedTextField name="minimumTenure" control={control} label="Minimum Tenure" errors={errors} />
+                  <ValidatedTextField name="prepaymentCharges" control={control} label="Prepayment Charges" errors={errors} />
+                  <ValidatedTextField name="latePaymentCharges" control={control} label="Late Payment Charges" errors={errors} />
+                  <ValidatedTextField name="foreclosureCharges" control={control} label="Foreclosure Charges" errors={errors} />
+
+                  <ValidatedTextArea name="eligibilityCriteria" control={control} label="Eligibility Criteria" errors={errors} rows={3} />
+                </FormRow>
+              </div>
+              {/* Support Details */}
+              <div className="mt-8 space-y-4">
+                <FormRow cols={3}>
+                  <ValidatedTextField name="customerSupportNumber" control={control} label="Customer Support Number" errors={errors} />
+                  <ValidatedTextField name="customerSupportEmail" control={control} label="Customer Support Email" errors={errors} />
+                  <ValidatedTextField name="termsAndConditionsLink" control={control} label="Terms & Conditions Link" errors={errors} />
+                </FormRow>
+
+
+              </div>
+
+            </div>
+          </div>
         </div>
 
-        {/* Author */}
-        <div>
-          <label className="block text-sm font-medium">Author</label>
-          <input
-            type="text"
-            name="author"
-            value={formData.author}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
-          />
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-medium">Status</label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => navigate("/blogs")}
-            className="px-4 py-2 rounded-lg border border-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
-          >
-            {loading ? "Creating..." : "Create Blog"}
-          </button>
+        {/* Submit */}
+        <div className="flex justify-end">
+          <SubmitBtn loading={loading} label={isEdit ? 'Update' : 'Submit'} />
         </div>
       </form>
     </div>
-  );
-};
-
-export default BlogForm;
+  )
+}

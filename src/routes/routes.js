@@ -45,7 +45,7 @@ export const routes = [
     showInSidebar: true,
     group: "Lender Management",
     groupOrder: 2, 
-    order: 1,
+    order: 2,
   },
   {
     path: "/list-of-lenders",
@@ -54,7 +54,7 @@ export const routes = [
     showInSidebar: true,
     group: "Lender Management",
     groupOrder: 2, 
-    order: 2,
+    order: 1,
   },
 
   // --- Blogs ---
