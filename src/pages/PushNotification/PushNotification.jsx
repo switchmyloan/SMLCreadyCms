@@ -96,66 +96,12 @@ const ComingSoon = () => {
     <div className="flex items-center justify-center min-h-screen">
       <div className="flex flex-col items-center text-center relative">
         {/* Coffee Cup */}
-        <div className="relative flex justify-center">
-          <span className="text-8xl">☕</span>
-
-          {/* Steam using SVG paths */}
-          <svg
-            className="absolute -top-10 left-1/2 -translate-x-1/2 w-16 h-16"
-            viewBox="0 0 64 64"
-            fill="none"
-          >
-            <path
-              d="M20 50 C10 30, 30 20, 20 0"
-              stroke="#aaa"
-              strokeWidth="2"
-              fill="transparent"
-              className="steam-line"
-            />
-            <path
-              d="M40 50 C30 30, 50 20, 40 0"
-              stroke="#aaa"
-              strokeWidth="2"
-              fill="transparent"
-              className="steam-line delay-300"
-            />
-          </svg>
-        </div>
-
         {/* Text */}
-        <h1 className="mt-6 text-4xl md:text-5xl font-bold tracking-wide animate-bounce">
+        <h1 className=" text-4xl md:text-5xl font-bold -tracking-tight animate-none">
           Coming Soon...
         </h1>
 
-        {/* Inline CSS */}
-        <style>{`
-          .steam-line {
-            stroke-dasharray: 200;
-            stroke-dashoffset: 200;
-            animation: drawSteam 4s ease-in-out infinite;
-            opacity: 0.7;
-          }
-          .steam-line.delay-300 {
-            animation-delay: 0.3s;
-          }
-          @keyframes drawSteam {
-            0% {
-              stroke-dashoffset: 200;
-              opacity: 0;
-            }
-            30% {
-              opacity: 1;
-            }
-            60% {
-              opacity: 1;
-            }
-            100% {
-              stroke-dashoffset: 0;
-              opacity: 0;
-              transform: translateY(-20px);
-            }
-          }
-        `}</style>
+        
       </div>
     </div>
   );
