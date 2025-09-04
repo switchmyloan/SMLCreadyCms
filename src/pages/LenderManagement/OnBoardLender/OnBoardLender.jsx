@@ -16,6 +16,7 @@ export default function LenderCreate() {
   const isEdit = Boolean(id)
 
   const [loading, setLoading] = useState(false)
+  const [openAdvanced, setOpenAdvanced] = useState(false)
 
   const {
     control,
@@ -51,6 +52,26 @@ export default function LenderCreate() {
     console.log("Form Data:", data)
   }
 
+
+   useEffect(() => {
+    if (
+      errors.startingInterestRate ||
+      errors.processingFee ||
+      errors.maximumLoanAmount ||
+      errors.minimumLoanAmount ||
+      errors.maximumTenure ||
+      errors.minimumTenure ||
+      errors.prepaymentCharges ||
+      errors.latePaymentCharges ||
+      errors.foreclosureCharges ||
+      errors.eligibilityCriteria ||
+      errors.customerSupportNumber ||
+      errors.customerSupportEmail ||
+      errors.termsAndConditionsLink
+    ) {
+      setOpenAdvanced(true)
+    }
+  }, [errors])
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">{isEdit ? 'Edit Lender' : 'Create Lender'}</h2>
@@ -60,20 +81,52 @@ export default function LenderCreate() {
         {/* Basic Info */}
         <div className="bg-white shadow p-6 rounded-xl space-y-4">
           <FormRow cols={3}>
-            <ValidatedTextField 
-            name="name"
-             control={control} 
-             label="Lender Name" 
-             errors={errors} 
-             rules={{required : true}}
-             helperText='Lender name required!'
-             />
-            <ValidatedTextField name="slug" control={control} label="Slug" errors={errors} />
-            <ValidatedTextField name="website" control={control} label="Website" errors={errors} />
+            <ValidatedTextField
+              name="name"
+              control={control}
+              label="Lender Name"
+              errors={errors}
+              rules={{ required: true }}
+              helperText='Lender name required!'
+            />
+
+            <ValidatedTextField
+              name="slug"
+              control={control}
+              label="Slug"
+              errors={errors}
+              rules={{ required: true }}
+              helperText='Slug required!'
+            />
+
+            <ValidatedTextField
+              name="website"
+              control={control}
+              label="Website"
+              errors={errors}
+              rules={{ required: true }}
+              helperText='Website required!'
+            />
           </FormRow>
+
           <FormRow cols={3}>
-            <ValidatedTextField name="appStoreLink" control={control} label="App Store Link" errors={errors} />
-            <ValidatedTextField name="playStoreLink" control={control} label="Play Store Link" errors={errors} />
+            <ValidatedTextField
+              name="appStoreLink"
+              control={control}
+              label="App Store Link"
+              errors={errors}
+              rules={{ required: true }}
+              helperText='App Store Link required!'
+            />
+
+            <ValidatedTextField
+              name="playStoreLink"
+              control={control}
+              label="Play Store Link"
+              errors={errors}
+              rules={{ required: true }}
+              helperText='Play Store Link required!'
+            />
 
           </FormRow>
 
@@ -83,27 +136,50 @@ export default function LenderCreate() {
           </FormRow>
           <FormRow cols={3}>
             <div>
-              <ValidatedLabel label="Select Category" />
-              <ImageUploadField name="logo" control={control} label="Logo" errors={errors} />
+              <ValidatedLabel label="Select Logo" />
+              <ImageUploadField
+                name="logo"
+                control={control}
+                label="Logo"
+                errors={errors}
+                rules={{ required: "Logo required!" }}
+                helperText='Logo required!'
+              />
             </div>
-            <ValidatedTextArea name="description" control={control} label="Description" errors={errors} rows={3} />
 
+            <ValidatedTextArea
+              name="description"
+              control={control}
+              label="Description"
+              errors={errors}
+              rows={3}
+              rules={{ required: "Description required!" }}
+              helperText=''
+            />
           </FormRow>
-
-
         </div>
-
 
 
         <div className="w-full join join-vertical bg-base-100">
           <div className="collapse collapse-arrow join-item border-base-300 border">
-            <input type="checkbox" />
+            <input 
+            type="checkbox" 
+            checked={openAdvanced}
+              onChange={() => setOpenAdvanced(!openAdvanced)}
+            />
             <div className="collapse-title font-semibold">Advanced Fields</div>
             <div className="collapse-content text-sm">
               {/* Financial Details */}
               <div className="space-y-4">
                 <FormRow cols={3}>
-                  <ValidatedTextField name="startingInterestRate" control={control} label="Starting Interest Rate" errors={errors} />
+                  <ValidatedTextField
+                    name="startingInterestRate"
+                    control={control}
+                    label="Starting Interest Rate"
+                    errors={errors}
+                    rules={{ required: true }}
+                    helperText='Starting Interest Rate required!'
+                  />
                   <ValidatedTextField name="processingFee" control={control} label="Processing Fee" errors={errors} />
                   <ValidatedTextField name="maximumLoanAmount" control={control} label="Maximum Loan Amount" errors={errors} />
                   <ValidatedTextField name="minimumLoanAmount" control={control} label="Minimum Loan Amount" errors={errors} />

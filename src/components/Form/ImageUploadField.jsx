@@ -133,15 +133,15 @@ const ImageUploadField = ({
         <div className="space-y-3">
           {/* Upload Button */}
           {!preview && (
-            <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-400 transition">
+            <label className={`flex flex-col items-center justify-center w-full h-20 border-2 border-dashed ${errors?.[name] ? 'border-red-500' : 'border-gray-300 '} rounded-lg cursor-pointer hover:border-blue-400 transition`}>
               <input
                 type="file"
                 accept="image/*"
                 className="hidden"
                 onChange={(e) => handleImageChange(e, onChange)}
               />
-              <Upload className="w-6 h-6 text-gray-500 mb-1" />
-              <span className="text-gray-600 text-sm">{label}</span>
+              <Upload className={`w-6 h-6 ${errors?.[name] ? 'text-red-500' : 'text-gray-500'}   mb-1`} />
+              <span className={`${errors?.[name] ? 'text-red-500' : 'text-gray-600'}  text-sm`}>{label}</span>
             </label>
           )}
 
