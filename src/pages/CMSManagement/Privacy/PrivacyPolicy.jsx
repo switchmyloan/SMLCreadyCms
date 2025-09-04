@@ -1,39 +1,183 @@
-import React, { useEffect, useState } from 'react'
-import DataTable from '@components/Table/DataTable';
-import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/cms-services';
-import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
+import React, { useEffect, useState } from "react";
+import DataTable from "@components/Table/DataTable";
+import { Toaster } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { getBlogs } from "@api/cms-services";
+import ToastNotification from "@components/Notification/ToastNotification";
+import { blogColumn } from "@components/TableHeader";
 
 
+// ------------------- Privacy Policy Modal -------------------
+const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
+  const [form, setForm] = useState({
+    title: "",
+    lastUpdated: "",
+    sections: [{ title: "", content: "" }],
+  });
+
+  if (!isOpen) return null;
+
+  // Handle input change
+  const handleChange = (e, idx, field) => {
+    if (field) {
+      // For sections
+      const updatedSections = [...form.sections];
+      updatedSections[idx][field] = e.target.value;
+      setForm({ ...form, sections: updatedSections });
+    } else {
+      setForm({ ...form, [e.target.name]: e.target.value });
+    }
+  };
+
+  // Add new section
+  const addSection = () => {
+    setForm({
+      ...form,
+      sections: [...form.sections, { title: "", content: "" }],
+    });
+  };
+
+  // Submit
+  const handleSubmit = () => {
+    onSave(form);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-gray-50 w-[90%] max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-lg p-6 relative">
+
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+        >
+          ✕
+        </button>
+
+        <h2 className="text-2xl font-semibold mb-4">Create Privacy Policy</h2>
+
+        {/* Title */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Page Title</label>
+            <input
+              type="text"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-3 py-2 bg-gray-50"
+              placeholder="Enter Privacy Policy Title"
+            />
+          </div>
+
+          {/* Last Updated */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-1">
+              Last Updated Date
+            </label>
+            <input
+              type="date"
+              name="lastUpdated"
+              value={form.lastUpdated}
+              onChange={handleChange}
+              className="w-full border rounded-lg px-3 py-2 bg-gray-50"
+            />
+          </div>
+        </div>
+        {/* Sections */}
+        <h3 className="text-lg font-semibold mt-6 mb-2">Sections</h3>
+        {form.sections.map((section, idx) => (
+          <div key={idx} className="border p-4 mb-4 rounded-lg">
+            <label className="block text-sm font-medium mb-1">
+              Section Title
+            </label>
+            <input
+              type="text"
+              value={section.title}
+              onChange={(e) => handleChange(e, idx, "title")}
+              className="w-full border rounded-lg px-3 py-2 mb-3 bg-gray-50"
+              placeholder="Enter Section Title"
+            />
+
+            <label className="block text-sm font-medium mb-1">
+              Section Content
+            </label>
+            <textarea
+              value={section.content}
+              onChange={(e) => handleChange(e, idx, "content")}
+              rows={4}
+              className="w-full border rounded-lg px-3 py-2 bg-gray-50"
+              placeholder="Write section details here..."
+            />
+          </div>
+        ))}
+
+        <button
+          onClick={addSection}
+          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+        >
+          + Add Section
+        </button>
+
+        {/* Save Button */}
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 mr-2 rounded-lg border border-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// ------------------- Privacy Policy Table Page -------------------
 const PrivacyPolicy = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
-  const [loading, setLoading] = useState(false); // N
+  const [loading, setLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
-    // totalDataCount: totalDataCount ? totalDataCount : 1
-  })
+  });
+
   const [query, setQuery] = useState({
     limit: 10,
     page_no: 1,
-    search: ''
-  })
+    search: "",
+  });
 
+  // Open Modal on Create
   const handleCreate = () => {
+    setIsModalOpen(true);
+  };
 
-    navigate("/blogs/create");
-  }
+  // Save Modal Data
+  const handleSave = (formData) => {
+    console.log("Form submitted:", formData);
+    // 🔹 TODO: API call to save in CMS
+    ToastNotification.success("Privacy Policy Saved!");
+  };
 
+  // Fetch Table Data
   const fetchBlogs = async () => {
     try {
-     setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
+      setLoading(true);
+      const response = await getBlogs(query.page_no, query.limit, "");
 
-      console.log('Response:', response.data.data);
       if (response?.data?.success) {
         setData(response?.data?.data?.data || []);
         setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
@@ -41,40 +185,34 @@ const PrivacyPolicy = () => {
         ToastNotification.error("Error fetching data");
       }
     } catch (error) {
-      console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
-      // router.push('/login');
+      console.error("Error fetching:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleEdit = (data) => {
-    navigate(`/blogs/${data?.id}`)
-  }
+    navigate(`/blogs/${data?.id}`);
+  };
 
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
+
   const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
-    setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
-      return {
-        ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
-      };
-    });
+    setQuery((prevQuery) => ({
+      ...prevQuery,
+      page_no: pageNo.pageIndex + 1,
+    }));
   };
+
   return (
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
-          handleEdit
-        })}
-        title='Privacy Policy'
-        data={[]}
+        columns={blogColumn({ handleEdit })}
+        title="Privacy Policy"
+        data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"
@@ -83,8 +221,15 @@ const PrivacyPolicy = () => {
         pagination={pagination}
         loading={loading}
       />
-    </>
-  )
-}
 
-export default PrivacyPolicy
+      {/* Modal */}
+      <PrivacyPolicyModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+      />
+    </>
+  );
+};
+
+export default PrivacyPolicy;

@@ -41,7 +41,8 @@ const createAxiosInstance = () => {
       // split URL (in case query params exist)
       const [path, query] = config.url.split('?')
       // Always append /admin to path
-      let newUrl = `${path}/admin`
+      // let newUrl = `${path}/admin`
+      let newUrl = `${path}`
 
       // Re-attach query params if they exist
       if (query) {
