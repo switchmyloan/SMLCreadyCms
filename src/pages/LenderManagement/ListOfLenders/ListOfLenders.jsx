@@ -25,7 +25,7 @@ const Blogs = () => {
 
   const handleCreate = () => {
 
-    navigate("/blogs/create");
+    navigate("/on-borde-lender-from");
   }
 
   const fetchBlogs = async () => {
@@ -77,7 +77,7 @@ const Blogs = () => {
         data={[]}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
-        createLabel="Create"
+        createLabel="On Board Lender"
         onPageChange={onPageChange}
         setPagination={setPagination}
         pagination={pagination}

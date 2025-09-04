@@ -1,90 +1,128 @@
-import React, { useEffect, useState } from 'react'
-import DataTable from '@components/Table/DataTable';
-import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/cms-services';
-import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
+import React, { useState } from "react";
+import { Toaster } from "react-hot-toast";
+import ToastNotification from "@components/Notification/ToastNotification";
+import { useNavigate } from "react-router-dom";
+// import { createBlog } from "@api/cms-services"; // <-- API call create blog ke liye
 
-
-const Blogs = () => {
+const BlogForm = () => {
   const navigate = useNavigate();
-  const [data, setData] = useState([]);
-  const [totalDataCount, setTotalDataCount] = useState(0);
-  const [loading, setLoading] = useState(false); // N
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-    // totalDataCount: totalDataCount ? totalDataCount : 1
-  })
-  const [query, setQuery] = useState({
-    limit: 10,
-    page_no: 1,
-    search: ''
-  })
+  const [formData, setFormData] = useState({
+    title: "",
+    content: "",
+    author: "",
+    status: "draft",
+  });
+  const [loading, setLoading] = useState(false);
 
-  const handleCreate = () => {
-
-    navigate("/blogs/create");
-  }
-
-  const fetchBlogs = async () => {
-    try {
-     setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
-
-      console.log('Response:', response.data.data);
-      if (response?.data?.success) {
-        setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
-      } else {
-        ToastNotification.error("Error fetching data");
-      }
-    } catch (error) {
-      console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
-      // router.push('/login');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEdit = (data) => {
-    navigate(`/blogs/${data?.id}`)
-  }
-
-  useEffect(() => {
-    fetchBlogs();
-  }, [query.page_no]);
-  const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
-    setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
-      return {
-        ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
-      };
+  // Handle Input Change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
     });
   };
-  return (
-    <>
-      <Toaster />
-      <DataTable
-        columns={blogColumn({
-          handleEdit
-        })}
-        title='On Board Lender'
-        data={[]}
-        totalDataCount={totalDataCount}
-        onCreate={handleCreate}
-        createLabel="Create"
-        onPageChange={onPageChange}
-        setPagination={setPagination}
-        pagination={pagination}
-        loading={loading}
-      />
-    </>
-  )
-}
 
-export default Blogs
+  // Handle Submit
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // try {
+    //   setLoading(true);
+    //   const response = await createBlog(formData); // API call
+
+    //   if (response?.data?.success) {
+    //     ToastNotification.success("Blog created successfully!");
+    //     navigate("/blogs"); // list page par redirect
+    //   } else {
+    //     ToastNotification.error("Failed to create blog");
+    //   }
+    // } catch (error) {
+    //   console.error("Error creating blog:", error);
+    //   ToastNotification.error("Something went wrong");
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
+  return (
+    <div className=" mx-auto bg-white shadow-lg rounded-lg p-6">
+      <Toaster />
+      <h2 className="text-2xl font-bold mb-6">On Board Lender</h2>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Title */}
+        <div>
+          <label className="block text-sm font-medium">Title</label>
+          <input
+            type="text"
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
+          />
+        </div>
+
+        {/* Content */}
+        <div>
+          <label className="block text-sm font-medium">Content</label>
+          <textarea
+            name="content"
+            value={formData.content}
+            onChange={handleChange}
+            required
+            rows="5"
+            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
+          ></textarea>
+        </div>
+
+        {/* Author */}
+        <div>
+          <label className="block text-sm font-medium">Author</label>
+          <input
+            type="text"
+            name="author"
+            value={formData.author}
+            onChange={handleChange}
+            required
+            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
+          />
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-sm font-medium">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg p-2 mt-1"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/blogs")}
+            className="px-4 py-2 rounded-lg border border-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-50"
+          >
+            {loading ? "Creating..." : "Create Blog"}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default BlogForm;

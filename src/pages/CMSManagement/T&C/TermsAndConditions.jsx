@@ -1,80 +1,117 @@
-import React, { useEffect, useState } from 'react'
-import DataTable from '@components/Table/DataTable';
-import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/cms-services';
-import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
-
+import React, { useEffect, useState } from "react";
+import DataTable from "@components/Table/DataTable";
+import { Toaster } from "react-hot-toast";
+import ToastNotification from "@components/Notification/ToastNotification";
+import { blogColumn } from "@components/TableHeader";
+import TermsAndConditionsModal from "../../Modals/TernsAndConditionsModal";
 
 const TermsAndConditions = () => {
-  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
-  const [loading, setLoading] = useState(false); // N
+  const [loading, setLoading] = useState(false);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
-    // totalDataCount: totalDataCount ? totalDataCount : 1
-  })
+  });
+
   const [query, setQuery] = useState({
     limit: 10,
     page_no: 1,
-    search: ''
-  })
+    search: "",
+  });
 
-  const handleCreate = () => {
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editData, setEditData] = useState(null);
 
-    navigate("/blogs/create");
-  }
-
-  const fetchBlogs = async () => {
+  // Fake API (replace later)
+  const fetchData = async () => {
     try {
-     setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
+      setLoading(true);
+      const response = {
+        success: true,
+        data: [
+          {
+            id: 1,
+            title: "Default Terms",
+            lastUpdated: "2025-09-04",
+            sections: [
+              {
+                title: "Introduction",
+                content: JSON.stringify({
+                  blocks: [
+                    {
+                      key: "6mgfh",
+                      text: "These are the sample terms & conditions...",
+                      type: "unstyled",
+                      depth: 0,
+                      inlineStyleRanges: [],
+                      entityRanges: [],
+                      data: {},
+                    },
+                  ],
+                  entityMap: {},
+                }),
+              },
+            ],
+          },
+        ],
+        pagination: { totalItems: 1 },
+      };
 
-      console.log('Response:', response.data.data);
-      if (response?.data?.success) {
-        setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+      if (response.success) {
+        setData(response.data);
+        setTotalDataCount(response.pagination.totalItems);
       } else {
         ToastNotification.error("Error fetching data");
       }
     } catch (error) {
-      console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
-      // router.push('/login');
+      console.error("Error fetching:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (data) => {
-    navigate(`/blogs/${data?.id}`)
-  }
+  const handleCreate = () => {
+    setEditData(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEdit = (row) => {
+    setEditData(row);
+    setIsModalOpen(true);
+  };
+
+  const handleSave = (form) => {
+    if (editData) {
+      console.log("Update:", form); // 🔹 Replace with update API
+      ToastNotification.success("Terms & Conditions Updated!");
+    } else {
+      console.log("Create:", form); // 🔹 Replace with create API
+      ToastNotification.success("Terms & Conditions Created!");
+    }
+    fetchData();
+  };
 
   useEffect(() => {
-    fetchBlogs();
+    fetchData();
   }, [query.page_no]);
+
   const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
-    setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
-      return {
-        ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
-      };
-    });
+    setQuery((prevQuery) => ({
+      ...prevQuery,
+      page_no: pageNo.pageIndex + 1,
+    }));
   };
+
   return (
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
-          handleEdit
-        })}
-        title='TermsAndConditions'
-        data={[]}
+        columns={blogColumn({ handleEdit })}
+        title="Terms & Conditions"
+        data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"
@@ -83,8 +120,15 @@ const TermsAndConditions = () => {
         pagination={pagination}
         loading={loading}
       />
-    </>
-  )
-}
 
-export default TermsAndConditions
+      <TermsAndConditionsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSave}
+        initialData={editData}
+      />
+    </>
+  );
+};
+
+export default TermsAndConditions;
