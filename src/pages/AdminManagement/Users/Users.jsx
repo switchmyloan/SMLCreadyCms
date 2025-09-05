@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DataTable from '../../../components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/modules/BlogsApi';
+import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '../../../components/Notification/ToastNotification';
 import { blogColumn } from '../../../components/TableHeader';
 
