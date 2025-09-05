@@ -197,6 +197,7 @@ import { useForm } from "react-hook-form";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import Drawer from "../../../components/Drawer";
+import { getPress } from "../../../api-services/Modules/PressApi";
 
 const Press = () => {
   const [data, setData] = useState([]);

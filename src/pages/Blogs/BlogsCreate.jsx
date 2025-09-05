@@ -8,10 +8,12 @@ import ValidatedLabel from '@components/Form/ValidatedLabel'
 import SubmitBtn from '@components/Form/SubmitBtn'
 import ToastNotification from '@components/Notification/ToastNotification'
 import CreateAuthorTagModal from '@components/Modal/CreateAuthorTagModal'
-import { AddAuthor, AddBlog, AddTag, getAuthor, getTags, getBlogById, UpdateBlog } from '@api/cms-services'
+import { GetTagById, getTags, AddTag } from '../../api-services/Modules/TagsApi';
+import { AddBlog } from '../../api-services/Modules/BlogsApi'
 import ImageUploadField from '@components/Form/ImageUploadField'
 import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
-import ValidatedTextArea from '@components/Form/ValidatedTextArea'
+import ValidatedTextArea from '@components/Form/ValidatedTextArea';
+import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
 
 const BlogPreviewCard = ({ formData, author, tags }) => {
   const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { AddFaq, getCategory, getFaq, updateFaq } from '@api/cms-services'; // Added updateFaq
+import { AddFaq, getFaq, updateFaq } from '../../api-services/Modules/FaqApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { faqColumn } from '@components/TableHeader';
 import { useForm } from 'react-hook-form';
@@ -11,6 +11,7 @@ import ValidatedTextArea from '@components/Form/ValidatedTextArea';
 import ValidatedLabel from '@components/Form/ValidatedLabel';
 import ValidatedSearchableSelectField from '@components/Form/ValidatedSearchableSelectField';
 import Drawer from '../../components/Drawer';
+import { getCategory } from '../../api-services/Modules/CategoryApi';
 
 const Faq = () => {
     const navigate = useNavigate();
