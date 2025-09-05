@@ -18,6 +18,8 @@ const Faq = () => {
     const [totalDataCount, setTotalDataCount] = useState(0);
     const [globalFilter, setGlobalFilter] = useState('');
     const [categoryData, setCategoryData] = useState([]);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
     const [pagination, setPagination] = useState({
         pageIndex: 0,
         pageSize: 10,
@@ -225,7 +227,16 @@ const Faq = () => {
                     </div>
 
                     {/* Category */}
-                    <ValidatedLabel label="Select category" />
+                    <div className="flex items-center justify-between">
+                        <ValidatedLabel label="Select category" />
+                        <button
+                            type="button"
+                            className="btn btn-xs btn-outline btn-primary"
+                            onClick={() => setIsCategoryModalOpen(true)}
+                        >
+                            + Create
+                        </button>
+                    </div>
                     <ValidatedSearchableSelectField
                         name="category_xid"
                         control={control}
@@ -249,6 +260,69 @@ const Faq = () => {
                 </form>
             </Drawer>
 
+            {isCategoryModalOpen && (
+                <dialog open className="modal">
+                    <div className="modal-box">
+                        <h3 className="font-bold text-lg">Create Category</h3>
+                        <form
+                            onSubmit={async (e) => {
+                                e.preventDefault();
+                                const formData = new FormData(e.target);
+                                const name = formData.get("name");
+
+                                try {
+                                    const response = await AddCategory({ name }); // API call
+                                    if (response?.data?.success) {
+                                        ToastNotification.success("Category created successfully!");
+                                        fetchCategory(); // refresh dropdown
+                                        setIsCategoryModalOpen(false);
+                                    } else {
+                                        ToastNotification.error("Failed to create category.");
+                                    }
+                                } catch (error) {
+                                    ToastNotification.error("Something went wrong!");
+                                }
+                            }}
+                            className="space-y-4 mt-4"
+                        >
+
+                            <div>
+                                <ValidatedLabel label="Category Name" />
+                                <input
+                                    name="name"
+                                    type="text"
+                                    placeholder="Category name"
+                                    className="input input-bordered w-full"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <ValidatedLabel label="Category Description" />
+                                <textarea
+                                    name="description"
+                                    placeholder="Category Description"
+                                    className="textarea textarea-bordered w-full"
+                                    rows={5}
+                                />
+                            </div>
+
+                            <div className="modal-action">
+                                <button
+                                    type="button"
+                                    className="btn"
+                                    onClick={() => setIsCategoryModalOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary">
+                                    Create
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </dialog>
+            )}
 
 
         </>
