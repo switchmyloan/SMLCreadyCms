@@ -6,7 +6,7 @@ const createAxiosInstance = () => {
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '',
     params: {
-      
+
     }
   })
 
@@ -36,20 +36,24 @@ const createAxiosInstance = () => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
-    if (config.url !== '/auth/login') {
-      // split URL (in case query params exist)
+
+    if (config.url !== '/auth/login' && !config.skipAdminAppend) {
+
       const [path, query] = config.url.split('?')
-      // Always append /admin to path
-      // let newUrl = `${path}/admin`
-      let newUrl = `${path}`
 
-      // Re-attach query params if they exist
-      if (query) {
-        newUrl += `?${query}`
+      // check if path has an ID at the end
+      const parts = path.split('/')
+     
+      if (parts.length > 2 && /^\d+$/.test(parts[parts.length - 1])) {
+        // id is last part => insert "admin" before it
+        const id = parts.pop()
+        const newPath = [...parts, 'admin', id].join('/')
+        config.url = query ? `${newPath}?${query}` : newPath
+      } else {
+        // normal case => append admin at the end
+        const newPath = `${path}/admin`
+        config.url = query ? `${newPath}?${query}` : newPath
       }
-
-      config.url = newUrl
     }
 
     return config

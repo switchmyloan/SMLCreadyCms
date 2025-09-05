@@ -1,7 +1,11 @@
 import Api from "../api"
 
 export const getBlogs = async (pageNo, limit, globalFilter) => {
-  return Api().get(`/blog?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`)
+  return Api().get(`/blog/admin/all-blogs?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`,
+    {
+        skipAdminAppend: true,
+    }
+  )
 }
 export const getBlogById = async id => Api().get(`/blog/${id}`)
 export const AddBlog = async (formData) => {

@@ -9,7 +9,7 @@ import SubmitBtn from '@components/Form/SubmitBtn'
 import ToastNotification from '@components/Notification/ToastNotification'
 import CreateAuthorTagModal from '@components/Modal/CreateAuthorTagModal'
 import { GetTagById, getTags, AddTag } from '../../api-services/Modules/TagsApi';
-import { AddBlog } from '../../api-services/Modules/BlogsApi'
+import { AddBlog, getBlogById, UpdateBlog } from '../../api-services/Modules/BlogsApi'
 import ImageUploadField from '@components/Form/ImageUploadField'
 import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
 import ValidatedTextArea from '@components/Form/ValidatedTextArea';
@@ -67,7 +67,7 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
 export default function BlogCreate() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEdit = Boolean(id);
+  const isEdit = id != 'create';
 
   const [globalFilter, setGlobalFilter] = useState('')
   const [loading, setLoading] = useState(false)
@@ -128,7 +128,7 @@ export default function BlogCreate() {
     try {
       const response = await getAuthor(1, 10, '')
       if (response?.data?.success) {
-        const mapped = response?.data?.data?.map(item => ({
+        const mapped = response?.data?.data?.data?.map(item => ({
           label: item?.name?.toUpperCase(),
           value: item?.id
         }))
@@ -147,12 +147,14 @@ export default function BlogCreate() {
     fetchAuthors()
 
     if (isEdit) {
+      console.log("ander aya")
       const fetchBlog = async () => {
         try {
           const res = await getBlogById(id)
+          console.log(res, "edit blog")
           if (res?.data?.success) {
-            const blog = res.data.data
-
+            const blog = res?.data?.data
+            
             let metadata = {};
             try {
               metadata = blog.metadata ? JSON.parse(blog.metadata) : {};
@@ -161,7 +163,7 @@ export default function BlogCreate() {
               metadata = {};
             }
 
-            console.log(metadata, "metadata>?>>>>>>>")
+            // console.log(metadata, "metadata>?>>>>>>>")
 
             setValue('title', blog.title)
             setValue('metaTitle', blog.metaTitle)
@@ -230,35 +232,6 @@ export default function BlogCreate() {
     }
   }
 
-  // Submit Blog
-  // const onSubmit = async (data) => {
-  //   const payload = {
-  //     ...data,
-  //     tags: data.tags?.map(tagId => ({ id: tagId })),
-  //     metaKeywords: keywords.join(',')
-  //   }
-
-  //   try {
-  //     setLoading(true)
-  //     let res
-  //     if (isEdit) {
-  //       res = await UpdateBlog({ id: id, ...payload })
-  //     } else {
-  //       res = await AddBlog(payload)
-  //     }
-
-  //     if (res?.data?.success) {
-  //       ToastNotification.success(isEdit ? "Blog updated successfully" : "Blog created successfully")
-  //       navigate('/blogs')
-  //     } else {
-  //       ToastNotification.error(isEdit ? "Failed to update blog" : "Failed to create blog")
-  //     }
-  //   } catch {
-  //     ToastNotification.error("Something went wrong")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
 
   const onSubmit = async (data) => {
     try {
@@ -320,6 +293,11 @@ export default function BlogCreate() {
     }
   };
 
+  useEffect(() =>{
+    fetchAuthors();
+    fetchTags();
+  },[])
+  // console.log(isEdit, "isEdit")
 
   return (
     <div className="">

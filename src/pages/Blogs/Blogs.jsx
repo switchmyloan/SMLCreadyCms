@@ -36,7 +36,7 @@ const Blogs = () => {
       console.log('Response:', response.data.data);
       if (response?.data?.success) {
         setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
