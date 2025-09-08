@@ -24,6 +24,8 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
   // const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
   const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
 
+  console.log(imageUrl, "imageUrl>>>>")
+
   return (
     <div className="bg-white shadow p-4 rounded-xl">
       <h3 className="font-semibold mb-2">Blog Preview</h3>
@@ -32,7 +34,7 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
           {/* Image fixed size */}
           <div className="flex-shrink-0">
             <img
-              src={`${imageUrl}`}
+              src={`${imageUrl + imageUrl}`}
               alt="Blog preview"
               className="object-cover rounded mb-4 w-24 h-24"
             />
@@ -65,6 +67,7 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
 };
 
 export default function BlogCreate() {
+  const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = id != 'create';
@@ -178,9 +181,13 @@ export default function BlogCreate() {
             setKeywords(keywordArray);
             setValue('metaKeywords', keywordArray.join(', '), { shouldValidate: true });
 
-            if (blog.metaImage) {
-              setValue('file', `http://localhost:3001${blog.metaImage}`); // Ensure the URL is correct
-            }
+           if (blog.metaImage) {
+            const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
+            console.log(fullImageUrl, "fullImageUrl")
+            setValue('file', fullImageUrl); // Set as string URL
+          } else {
+            setValue('file', ''); // Clear file field if no image
+          }
           } else {
             ToastNotification.error("Failed to load blog")
           }

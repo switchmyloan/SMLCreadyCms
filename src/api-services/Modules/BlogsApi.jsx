@@ -1,9 +1,9 @@
 import Api from "../api"
 
 export const getBlogs = async (pageNo, limit, globalFilter) => {
-  return Api().get(`/blog/admin/all-blogs?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`,
+  return Api().get(`/blog?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`,
     {
-        skipAdminAppend: true,
+        skipAdminAppend: false,
     }
   )
 }
