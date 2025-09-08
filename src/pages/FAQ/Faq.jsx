@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { AddFaq, getFaq, updateFaq } from '../../api-services/Modules/FaqApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { faqColumn } from '@components/TableHeader';
@@ -12,6 +11,7 @@ import ValidatedLabel from '@components/Form/ValidatedLabel';
 import ValidatedSearchableSelectField from '@components/Form/ValidatedSearchableSelectField';
 import Drawer from '../../components/Drawer';
 import { getCategory } from '../../api-services/Modules/CategoryApi';
+import {AddCategory} from "../../api-services/Modules/CategoryApi";
 
 const Faq = () => {
     // const navigate = useNavigate();
@@ -87,7 +87,7 @@ const Faq = () => {
         try {
             const response = await getCategory(query.page_no, query.limit, '');
             if (response?.data?.success) {
-                const mapped = response?.data?.data?.map((item) => ({
+                const mapped = response?.data?.data?.data?.map((item) => ({
                     label: item?.name?.toUpperCase(),
                     value: item?.id,
                 }));
@@ -270,9 +270,17 @@ const Faq = () => {
                                 e.preventDefault();
                                 const formData = new FormData(e.target);
                                 const name = formData.get("name");
+                                const description = formData.get("description");
+
+                                const categoryData = {
+                                    name : name,
+                                    description: description
+                                }
+                                console.log(categoryData, "formadadadadada")
+                               
 
                                 try {
-                                    const response = await AddCategory({ name }); // API call
+                                    const response = await AddCategory(categoryData); // API call
                                     if (response?.data?.success) {
                                         ToastNotification.success("Category created successfully!");
                                         fetchCategory(); // refresh dropdown
@@ -281,6 +289,7 @@ const Faq = () => {
                                         ToastNotification.error("Failed to create category.");
                                     }
                                 } catch (error) {
+                                    console.log('err', error)
                                     ToastNotification.error("Something went wrong!");
                                 }
                             }}
