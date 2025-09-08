@@ -14,7 +14,7 @@ import Drawer from '../../components/Drawer';
 import { getCategory } from '../../api-services/Modules/CategoryApi';
 
 const Faq = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const [data, setData] = useState([]);
     const [totalDataCount, setTotalDataCount] = useState(0);
     const [globalFilter, setGlobalFilter] = useState('');
