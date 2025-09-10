@@ -15,16 +15,80 @@ import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
 import ValidatedTextArea from '@components/Form/ValidatedTextArea';
 import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
 
-const BlogPreviewCard = ({ formData, author, tags }) => {
+// const BlogPreviewCard = ({ formData, author, tags }) => {
+//   const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';
+//   const selectedTags = formData.tags
+//     ?.map(tagId => tags.find(t => t.value === tagId)?.label)
+//     .filter(Boolean)
+//     .join(', ') || 'No tags selected';
+//   // const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
+//   const imageUrl = formData.metaImage instanceof File ? URL.createObjectURL(formData.metaImage) : formData.metaImage || 'https://avatar.iran.liara.run/public/38';
+
+//   console.log(imageUrl, "imageUrl>>>>")
+
+//   return (
+//     <div className="bg-white shadow p-4 rounded-xl">
+//       <h3 className="font-semibold mb-2">Blog Preview</h3>
+//       <div className="border rounded-lg p-4">
+//         <div className="flex gap-3">
+//           {/* Image fixed size */}
+//           <div className="flex-shrink-0">
+//             <img
+//               src={`${imageUrl + imageUrl}`}
+//               alt="Blog preview"
+//               className="object-cover rounded mb-4 w-24 h-24"
+//             />
+//           </div>
+
+//           {/* Text always wrap hogi */}
+//           <div className="flex-1 min-w-0">
+//             <h4 className="text-lg font-bold">
+//               {formData.title || "Blog Title"}
+//             </h4>
+//             <p className="text-sm text-gray-600 mb-2 break-all">
+//               {formData.description || "Blog description will appear here..."}
+//             </p>
+//           </div>
+//         </div>
+
+//         <p className="text-sm">
+//           <strong>Author:</strong> {selectedAuthor}
+//         </p>
+//         <p className="text-sm">
+//           <strong>Level:</strong> {formData.metadata?.level || "No level"}
+//         </p>
+//         <p className="text-sm mt-2">
+//           {formData.content || "Blog content will appear here..."}
+//         </p>
+//       </div>
+//     </div>
+
+//   );
+// };
+
+
+const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
   const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';
   const selectedTags = formData.tags
     ?.map(tagId => tags.find(t => t.value === tagId)?.label)
     .filter(Boolean)
     .join(', ') || 'No tags selected';
-  // const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
-  const imageUrl = formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image || 'https://avatar.iran.liara.run/public/38';
 
-  console.log(imageUrl, "imageUrl>>>>")
+  // Determine the image URL based on create or edit mode
+  const imageUrl = formData.metaImage
+    ? formData.metaImage instanceof File
+      ? URL.createObjectURL(formData.metaImage) // Create mode: File object
+      : `${baseImageUrl}${formData.metaImage}` // Edit mode: Prepend base URL
+    : 'https://avatar.iran.liara.run/public/38'; // Fallback image
+
+  // Clean up object URL to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (formData.metaImage instanceof File) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [formData.metaImage, imageUrl]);
 
   return (
     <div className="bg-white shadow p-4 rounded-xl">
@@ -34,7 +98,7 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
           {/* Image fixed size */}
           <div className="flex-shrink-0">
             <img
-              src={`${imageUrl + imageUrl}`}
+              src={imageUrl}
               alt="Blog preview"
               className="object-cover rounded mb-4 w-24 h-24"
             />
@@ -62,10 +126,8 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
         </p>
       </div>
     </div>
-
   );
 };
-
 export default function BlogCreate() {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
@@ -175,7 +237,7 @@ export default function BlogCreate() {
             setValue('status', blog.status)
             setValue('metadata.level', metadata.level || '');
             setValue('metadata.category', metadata.category || '');
-            setValue('author_xid', blog.author_xid || '')
+            setValue('author_xid', blog.author.id || '')
             setValue('tags', blog.tags?.map(t => t.id) || [])
             const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',').filter(keyword => keyword.trim() !== '') : [];
             setKeywords(keywordArray);
@@ -258,7 +320,7 @@ export default function BlogCreate() {
 
       // Non-file fields append
       Object.keys(payload).forEach((key) => {
-        if (key !== "image" && key !== "tags" && key !== "metadata") {
+        if (key !== "metaImage" && key !== "tags" && key !== "metadata") {
           formData.append(key, payload[key]);
         }
       });
@@ -274,10 +336,13 @@ export default function BlogCreate() {
       }
 
       // File: create me hamesha, update me sirf jab nayi file ho
-      if (!isEdit || (isEdit && payload.image instanceof File)) {
-        formData.append("image", payload.image);
+      if (!isEdit || (isEdit && payload.metaImage instanceof File)) {
+        formData.append("metaImage", payload.metaImage);
       }
 
+
+     const formDataObject = Object.fromEntries(formData.entries());
+console.log("FormData as object:", formDataObject);
       // ---- API CALL ----
       if (isEdit) {
         res = await UpdateBlog(id, formData);  // sirf id aur formData bhejna
