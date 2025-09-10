@@ -64,7 +64,7 @@ const Faq = () => {
         // Populate form with FAQ data
         setValue('question', faq.question);
         setValue('answer', faq.answer);
-        setValue('category_xid', faq.category_xid);
+        setValue('category_xid', faq?.category?.id);
         setValue('isFeatured', faq.isFeatured || false);
     };
 
