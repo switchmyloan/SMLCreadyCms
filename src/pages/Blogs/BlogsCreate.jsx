@@ -22,7 +22,7 @@ const BlogPreviewCard = ({ formData, author, tags }) => {
     .filter(Boolean)
     .join(', ') || 'No tags selected';
   // const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
-  const imageUrl = formData.file instanceof File ? URL.createObjectURL(formData.file) : formData.file || 'https://avatar.iran.liara.run/public/38';
+  const imageUrl = formData.image instanceof File ? URL.createObjectURL(formData.image) : formData.image || 'https://avatar.iran.liara.run/public/38';
 
   console.log(imageUrl, "imageUrl>>>>")
 
@@ -97,7 +97,7 @@ export default function BlogCreate() {
       isFeatured: false,
       metaTitle: '',
       metaDescription: '',
-      file: '',
+      metaImage: '',
       metaKeywords: '',
       metadata: { category: '', level: '' },
       author_xid: '',
@@ -184,9 +184,9 @@ export default function BlogCreate() {
            if (blog.metaImage) {
             const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
             console.log(fullImageUrl, "fullImageUrl")
-            setValue('file', fullImageUrl); // Set as string URL
+            setValue('metaImage', fullImageUrl); // Set as string URL
           } else {
-            setValue('file', ''); // Clear file field if no image
+            setValue('metaImage', ''); // Clear image field if no image
           }
           } else {
             ToastNotification.error("Failed to load blog")
@@ -258,7 +258,7 @@ export default function BlogCreate() {
 
       // Non-file fields append
       Object.keys(payload).forEach((key) => {
-        if (key !== "file" && key !== "tags" && key !== "metadata") {
+        if (key !== "image" && key !== "tags" && key !== "metadata") {
           formData.append(key, payload[key]);
         }
       });
@@ -274,8 +274,8 @@ export default function BlogCreate() {
       }
 
       // File: create me hamesha, update me sirf jab nayi file ho
-      if (!isEdit || (isEdit && payload.file instanceof File)) {
-        formData.append("file", payload.file);
+      if (!isEdit || (isEdit && payload.image instanceof File)) {
+        formData.append("image", payload.image);
       }
 
       // ---- API CALL ----
@@ -407,7 +407,7 @@ export default function BlogCreate() {
             <div>
               <ValidatedLabel label="Upload Image" />
               <ImageUploadField
-                name="file"
+                name="metaImage"
                 control={control}
                 label="Upload Image"
                 errors={errors}

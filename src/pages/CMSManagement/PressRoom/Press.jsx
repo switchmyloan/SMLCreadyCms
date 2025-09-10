@@ -12,6 +12,7 @@ import ImageUploadField from "../../../components/Form/ImageUploadField";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
 
 const Press = () => {
+  const imageUrl = import.meta.env.VITE_IMAGE_URL
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [pagination, setPagination] = useState({
@@ -39,6 +40,7 @@ const Press = () => {
       title: "",
       description: "",
       image: "",
+      file:'',
       sourceLogo: "",
       redirectLink: "",
       status: "active",
@@ -52,14 +54,19 @@ const Press = () => {
   };
 
   const handleEdit = (press) => {
+
+    console.log(press, "presssss")
     setIsEditMode(true);
     setSelectedPress(press?.id);
     setIsDrawerOpen(true);
 
     // prefill form values
+
+    
+    const fullImageUrl = `${imageUrl + press.image}`
     setValue("title", press.title);
     setValue("description", press.description);
-    setValue("image", press.image);
+    setValue("file",fullImageUrl);
     setValue("sourceLogo", press.sourceLogo);
     setValue("redirectLink", press.redirectLink);
     setValue("status", press.status);
@@ -70,7 +77,7 @@ const Press = () => {
       const response = await getPress(query.page_no, query.limit, "");
       if (response?.data?.success) {
         setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching Press");
       }
@@ -174,7 +181,7 @@ const Press = () => {
           {/* Image */}
             <ValidatedLabel label="Image" />
           <ImageUploadField
-            name='image'
+            name='file'
             control={control}
             label='Image URL'
             rules={{ required: true }}

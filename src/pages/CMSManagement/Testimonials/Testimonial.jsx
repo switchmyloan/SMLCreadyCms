@@ -11,11 +11,14 @@ import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import ValidatedLabel from "@components/Form/ValidatedLabel";
 import ImageUploadField from "@components/Form/ImageUploadField";
 import Drawer from "@components/Drawer"; 
+import SubmitBtn from '@components/Form/SubmitBtn'
 
 const Testimonials = () => {
+  const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -55,6 +58,7 @@ const Testimonials = () => {
   };
 
   const handleEdit = (testimonial) => {
+    console.log(testimonial, "edit data")
     setIsEditMode(true);
     setSelectedTestimonial(testimonial?.id);
     setIsDrawerOpen(true);
@@ -62,7 +66,10 @@ const Testimonials = () => {
     setValue("company", testimonial.company || "");
     setValue("designation", testimonial.designation || "");
     setValue("testimonial", testimonial.testimonial || "");
-    setValue("image", testimonial.image || null);
+
+    const fullImageUrl = `${imageUrl + testimonial.image}`
+    console.log(fullImageUrl, "fullImageUrl")
+    setValue("image", fullImageUrl || null);
     setValue("order", testimonial.order || 1);
     setValue("isActive", testimonial.isActive ?? true);
   };
@@ -71,8 +78,8 @@ const Testimonials = () => {
     try {
       const response = await getTestimonials(query.page_no, query.limit, "");
       if (response?.data?.success) {
-        setData(response?.data?.data || []);
-        setTotalDataCount(response?.data?.pagination?.total || 0);
+        setData(response?.data?.data?.data || []);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error(
           response?.data?.message || "Error fetching testimonials"
@@ -84,30 +91,35 @@ const Testimonials = () => {
   };
 
   const handleAddTestimonial = async (formData) => {
+    setLoading(true);
+    console.log(formData, "dddd")
     try {
       const sanitizedData = {
         name: formData.name?.trim() || "",
         designation: formData.designation?.trim() || "",
         company: formData.company?.trim() || "",
         testimonial: formData.testimonial?.trim() || "",
-        image: typeof formData.image === "string" ? formData.image : "",
+        file: formData.image || "",
         isActive: formData.isActive ?? true,
         order: Number(formData.order) || 1,
       };
 
-    //   const response = await addTestimonial(sanitizedData);
-    //   if (response?.data?.success) {
-    //     ToastNotification.success("Testimonial added successfully!");
-    //     await fetchTestimonials();
-    //     setIsDrawerOpen(false);
-    //     reset();
-    //   } else {
-    //     ToastNotification.error(
-    //       response?.data?.message || "Failed to add testimonial."
-    //     );
-    //   }
+      const response = await addTestimonial(sanitizedData);
+      if (response?.data?.success) {
+        ToastNotification.success("Testimonial added successfully!");
+        await fetchTestimonials();
+        setIsDrawerOpen(false);
+        setLoading(false);
+        reset();
+      } else {
+        ToastNotification.error(
+          response?.data?.message || "Failed to add testimonial."
+        );
+        setLoading(false);
+      }
     } catch (error) {
       ToastNotification.error(error.message || "Something went wrong!");
+         setLoading(false);
     }
   };
 
@@ -126,10 +138,8 @@ const Testimonials = () => {
       formDataToSend.append("isActive", String(formData.isActive ?? true));
       formDataToSend.append("order", String(Number(formData.order) || 1));
 
-      const response = await updateTestimonial({
-        id: selectedTestimonial,
-        ...Object.fromEntries(formDataToSend),
-      });
+      console.table(formData, "formDataToSend")
+      const response = await updateTestimonial({ id: selectedTestimonial, ...formData});
       if (response?.data?.success) {
         ToastNotification.success("Testimonial updated successfully!");
         await fetchTestimonials();
@@ -154,6 +164,8 @@ const Testimonials = () => {
       await handleAddTestimonial(formData);
     }
   };
+
+  
 
   const onPageChange = (pageNo) => {
     setQuery((prevQuery) => ({
@@ -272,13 +284,15 @@ const Testimonials = () => {
             >
               Cancel
             </button>
-            <button
+            {/* <button
               type="submit"
               className="btn btn-primary"
               disabled={Object.keys(errors).length > 0}
             >
               {isEditMode ? "Update" : "Create"}
-            </button>
+            </button> */}
+
+              <SubmitBtn loading={loading} label={isEditMode ? "Update" : "Submit"} />
           </div>
         </form>
       </Drawer>

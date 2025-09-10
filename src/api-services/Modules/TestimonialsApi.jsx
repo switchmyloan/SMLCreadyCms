@@ -8,15 +8,15 @@ export const addTestimonial = async (data) => {
     console.log('Sending to API:', data);
     return Api().post('/testimonial', data, {
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'multipart/form-data'
         }
     });
 };
 
 
 export const updateTestimonial = async (id, formData) => {
-  console.log(id?.id, "id?????????????")
-  return Api().put(`/testimonial/${id?.id}`, formData, {
+  console.log(id, "id?????????????")
+  return Api().put(`/testimonial/${id?.id}`, id, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
