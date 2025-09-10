@@ -99,7 +99,7 @@ const Testimonials = () => {
         designation: formData.designation?.trim() || "",
         company: formData.company?.trim() || "",
         testimonial: formData.testimonial?.trim() || "",
-        file: formData.image || "",
+        image: formData.image || "",
         isActive: formData.isActive ?? true,
         order: Number(formData.order) || 1,
       };
