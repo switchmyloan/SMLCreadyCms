@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import Drawer from "../../../components/Drawer";
-import { AddPress, getPress } from "../../../api-services/Modules/PressApi";
+import { AddPress, getPress, UpdatePress } from "../../../api-services/Modules/PressApi";
 import ImageUploadField from "../../../components/Form/ImageUploadField";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
 
@@ -43,7 +43,7 @@ const Press = () => {
       file:'',
       sourceLogo: "",
       redirectLink: "",
-      status: "active",
+      isActive: "true",
     },
   });
 
@@ -69,7 +69,7 @@ const Press = () => {
     setValue("file",fullImageUrl);
     setValue("sourceLogo", press.sourceLogo);
     setValue("redirectLink", press.redirectLink);
-    setValue("status", press.status);
+    setValue("isActive", press.isActive);
   };
 
   const fetchPress = async () => {
@@ -92,7 +92,7 @@ const Press = () => {
 
       console.table(formData, "formdata")
         if (isEditMode) {
-          const response = await updatePress({ id: selectedPress, ...formData });
+          const response = await UpdatePress({ id: selectedPress, ...formData });
           if (response?.data?.success) {
             ToastNotification.success("Press updated successfully!");
             fetchPress();
@@ -189,14 +189,14 @@ const Press = () => {
           />
 
           {/* Source Logo */}
-          <ValidatedLabel label="Source Logo" />
+          {/* <ValidatedLabel label="Source Logo" />
             <ImageUploadField
             name='sourceLogo'
             control={control}
             label='Source Logo'
-            rules={{ required: true }}
+            rules={{ required: false }}
             errors={errors}
-          />
+          /> */}
 
           {/* Redirect Link */}
           <ValidatedTextField
@@ -211,11 +211,11 @@ const Press = () => {
           <div>
             <label className="block mb-1">Status</label>
             <select
-              {...register("status")}
+              {...register("isActive")}
               className="select select-bordered w-full"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
             </select>
           </div>
 
