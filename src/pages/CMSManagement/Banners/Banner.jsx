@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom'
-import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { blogColumn } from '@components/TableHeader';
 import Drawer from '../../../components/Drawer';
@@ -11,19 +9,25 @@ import ImageUploadField from "../../../components/Form/ImageUploadField";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
 import ValidatedTextArea from "../../../components/Form/ValidatedTextArea";
 import { useForm } from "react-hook-form";
+import { AddBanner, getBanners, getBannerById, UpdateBanner, deleteBanner } from '../../../api-services/Modules/BannerApi';
+import { bannerColumn } from '../../../components/TableHeader';
+import SubmitBtn from '@components/Form/SubmitBtn'
+import ConfirmModal from '../../../components/ConfirmationationModal';
 
 
 const Banner = () => {
-  const navigate = useNavigate();
+  const imageUrl = import.meta.env.VITE_IMAGE_URL
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
-  const [loading, setLoading] = useState(false); // N
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedBanner, setSelectedBanner] = useState(null);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState(null);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
-    // totalDataCount: totalDataCount ? totalDataCount : 1
   })
   const [query, setQuery] = useState({
     limit: 10,
@@ -31,9 +35,7 @@ const Banner = () => {
     search: ''
   })
 
-
-
-   const {
+  const {
     control,
     register,
     handleSubmit,
@@ -42,14 +44,16 @@ const Banner = () => {
     setValue,
   } = useForm({
     defaultValues: {
-      title: "",
-      description: "",
-      file: "",
-      status: "active",
+      bannerTitle: "",
+      bannerDescription: "",
+      bannerImage: "",
+      bannerBtn: '',
+      bannerLink: '',
+      isActive: true,
     },
   });
 
-  
+
   const handleCreate = () => {
     setIsDrawerOpen(true);
     setIsEditMode(false);
@@ -57,34 +61,60 @@ const Banner = () => {
   };
 
 
-  const handleEdit = (blog) => {
-    setIsEditMode(true);
-    setSelectedBlog(blog?.id);
-    setIsDrawerOpen(true);
+  const handleEdit = async (data) => {
+    try {
+      // setLoading(true);
+      const response = await getBannerById(data.id);
+      if (response?.data?.success) {
+        const banner = response.data.data; // Adjust based on your API response structure
+        console.log(banner, 'banner data from getBannerById');
 
-    // prefill form
-    const fullImageUrl = blog.image ? `${imageUrl + blog.image}` : "";
-    setValue("title", blog.title);
-    setValue("description", blog.description);
-    setValue("file", fullImageUrl);
-    setValue("status", blog.status || "active");
+        setIsEditMode(true);
+        setSelectedBanner(data.id);
+        setIsDrawerOpen(true);
+
+        // Prefill form with banner data
+        setValue('bannerTitle', banner.bannerTitle || '');
+        setValue('bannerDescription', banner.bannerDescription || '');
+        setValue('bannerBtn', banner.bannerBtn || '');
+        setValue('bannerLink', banner.bannerLink || '');
+        setValue('isActive', banner.isActive !== undefined ? banner.isActive : true);
+
+        // setValue('bannerImage', banner.image || '');
+
+        if (banner.bannerImage) {
+          const fullImageUrl = `${imageUrl}${banner?.bannerImage}`; // Ensure no double slashes
+          console.log(fullImageUrl, "fullImageUrl")
+          setValue('bannerImage', fullImageUrl); // Set as string URL
+        } else {
+          setValue('bannerImage', ''); // Clear image field if no image
+        }
+      } else {
+        ToastNotification.error('Failed to fetch banner details');
+      }
+    } catch (error) {
+      console.error('Error fetching banner:', error);
+      ToastNotification.error('Failed to fetch banner details');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchBlogs = async () => {
+  const fetchBanners = async () => {
     try {
-     setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
+      setLoading(true);
+      const response = await getBanners(query.page_no, query.limit, '');
 
-      console.log('Response:', response.data.data);
+      console.log('Response:', response.data.data.data);
       if (response?.data?.success) {
         setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
     } catch (error) {
       console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
+      //   ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
       setLoading(false);
@@ -93,62 +123,105 @@ const Banner = () => {
 
 
   useEffect(() => {
-    fetchBlogs();
+    fetchBanners();
   }, [query.page_no]);
 
   const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
     setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
       return {
         ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
+        page_no: pageNo.pageIndex + 1
       };
     });
   };
 
   const onSubmit = async (formData) => {
+    setLoading(true);
     try {
+      const formDataToSend = new FormData();
+      formDataToSend.append('bannerTitle', formData.bannerTitle);
+      formDataToSend.append('bannerDescription', formData.bannerDescription);
+      formDataToSend.append('bannerBtn', formData.bannerBtn);
+      formDataToSend.append('bannerLink', formData.bannerLink);
+      formDataToSend.append('isActive', formData.isActive);
+      if (formData.bannerImage && formData.bannerImage instanceof File) {
+        formDataToSend.append('bannerImage', formData.bannerImage);
+      }
+
       if (isEditMode) {
-        const response = await updateBlog({ id: selectedBlog, ...formData });
+        // Call PATCH API for updating banner
+        const response = await UpdateBanner(selectedBanner, formDataToSend);
         if (response?.data?.success) {
-          ToastNotification.success("Blog updated successfully!");
-          fetchBlogs();
+          ToastNotification.success('Banner Updated Successfully!');
+          fetchBanners();
           closeDrawer();
+           setLoading(false);
         } else {
-          ToastNotification.error("Failed to update Blog.");
+          ToastNotification.error('Failed to Update Banner!');
+          setLoading(false);
         }
       } else {
-        const response = await AddBlog(formData);
+        // Call POST API for creating banner
+        const response = await AddBanner(formDataToSend);
         if (response?.data?.success) {
-          ToastNotification.success("Blog created successfully!");
-          fetchBlogs();
+          ToastNotification.success('Banner created successfully!');
+          fetchBanners();
           closeDrawer();
+          setLoading(false);
         } else {
-          ToastNotification.error("Failed to create Blog.");
+          ToastNotification.error('Failed to create Banner!');
+          setLoading(false);
         }
       }
     } catch (error) {
-      console.error("Error:", error);
-      ToastNotification.error("Something went wrong!");
+      console.error('Error:', error);
+      ToastNotification.error('Something went wrong!');
+      setLoading(false);
     }
   };
 
-   const closeDrawer = () => {
+  const closeDrawer = () => {
     setIsDrawerOpen(false);
     setIsEditMode(false);
-    setSelectedBlog(null);
+    setSelectedBanner(null);
     reset();
   };
+
+  const handleDeleteClick = (id) => {
+    setBannerToDelete(id);
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setLoading(true);
+      const response = await deleteBanner(bannerToDelete);
+      if (response?.data?.success) {
+        ToastNotification.success("Banner deleted successfully!");
+        fetchBanners();
+      } else {
+        ToastNotification.error("Failed to delete banner!");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      ToastNotification.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+      setBannerToDelete(null);
+    }
+  };
+
   return (
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
-          handleEdit
+        columns={bannerColumn({
+          handleEdit,
+          handleDelete : handleDeleteClick,
         })}
-        title='Banner'
-        data={[]}
+        title='Banners'
+        data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="Create"
@@ -158,8 +231,14 @@ const Banner = () => {
         loading={loading}
       />
 
-
-
+       <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={confirmDelete}
+        loading={loading}
+        title="Delete Confirmation"
+        message="Are you sure you want to delete this banner? This action cannot be undone."
+      />
 
       <Drawer
         isOpen={isDrawerOpen}
@@ -167,20 +246,38 @@ const Banner = () => {
         title={isEditMode ? "Update Banner" : "Create Banner"}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Title */}
           <ValidatedTextField
-            name="title"
+            name="bannerTitle"
             control={control}
             rules={{ required: true }}
             label="Title"
-            placeholder="Enter title"
+            placeholder="Enter Title"
             errors={errors}
             helperText="Title is required!"
           />
 
-          {/* Description */}
+          <ValidatedTextField
+            name="bannerBtn"
+            control={control}
+            rules={{ required: true }}
+            label="Button Text"
+            placeholder="Enter Button Text"
+            errors={errors}
+            helperText="Button Text is required!"
+          />
+
+          <ValidatedTextField
+            name="bannerLink"
+            control={control}
+            rules={{ required: true }}
+            label="Button Link"
+            placeholder="Enter Button Link"
+            errors={errors}
+            helperText="Button Link is required!"
+          />
+
           <ValidatedTextArea
-            name="description"
+            name="bannerDescription"
             control={control}
             label="Description"
             errors={errors}
@@ -189,29 +286,26 @@ const Banner = () => {
             rules={{ required: "Description is required" }}
           />
 
-          {/* Image */}
           <ValidatedLabel label="Image" />
           <ImageUploadField
-            name="file"
+            name="bannerImage"
             control={control}
             label="Image"
             rules={{ required: true }}
             errors={errors}
           />
 
-          {/* Status */}
           <div>
             <label className="block mb-1">Status</label>
             <select
-              {...register("status")}
+              {...register("isActive")}
               className="select select-bordered w-full"
             >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
             </select>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
             <button
               type="button"
@@ -220,13 +314,16 @@ const Banner = () => {
             >
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary">
-              {isEditMode ? "Update" : "Create"}
-            </button>
+            <div>
+              <SubmitBtn loading={loading} label={isEditMode ? "Update" : "Submit"} />
+            </div>
+
+
+
           </div>
         </form>
       </Drawer>
-          </>
+    </>
   )
 }
 
