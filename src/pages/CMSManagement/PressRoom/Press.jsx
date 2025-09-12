@@ -40,10 +40,9 @@ const Press = () => {
       title: "",
       description: "",
       image: "",
-      file:'',
       sourceLogo: "",
       redirectLink: "",
-      isActive: "true",
+      status: "draft",
     },
   });
 
@@ -66,10 +65,10 @@ const Press = () => {
     const fullImageUrl = `${imageUrl + press.image}`
     setValue("title", press.title);
     setValue("description", press.description);
-    setValue("file",fullImageUrl);
+    setValue("image",fullImageUrl);
     setValue("sourceLogo", press.sourceLogo);
     setValue("redirectLink", press.redirectLink);
-    setValue("isActive", press.isActive);
+    setValue("status", press.status);
   };
 
   const fetchPress = async () => {
@@ -181,7 +180,7 @@ const Press = () => {
           {/* Image */}
             <ValidatedLabel label="Image" />
           <ImageUploadField
-            name='file'
+            name='image'
             control={control}
             label='Image URL'
             rules={{ required: true }}
@@ -189,14 +188,14 @@ const Press = () => {
           />
 
           {/* Source Logo */}
-          {/* <ValidatedLabel label="Source Logo" />
+          <ValidatedLabel label="Source Logo" />
             <ImageUploadField
             name='sourceLogo'
             control={control}
             label='Source Logo'
             rules={{ required: false }}
             errors={errors}
-          /> */}
+          />
 
           {/* Redirect Link */}
           <ValidatedTextField
@@ -211,11 +210,14 @@ const Press = () => {
           <div>
             <label className="block mb-1">Status</label>
             <select
-              {...register("isActive")}
+              {...register("status")}
               className="select select-bordered w-full"
             >
-              <option value="true">Active</option>
-              <option value="false">Inactive</option>
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+              <option value="reviewed">Reviewed</option>
+              
             </select>
           </div>
 
