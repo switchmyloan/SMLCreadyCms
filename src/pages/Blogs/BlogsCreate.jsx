@@ -132,6 +132,7 @@ export default function BlogCreate() {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const { id } = useParams();
+  console.log("idddd", id)
   const isEdit = id != 'create';
 
   const [globalFilter, setGlobalFilter] = useState('')
@@ -211,7 +212,7 @@ export default function BlogCreate() {
     fetchTags()
     fetchAuthors()
 
-    if (isEdit) {
+    if (isEdit && id != undefined) {
       console.log("ander aya")
       const fetchBlog = async () => {
         try {

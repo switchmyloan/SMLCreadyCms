@@ -116,15 +116,15 @@ export const routes = [
     //   groupOrder: 5,
     //   order: 3,
     // },
-  {
-    path: "/offer",
-    label: "Offers",
-    icon: "ClipboardList", // ✅ offers list
-    showInSidebar: true,
-    group: "CMS Management",
-    groupOrder: 5,
-    order: 4,
-  },
+  // {
+  //   path: "/offer",
+  //   label: "Offers",
+  //   icon: "ClipboardList", // ✅ offers list
+  //   showInSidebar: true,
+  //   group: "CMS Management",
+  //   groupOrder: 5,
+  //   order: 4,
+  // },
   {
     path: "/banners",
     label: "Banners",
