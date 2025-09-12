@@ -43,6 +43,7 @@ const Press = () => {
       sourceLogo: "",
       redirectLink: "",
       status: "draft",
+      // order: 0
     },
   });
 
@@ -62,13 +63,15 @@ const Press = () => {
     // prefill form values
 
     
-    const fullImageUrl = `${imageUrl + press.image}`
-    setValue("title", press.title);
-    setValue("description", press.description);
+    const fullImageUrl = `${imageUrl + press?.image}`
+    const fullSourceLogoUrl = `${imageUrl + press?.sourceLogo}`
+    setValue("title", press?.title);
+    setValue("description", press?.description);
     setValue("image",fullImageUrl);
-    setValue("sourceLogo", press.sourceLogo);
-    setValue("redirectLink", press.redirectLink);
-    setValue("status", press.status);
+    setValue("sourceLogo", fullSourceLogoUrl);
+    setValue("redirectLink", press?.redirectLink);
+    setValue("status", press?.status);
+    // setValue("order". press?.order)
   };
 
   const fetchPress = async () => {
@@ -205,6 +208,13 @@ const Press = () => {
             placeholder="Enter redirect link"
             errors={errors}
           />
+          {/* <ValidatedTextField
+            name="order"
+            control={control}
+            label="Order"
+            placeholder="Enter order"
+            errors={errors}
+          /> */}
 
           {/* Status */}
           <div>
