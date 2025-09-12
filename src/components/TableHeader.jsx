@@ -1,6 +1,7 @@
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Image, Trash2 } from 'lucide-react';
+const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 
-export const blogColumn = ({handleEdit}) => [
+export const blogColumn = ({ handleEdit }) => [
   {
     header: 'Title',
     accessorKey: 'title',
@@ -12,9 +13,24 @@ export const blogColumn = ({handleEdit}) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Description',
-    accessorKey: 'description',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    header: "Description",
+    accessorKey: "description",
+    cell: ({ getValue }) => (
+        <div
+          style={{
+            minWidth: "150px",
+            maxWidth: "200px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+          className="tooltip cursor-pointer " 
+          data-tip={getValue() || "N/A"} 
+          title={getValue() || "N/A"}
+        >
+          {getValue() || "N/A"}
+          </div>
+    ),
   },
   {
     header: 'Status',
@@ -44,17 +60,33 @@ export const blogColumn = ({handleEdit}) => [
     },
   },
 ];
-export const faqColumn = ({handleEdit}) => [
+export const faqColumn = ({ handleEdit }) => [
   {
     header: 'Questions',
     accessorKey: 'question',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Answers',
-    accessorKey: 'answer',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    header: "Answers",
+    accessorKey: "answer",
+    cell: ({ getValue }) => (
+        <div
+          style={{
+            minWidth: "150px",
+            maxWidth: "200px",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+          className="tooltip cursor-pointer " 
+          data-tip={getValue() || "N/A"} 
+          title={getValue() || "N/A"}
+        >
+          {getValue() || "N/A"}
+          </div>
+    ),
   },
+
   {
     header: 'Category',
     accessorKey: 'category_xid',
@@ -88,7 +120,7 @@ export const faqColumn = ({handleEdit}) => [
     },
   },
 ];
-export const testimonialsColumn = ({handleEdit}) => [
+export const testimonialsColumn = ({ handleEdit }) => [
   {
     header: 'Name',
     accessorKey: 'name',
@@ -127,7 +159,7 @@ export const testimonialsColumn = ({handleEdit}) => [
     },
   },
 ];
-export const pressColumn = ({handleEdit}) => [
+export const pressColumn = ({ handleEdit }) => [
   {
     header: 'Title',
     accessorKey: 'title',
@@ -171,7 +203,7 @@ export const pressColumn = ({handleEdit}) => [
     },
   },
 ];
-export const bannerColumn = ({handleEdit, handleDelete }) => [
+export const bannerColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Title',
     accessorKey: 'bannerTitle',
@@ -181,6 +213,39 @@ export const bannerColumn = ({handleEdit, handleDelete }) => [
     header: 'Description',
     accessorKey: 'bannerDescription',
     cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Banner',
+    accessorKey: 'bannerImage',
+    cell: info => {
+      const imageUrl = info.row.original.bannerImage
+
+      if (!imageUrl) {
+        return null
+      }
+      const imagePath = `${S3_IMAGE_PATH}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+      console.log(imagePath, "imagePath")
+      return (
+        <>
+        <img src={imagePath} alt="" 
+         width={100}
+          // height={50}
+          style={{ 
+            objectFit: 'cover',
+            marginBottom: '10px',
+           }}
+         />
+        {/* <Image
+          src={imagePath}
+          alt='banner'
+          width={100}
+          height={50}
+          style={{ objectFit: 'cover' }}
+          unoptimized
+        /> */}
+        </>
+      )
+    },
   },
   {
     header: 'Status',

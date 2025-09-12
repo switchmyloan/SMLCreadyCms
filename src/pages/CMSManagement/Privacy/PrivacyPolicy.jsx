@@ -28,10 +28,12 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
   const handleSubmit = () => {
     const finalData = {
       ...form,
-      sections: form.sections.map((s) => ({
-        title: s.title,
-        content: JSON.stringify(convertToRaw(s.content.getCurrentContent())), // save as raw JSON
-      })),
+      content:{
+          data : form.sections.map((s) => ({
+              title: s.title,
+              content: JSON.stringify(convertToRaw(s.content.getCurrentContent())), // save as raw JSON
+            })),
+        }
     };
     onSave(finalData);
     onClose();
@@ -72,21 +74,21 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
               placeholder="Enter Privacy Policy Title"
             />
           </div>
-
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Last Updated Date
-            </label>
+            <label className="block text-sm font-medium mb-1">Slug</label>
             <input
-              type="date"
-              name="lastUpdated"
-              value={form.lastUpdated}
+              type="slug"
+              name="Slug"
+              value={form.slug}
               onChange={(e) =>
-                setForm({ ...form, [e.target.name]: e.target.value })
+                setForm({ ...form, [e.target.sug]: e.target.value })
               }
               className="w-full border rounded-lg px-3 py-2 bg-gray-50"
+              placeholder="Enter Slug"
             />
           </div>
+
+          
         </div>
 
         {/* Sections */}

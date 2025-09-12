@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
 import Drawer from '../../../components/Drawer';
 import ValidatedTextField from "../../../components/Form/ValidatedTextField";
 import ImageUploadField from "../../../components/Form/ImageUploadField";
@@ -23,7 +22,7 @@ const Banner = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedBanner, setSelectedBanner] = useState(null);
-    const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [bannerToDelete, setBannerToDelete] = useState(null);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -53,41 +52,35 @@ const Banner = () => {
     },
   });
 
-
   const handleCreate = () => {
     setIsDrawerOpen(true);
     setIsEditMode(false);
     reset();
   };
 
-
   const handleEdit = async (data) => {
     try {
       // setLoading(true);
       const response = await getBannerById(data.id);
       if (response?.data?.success) {
-        const banner = response.data.data; // Adjust based on your API response structure
+        const banner = response.data.data; 
         console.log(banner, 'banner data from getBannerById');
 
         setIsEditMode(true);
         setSelectedBanner(data.id);
         setIsDrawerOpen(true);
-
-        // Prefill form with banner data
         setValue('bannerTitle', banner.bannerTitle || '');
         setValue('bannerDescription', banner.bannerDescription || '');
         setValue('bannerBtn', banner.bannerBtn || '');
         setValue('bannerLink', banner.bannerLink || '');
         setValue('isActive', banner.isActive !== undefined ? banner.isActive : true);
 
-        // setValue('bannerImage', banner.image || '');
-
         if (banner.bannerImage) {
-          const fullImageUrl = `${imageUrl}${banner?.bannerImage}`; // Ensure no double slashes
+          const fullImageUrl = `${imageUrl}${banner?.bannerImage}`;
           console.log(fullImageUrl, "fullImageUrl")
-          setValue('bannerImage', fullImageUrl); // Set as string URL
+          setValue('bannerImage', fullImageUrl);
         } else {
-          setValue('bannerImage', ''); // Clear image field if no image
+          setValue('bannerImage', '');
         }
       } else {
         ToastNotification.error('Failed to fetch banner details');
@@ -216,10 +209,12 @@ const Banner = () => {
     <>
       <Toaster />
       <DataTable
-        columns={bannerColumn({
-          handleEdit,
-          handleDelete : handleDeleteClick,
-        })}
+        columns={
+          bannerColumn(
+            {
+              handleEdit,
+              handleDelete : handleDeleteClick,
+            })}
         title='Banners'
         data={data}
         totalDataCount={totalDataCount}
@@ -317,9 +312,6 @@ const Banner = () => {
             <div>
               <SubmitBtn loading={loading} label={isEditMode ? "Update" : "Submit"} />
             </div>
-
-
-
           </div>
         </form>
       </Drawer>

@@ -107,15 +107,15 @@ export const routes = [
     groupOrder: 5,
     order: 2,
   },
-  {
-    path: "/social-icons",
-    label: "Social Icons",
-    icon: "Settings", // ✅ generic icons/social
-    showInSidebar: true,
-    group: "CMS Management",
-    groupOrder: 5,
-    order: 3,
-  },
+    // {
+    //   path: "/social-icons",
+    //   label: "Social Icons",
+    //   icon: "Settings", // ✅ generic icons/social
+    //   showInSidebar: true,
+    //   group: "CMS Management",
+    //   groupOrder: 5,
+    //   order: 3,
+    // },
   {
     path: "/offer",
     label: "Offers",
@@ -136,22 +136,22 @@ export const routes = [
   },
   {
     path: "/terms-conditions",
-    label: "Terms & Conditions",
+    label: "Pages",
     icon: "ShieldCheck", // ✅ policies/security
     showInSidebar: true,
     group: "CMS Management",
     groupOrder: 5,
     order: 6,
   },
-  {
-    path: "/privacy-policy",
-    label: "Privacy Policy",
-    icon: "ShieldCheck", // ✅ security/privacy
-    showInSidebar: true,
-    group: "CMS Management",
-    groupOrder: 5,
-    order: 7,
-  },
+  // {
+  //   path: "/privacy-policy",
+  //   label: "Privacy Policy",
+  //   icon: "ShieldCheck", // ✅ security/privacy
+  //   showInSidebar: true,
+  //   group: "CMS Management",
+  //   groupOrder: 5,
+  //   order: 7,
+  // },
 
   // --- Admin Management ---
   {
