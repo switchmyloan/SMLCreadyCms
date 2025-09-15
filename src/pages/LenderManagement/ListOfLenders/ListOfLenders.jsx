@@ -52,7 +52,7 @@ const Blogs = () => {
   };
 
   const handleEdit = (data) => {
-    navigate(`/blogs/${data?.id}`)
+    navigate(`/on-borde-lender-from/${data?.id}`)
   }
 
   useEffect(() => {

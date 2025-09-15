@@ -45,6 +45,7 @@ function App() {
             <Route path="leads" element={<Leads />} />
             <Route path="archive-users" element={<ArchiveUsers />} />
             <Route path="on-borde-lender-from" element={<OnBoardLender />} />
+            <Route path="on-borde-lender-from/:id" element={<OnBoardLender />} />
             <Route path="list-of-lenders" element={<ListOfLender />} />
             <Route path="social-icons" element={<SocialIcons />} />
             <Route path="offer" element={<Offers />} />

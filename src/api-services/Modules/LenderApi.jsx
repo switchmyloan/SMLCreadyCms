@@ -17,9 +17,5 @@ export const AddLender = async (formData) => {
 export const getLenderById = async id => Api().get(`/lender/${id}`);
 
 export const UpdateLender = async (id, formData) => {
-    return Api().patch(`/lender/${id}`, formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-    });
+    return Api().put(`/lender/${id}`, formData);
 };
