@@ -16,21 +16,53 @@ export const blogColumn = ({ handleEdit }) => [
     header: "Description",
     accessorKey: "description",
     cell: ({ getValue }) => (
-        <div
-          style={{
-            minWidth: "150px",
-            maxWidth: "200px",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-          className="tooltip cursor-pointer " 
-          data-tip={getValue() || "N/A"} 
-          title={getValue() || "N/A"}
-        >
-          {getValue() || "N/A"}
-          </div>
+      <div
+        style={{
+          minWidth: "150px",
+          maxWidth: "200px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        className="tooltip cursor-pointer "
+        data-tip={getValue() || "N/A"}
+        title={getValue() || "N/A"}
+      >
+        {getValue() || "N/A"}
+      </div>
     ),
+  },
+  {
+    header: 'Banner',
+    accessorKey: 'metaImage',
+    cell: info => {
+      const imageUrl = info.row.original.metaImage
+
+      if (!imageUrl) {
+        return null
+      }
+      const imagePath = `${S3_IMAGE_PATH}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`
+      console.log(imagePath, "imagePath")
+      return (
+        <>
+          <img
+            src={imagePath}
+            alt="blog image"
+            onError={(e) => {
+              e.currentTarget.src = "https://dummyimage.com/100x50/cccccc/000000&text=No+Image"; // public folder me rakho
+            }}
+            style={{
+              objectFit: 'cover',
+              marginBottom: '10px',
+              width: '100px',
+              height: '50px',
+              borderRadius: "0px"
+            }}
+          />
+
+        </>
+      )
+    },
   },
   {
     header: 'Status',
@@ -70,20 +102,20 @@ export const faqColumn = ({ handleEdit }) => [
     header: "Answers",
     accessorKey: "answer",
     cell: ({ getValue }) => (
-        <div
-          style={{
-            minWidth: "150px",
-            maxWidth: "200px",
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-          className="tooltip cursor-pointer " 
-          data-tip={getValue() || "N/A"} 
-          title={getValue() || "N/A"}
-        >
-          {getValue() || "N/A"}
-          </div>
+      <div
+        style={{
+          minWidth: "150px",
+          maxWidth: "200px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        className="tooltip cursor-pointer "
+        data-tip={getValue() || "N/A"}
+        title={getValue() || "N/A"}
+      >
+        {getValue() || "N/A"}
+      </div>
     ),
   },
 
@@ -227,22 +259,16 @@ export const bannerColumn = ({ handleEdit, handleDelete }) => [
       console.log(imagePath, "imagePath")
       return (
         <>
-        <img src={imagePath} alt="" 
-         width={100}
-          // height={50}
-          style={{ 
-            objectFit: 'cover',
-            marginBottom: '10px',
-           }}
-         />
-        {/* <Image
-          src={imagePath}
-          alt='banner'
-          width={100}
-          height={50}
-          style={{ objectFit: 'cover' }}
-          unoptimized
-        /> */}
+          <img src={imagePath} alt=""
+
+            style={{
+              objectFit: 'cover',
+              marginBottom: '10px',
+              width: '100px',
+              height: '50px',
+            }}
+          />
+
         </>
       )
     },

@@ -13,7 +13,7 @@ export const AddPress = async (formData) => {
 
 export const UpdatePress = async (formData) => {
   console.log(formData, "www")
-  return Api().patch(`/press/${formData?.id}`, formData, {
+  return Api().put(`/press/${formData?.id}`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
