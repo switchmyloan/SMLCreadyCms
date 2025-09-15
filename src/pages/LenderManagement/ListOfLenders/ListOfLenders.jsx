@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { blogColumn } from '@components/TableHeader';
+import { getLender } from '../../../api-services/Modules/LenderApi';
+import { lenderColumn } from '../../../components/TableHeader';
 
 
 const Blogs = () => {
@@ -31,12 +33,12 @@ const Blogs = () => {
   const fetchBlogs = async () => {
     try {
      setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
+      const response = await getLender(query.page_no, query.limit, '');
 
-      console.log('Response:', response.data.data);
+      console.log('Response:', response.data);
       if (response?.data?.success) {
-        setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+        setData(response?.data?.data.data || []);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
@@ -66,15 +68,17 @@ const Blogs = () => {
       };
     });
   };
+
+  console.log(data, 'blogColumnblogColumnblogColumn')
   return (
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
+        columns={lenderColumn({
           handleEdit
         })}
         title='List Of Lender'
-        data={[]}
+        data={data}
         totalDataCount={totalDataCount}
         onCreate={handleCreate}
         createLabel="On Board Lender"

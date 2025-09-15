@@ -301,3 +301,73 @@ export const bannerColumn = ({ handleEdit, handleDelete }) => [
     },
   },
 ];
+export const lenderColumn = ({ handleEdit, handleDelete }) => [
+  {
+    header: 'Name',
+    accessorKey: 'name',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Max Loan Amount',
+    accessorKey: 'maximumLoanAmount',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Min Loan Amount',
+    accessorKey: 'minimumLoanAmount',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Min Tenure',
+    accessorKey: 'minimumTenure',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Max Tenure',
+    accessorKey: 'maximumTenure',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Rate',
+    accessorKey: 'startingInterestRate',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Charge',
+    accessorKey: 'foreclosureCharges',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Late Charge',
+    accessorKey: 'latePaymentCharges',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  
+  {
+    header: 'Status',
+    accessorKey: 'isActive',
+    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+  },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Edit2 size={20} />
+          </button>
+          <button
+            onClick={() => handleDelete(row.original.id)}
+            className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+          >
+            <Trash2 size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];
