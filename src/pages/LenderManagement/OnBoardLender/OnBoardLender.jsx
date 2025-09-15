@@ -13,7 +13,7 @@ import { Toaster } from 'react-hot-toast';
 import { AddLender, getLenderById, UpdateLender } from '../../../api-services/Modules/LenderApi';
 
 export default function LenderCreate() {
-    const imageUrl = import.meta.env.VITE_IMAGE_URL
+  const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = id != 'create';
@@ -54,6 +54,7 @@ export default function LenderCreate() {
       faqLink: '',
       aboutUsLink: '',
       sortedOrder: '',
+      isActive: true,
     },
   });
 
@@ -199,11 +200,12 @@ export default function LenderCreate() {
             setValue('faqLink', lender.faqLink || '');
             setValue('aboutUsLink', lender.aboutUsLink || '');
             setValue('sortedOrder', lender.sortedOrder ? String(lender.sortedOrder) : '');
+            setValue('isActive', lender.isActive !== undefined ? lender.isActive : true);
 
             // Handle logo image
             if (lender.logo) {
               setBannerImageKey(lender.logo);
-              setImgSrc(imageUrl+lender.logo); // Set for preview
+              setImgSrc(imageUrl + lender.logo); // Set for preview
               setValue('logo', lender.logo);
             } else {
               setValue('logo', '');
@@ -273,7 +275,7 @@ export default function LenderCreate() {
             />
           </FormRow>
           <div className="flex gap-4">
-             <div className="w-2/3">
+            <div className="w-2/3">
               <ValidatedTextArea
                 name="description"
                 control={control}
@@ -300,9 +302,22 @@ export default function LenderCreate() {
                 isUploading={isUploadingBanner}
               />
             </div>
-
-           
           </div>
+          <FormRow>
+            <div className="form-control mt-4">
+              <label className="label mr-3 font-medium">
+                <span className="label-text">Is Active</span>
+              </label>
+              <input
+                type="checkbox"
+                {...control.register('isActive')}
+                className="toggle toggle-primary"
+              />
+              {errors.isActive && (
+                <span className="text-error text-sm">{errors.isActive.message}</span>
+              )}
+            </div>
+          </FormRow>
         </div>
 
         {/* Advanced Fields */}
@@ -482,11 +497,17 @@ export default function LenderCreate() {
                     helperText={errors.sortedOrder ? errors.sortedOrder.message : ''}
                     required
                   />
+
+
+
                 </FormRow>
               </div>
             </div>
           </div>
+
+          
         </div>
+
 
         <div className="flex justify-end">
           <SubmitBtn loading={loading} label={isEdit ? 'Update' : 'Submit'} />
