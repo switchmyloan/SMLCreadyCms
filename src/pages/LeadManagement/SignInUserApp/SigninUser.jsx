@@ -50,8 +50,10 @@ const Blogs = () => {
     }
   };
 
-  const handleEdit = (data) => {
-    navigate(`/blogs/${data?.id}`)
+   const handleEdit = (data) => {
+    navigate(`/lead-detail/${data?.id}`, {
+    state: { lead: data }   // 👈 data pass ho gaya
+  })
   }
 
   useEffect(() => {
