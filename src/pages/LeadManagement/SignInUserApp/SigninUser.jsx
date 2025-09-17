@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
 import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
+import { signInColumns } from '@components/TableHeader';
 import { getInAppLeads } from '../../../api-services/Modules/Leads';
 
 
@@ -71,7 +71,7 @@ const Blogs = () => {
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
+        columns={signInColumns({
           handleEdit
         })}
         title='Sign In Users'

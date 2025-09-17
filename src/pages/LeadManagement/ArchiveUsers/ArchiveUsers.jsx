@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
 import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
+import { archiveColumns } from '@components/TableHeader';
 
 
 const Blogs = () => {
@@ -70,7 +70,7 @@ const Blogs = () => {
     <>
       <Toaster />
       <DataTable
-        columns={blogColumn({
+        columns={archiveColumns({
           handleEdit
         })}
         title='Archive Users'
