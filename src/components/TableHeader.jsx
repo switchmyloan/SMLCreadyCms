@@ -371,3 +371,71 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
     },
   },
 ];
+export const leadsColumn = ({ handleEdit, handleDelete }) => [
+  {
+    header: 'FirstName',
+    accessorKey: 'firstName',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'LastName',
+    accessorKey: 'lastName',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'phoneNumber',
+    accessorKey: 'phoneNumber',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'BioMetric',
+    accessorKey: 'isBioMetricEnabled',
+    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+  },
+  {
+    header: 'Mpin Enabled',
+    accessorKey: 'isMpinEnabled',
+    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+  },
+  {
+    header: 'Email Verified',
+    accessorKey: 'isEmailVerified',
+    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+  },
+  
+  {
+    header: 'Phone Verified',
+    accessorKey: 'isPhoneVerified',
+    cell: ({ getValue }) => (
+      <span className="flex space-x-3">
+        {getValue() ? (
+          <span className="p-2 font-semibold">Active</span>
+        ) : (
+          <span className="p-2 font-semibold">Inactive</span>
+        )}
+      </span>
+    )
+  },
+  // {
+  //   header: 'Actions',
+  //   accessorKey: 'actions',
+  //   cell: ({ row }) => {
+  //     return (
+  //       <div className="flex space-x-3">
+  //         <button
+  //           onClick={() => handleEdit(row.original)}
+  //           className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+  //         >
+  //           <Edit2 size={20} />
+  //         </button>
+  //         <button
+  //           onClick={() => handleDelete(row.original.id)}
+  //           className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+  //         >
+  //           <Trash2 size={20} />
+  //         </button>
+  //       </div>
+  //     );
+  //   },
+  // },
+];

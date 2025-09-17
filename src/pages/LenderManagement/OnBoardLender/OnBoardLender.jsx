@@ -16,8 +16,7 @@ export default function LenderCreate() {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const { id } = useParams();
-  const isEdit = id != 'create';
-
+  console.log(id, "id");
   const [loading, setLoading] = useState(false);
   const [openAdvanced, setOpenAdvanced] = useState(false);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
@@ -148,8 +147,9 @@ export default function LenderCreate() {
     }
     setLoading(true);
     try {
+      console.log(id , "id")
       // const response = await AddLender(submittedData);
-      const response = isEdit
+      const response = id
         ? await UpdateLender(id, submittedData)
         : await AddLender(submittedData);
       console.log('API Response:', response);
@@ -168,7 +168,7 @@ export default function LenderCreate() {
   };
 
   useEffect(() => {
-    if (isEdit && id) {
+    if (id) {
       console.log('Fetching lender data for ID:', id);
       const fetchLender = async () => {
         try {
@@ -220,12 +220,12 @@ export default function LenderCreate() {
       };
       fetchLender();
     }
-  }, [id, isEdit, setValue]);
+  }, [id, setValue]);
 
   return (
     <div>
       <Toaster />
-      <h2 className="text-2xl font-bold mb-6">{isEdit ? 'Edit Lender' : 'Create Lender'}</h2>
+      <h2 className="text-2xl font-bold mb-6">{id ? 'Edit Lender' : 'Create Lender'}</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Basic Info */}
@@ -350,15 +350,7 @@ export default function LenderCreate() {
                     helperText={errors.processingFee ? errors.processingFee.message : ''}
                     required
                   />
-                  <ValidatedTextField
-                    name="maximumLoanAmount"
-                    control={control}
-                    label="Maximum Loan Amount"
-                    errors={errors}
-                    rules={{ required: 'Maximum Loan Amount is required' }}
-                    helperText={errors.maximumLoanAmount ? errors.maximumLoanAmount.message : ''}
-                    required
-                  />
+                
                   <ValidatedTextField
                     name="minimumLoanAmount"
                     control={control}
@@ -368,15 +360,16 @@ export default function LenderCreate() {
                     helperText={errors.minimumLoanAmount ? errors.minimumLoanAmount.message : ''}
                     required
                   />
-                  <ValidatedTextField
-                    name="maximumTenure"
+                    <ValidatedTextField
+                    name="maximumLoanAmount"
                     control={control}
-                    label="Maximum Tenure"
+                    label="Maximum Loan Amount"
                     errors={errors}
-                    rules={{ required: 'Maximum Tenure is required' }}
-                    helperText={errors.maximumTenure ? errors.maximumTenure.message : ''}
+                    rules={{ required: 'Maximum Loan Amount is required' }}
+                    helperText={errors.maximumLoanAmount ? errors.maximumLoanAmount.message : ''}
                     required
                   />
+                 
                   <ValidatedTextField
                     name="minimumTenure"
                     control={control}
@@ -384,6 +377,15 @@ export default function LenderCreate() {
                     errors={errors}
                     rules={{ required: 'Minimum Tenure is required' }}
                     helperText={errors.minimumTenure ? errors.minimumTenure.message : ''}
+                    required
+                  />
+                   <ValidatedTextField
+                    name="maximumTenure"
+                    control={control}
+                    label="Maximum Tenure"
+                    errors={errors}
+                    rules={{ required: 'Maximum Tenure is required' }}
+                    helperText={errors.maximumTenure ? errors.maximumTenure.message : ''}
                     required
                   />
                   <ValidatedTextField
@@ -510,7 +512,7 @@ export default function LenderCreate() {
 
 
         <div className="flex justify-end">
-          <SubmitBtn loading={loading} label={isEdit ? 'Update' : 'Submit'} />
+          <SubmitBtn loading={loading} label={id ? 'Update' : 'Submit'} />
         </div>
       </form>
     </div>

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { blogColumn } from '@components/TableHeader';
+import { getInAppLeads } from '../../../api-services/Modules/Leads';
 
 
 const Blogs = () => {
@@ -31,12 +32,12 @@ const Blogs = () => {
   const fetchBlogs = async () => {
     try {
      setLoading(true); 
-      const response = await getBlogs(query.page_no, query.limit, '');
+      const response = await getInAppLeads(query.page_no, query.limit, '');
 
       console.log('Response:', response.data.data);
       if (response?.data?.success) {
-        setData(response?.data?.data?.data || []);
-        setTotalDataCount(response?.data?.data?.pagination?.totalItems || 0);
+        setData(response?.data?.data?.users || []);
+        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
