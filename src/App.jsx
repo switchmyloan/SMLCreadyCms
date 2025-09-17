@@ -24,6 +24,7 @@ import PrivacyPolicy from '@pages/CMSManagement/Privacy/PrivacyPolicy';
 import Roles from "@pages/AdminManagement/Roles/Roles"
 import Users from '@pages/AdminManagement/Users/Users';
 import PushNotification from '@pages/PushNotification/PushNotification';
+import LeadDetail from '@pages/LeadManagement/Leads/LeadDetail';
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
             <Route path="testimonials" element={<Testimonials />} />
             <Route path="signin-user" element={<SigninUser />} />
             <Route path="leads" element={<Leads />} />
+            <Route path="lead-detail/:id" element={<LeadDetail />} />
             <Route path="archive-users" element={<ArchiveUsers />} />
             <Route path="on-borde-lender-from" element={<OnBoardLender />} />
             <Route path="on-borde-lender-from/:id" element={<OnBoardLender />} />

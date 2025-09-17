@@ -1,4 +1,4 @@
-import { Edit2, Image, Trash2 } from 'lucide-react';
+import { Edit2, Image, Trash2 , Eye} from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 
 export const blogColumn = ({ handleEdit }) => [
@@ -416,26 +416,20 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
       </span>
     )
   },
-  // {
-  //   header: 'Actions',
-  //   accessorKey: 'actions',
-  //   cell: ({ row }) => {
-  //     return (
-  //       <div className="flex space-x-3">
-  //         <button
-  //           onClick={() => handleEdit(row.original)}
-  //           className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
-  //         >
-  //           <Edit2 size={20} />
-  //         </button>
-  //         <button
-  //           onClick={() => handleDelete(row.original.id)}
-  //           className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
-  //         >
-  //           <Trash2 size={20} />
-  //         </button>
-  //       </div>
-  //     );
-  //   },
-  // },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
 ];
