@@ -308,12 +308,12 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Max Loan Amount',
+    header: 'Max Amount',
     accessorKey: 'maximumLoanAmount',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Min Loan Amount',
+    header: 'Min Amount',
     accessorKey: 'minimumLoanAmount',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
@@ -332,16 +332,7 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'startingInterestRate',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
-  {
-    header: 'Charge',
-    accessorKey: 'foreclosureCharges',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
-  {
-    header: 'Late Charge',
-    accessorKey: 'latePaymentCharges',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
+ 
   
   {
     header: 'Status',
@@ -360,12 +351,12 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
           >
             <Edit2 size={20} />
           </button>
-          <button
+          {/* <button
             onClick={() => handleDelete(row.original.id)}
             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
           >
             <Trash2 size={20} />
-          </button>
+          </button> */}
         </div>
       );
     },
