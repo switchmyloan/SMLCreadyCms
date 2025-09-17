@@ -154,7 +154,7 @@ export default function LenderCreate() {
         : await AddLender(submittedData);
       console.log('API Response:', response);
       if (response?.data?.success) {
-        ToastNotification.success('Lender Added Successfully');
+        ToastNotification.success(`Lender ${id ? 'Updated' : 'Added'} Successfully`);
         navigate('/list-of-lenders');
       } else {
         ToastNotification.error(`Failed to add lender: ${response?.data?.message || 'Unknown error'}`);

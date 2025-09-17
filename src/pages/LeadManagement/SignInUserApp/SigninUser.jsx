@@ -31,10 +31,10 @@ const Blogs = () => {
 
   const fetchBlogs = async () => {
     try {
-     setLoading(true); 
+      setLoading(true);
       const response = await getInAppLeads(query.page_no, query.limit, '');
 
-      console.log('Response:', response.data.data);
+      console.log('Response:', response);
       if (response?.data?.success) {
         setData(response?.data?.data?.users || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
@@ -43,7 +43,7 @@ const Blogs = () => {
       }
     } catch (error) {
       console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
+      //   ToastNotification.error('Failed to fetch data');
       // router.push('/login');
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ const Blogs = () => {
           handleEdit
         })}
         title='Sign In Users'
-        data={[]}
+        data={data}
         totalDataCount={totalDataCount}
         // onCreate={handleCreate}
         createLabel="Create"
