@@ -128,7 +128,7 @@ function DataTable({
       </div>
 
       {/* Table */}
-      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" >
         <thead className="bg-gray-100 text-gray-700 text-sm font-semibold uppercase tracking-wide border-b border-gray-200">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -174,7 +174,8 @@ function DataTable({
                   } hover:bg-purple-50`}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-3 py-0 border-b border-gray-200 text-sm">
+                  <td key={cell.id} className="px-4 py-0 border-b border-gray-200 text-sm">
+                    {/* px-4 py-3 */}
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
                 ))}

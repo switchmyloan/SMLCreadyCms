@@ -363,49 +363,57 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
   },
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
-  {
-    header: 'FirstName',
+ {
+    header: 'First Name',
     accessorKey: 'firstName',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'LastName',
+    header: 'Last Name',
     accessorKey: 'lastName',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'phoneNumber',
+    header: 'Number',
     accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'BioMetric',
-    accessorKey: 'isBioMetricEnabled',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Gender',
+    accessorKey: 'gender',
+    cell: ({ getValue }) => getValue() ? 'Male' : 'Female',
   },
   {
-    header: 'Mpin Enabled',
-    accessorKey: 'isMpinEnabled',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Job Type',
+    accessorKey: 'jobType',
+    cell: ({ getValue }) => getValue(),
   },
   {
-    header: 'Email Verified',
-    accessorKey: 'isEmailVerified',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Income',
+    accessorKey: 'monthlyIncome',
+    cell: ({ getValue }) => getValue() || 'N/A',
   },
-  
   {
-    header: 'Phone Verified',
-    accessorKey: 'isPhoneVerified',
-    cell: ({ getValue }) => (
-      <span className="flex space-x-3">
-        {getValue() ? (
-          <span className="p-2 font-semibold">Active</span>
-        ) : (
-          <span className="p-2 font-semibold">Inactive</span>
-        )}
-      </span>
-    )
+    header: 'DOB',
+    accessorKey: 'dateOfBirth',
+    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
+  },
+  {
+    header: 'PAN Number',
+    accessorKey: 'panNumber',
+    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
+  },
+  {
+    header: 'Created At',
+    accessorKey: 'createdAt',
+    cell: ({ getValue }) => {
+    const dateStr = getValue();
+    if (!dateStr) {
+      return 'N/A';
+    }
+    const [year, month, day] = dateStr.split('T')[0].split('-');
+    return `${day}-${month}-${year}`;
+  },
   },
   {
     header: 'Actions',
@@ -426,48 +434,44 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
 ];
 export const signInColumns = ({ handleEdit, handleDelete }) => [
   {
-    header: 'FirstName',
+    header: 'First Name',
     accessorKey: 'firstName',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'LastName',
+    header: 'Last Name',
     accessorKey: 'lastName',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'phoneNumber',
+    header: 'Number',
     accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'BioMetric',
-    accessorKey: 'isBioMetricEnabled',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Gender',
+    accessorKey: 'gender',
+    cell: ({ getValue }) => getValue() ? 'Male' : 'Female',
   },
   {
-    header: 'Mpin Enabled',
-    accessorKey: 'isMpinEnabled',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Job Type',
+    accessorKey: 'jobType',
+    cell: ({ getValue }) => getValue(),
   },
   {
-    header: 'Email Verified',
-    accessorKey: 'isEmailVerified',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+    header: 'Income',
+    accessorKey: 'monthlyIncome',
+    cell: ({ getValue }) => getValue() || 'N/A',
   },
-  
   {
-    header: 'Phone Verified',
-    accessorKey: 'isPhoneVerified',
-    cell: ({ getValue }) => (
-      <span className="flex space-x-3">
-        {getValue() ? (
-          <span className="p-2 font-semibold">Active</span>
-        ) : (
-          <span className="p-2 font-semibold">Inactive</span>
-        )}
-      </span>
-    )
+    header: 'DOB',
+    accessorKey: 'dateOfBirth',
+    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
+  },
+  {
+    header: 'PAN Number',
+    accessorKey: 'panNumber',
+    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
   },
   {
     header: 'Actions',
