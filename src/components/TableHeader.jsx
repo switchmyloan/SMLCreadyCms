@@ -1,4 +1,4 @@
-import { Edit2, Image, Trash2 , Eye} from 'lucide-react';
+import { Edit2, Image, Trash2, Eye } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 
 export const blogColumn = ({ handleEdit }) => [
@@ -64,11 +64,23 @@ export const blogColumn = ({ handleEdit }) => [
       )
     },
   },
-  {
-    header: 'Status',
-    accessorKey: 'status',
-    cell: ({ getValue }) => getValue() || 'N/A',
+{
+  header: 'Status',
+  accessorKey: 'isActive',
+  cell: ({ getValue }) => {
+    const isActive = getValue(); // This returns a boolean: true or false
+    
+    // Determine the text and badge color based on the boolean value
+    const statusText = isActive ? 'Active' : 'Inactive';
+    const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+        {statusText}
+      </span>
+    );
   },
+},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -332,13 +344,25 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'startingInterestRate',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
- 
-  
-  {
-    header: 'Status',
-    accessorKey: 'isActive',
-    cell: ({ getValue }) => getValue() ? 'True' : 'False',
+
+
+ {
+  header: 'Status',
+  accessorKey: 'isActive',
+  cell: ({ getValue }) => {
+    const isActive = getValue(); // This returns a boolean: true or false
+    
+    // Determine the text and badge color based on the boolean value
+    const statusText = isActive ? 'Active' : 'Inactive';
+    const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+        {statusText}
+      </span>
+    );
   },
+},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -363,7 +387,7 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
   },
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
- {
+  {
     header: 'First Name',
     accessorKey: 'firstName',
     cell: ({ getValue }) => getValue() || 'N/A',
@@ -379,42 +403,139 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Gender',
-    accessorKey: 'gender',
-    cell: ({ getValue }) => getValue() ? 'Male' : 'Female',
+  header: 'Gender',
+  accessorKey: 'gender',
+  cell: ({ getValue }) => {
+    const genderValue = getValue();
+    // Normalize the value to a consistent case (e.g., lowercase)
+    const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
+    
+    // Check for "male" or "female" using the normalized value
+    const isMale = normalizedGender === 'male';
+    const isFemale = normalizedGender === 'female';
+
+    let genderText = 'N/A';
+    let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
+
+    if (isMale) {
+      genderText = 'Male';
+      badgeColorClass = 'bg-blue-100 text-blue-800';
+    } else if (isFemale) {
+      genderText = 'Female';
+      badgeColorClass = 'bg-pink-100 text-pink-800';
+    }
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+        {genderText}
+      </span>
+    );
   },
+},
   {
-    header: 'Job Type',
-    accessorKey: 'jobType',
-    cell: ({ getValue }) => getValue(),
+  header: 'Job Type',
+  accessorKey: 'jobType',
+  cell: ({ getValue }) => {
+    const jobType = getValue();
+
+    // Function to convert to Title Case
+    const toTitleCase = (str) => {
+      if (!str) return 'N/A';
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const formattedJobType = toTitleCase(jobType);
+
+    // Define a mapping of job types to badge styles
+    const badgeStyles = {
+      'Salaried': 'bg-blue-100 text-blue-800',
+      'Self-Employed': 'bg-green-100 text-green-800',
+      'Self-employed': 'bg-green-100 text-green-800',
+      'Business Owner': 'bg-purple-100 text-purple-800',
+      'Freelancer': 'bg-yellow-100 text-yellow-800',
+      'Student': 'bg-indigo-100 text-indigo-800',
+      'Other': 'bg-gray-100 text-gray-800',
+    };
+    
+    // Get the style for the formatted job type, defaulting to 'Other'
+    const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+        {formattedJobType}
+      </span>
+    );
   },
+},
   {
     header: 'Income',
     accessorKey: 'monthlyIncome',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => {
+      const income = getValue();
+
+      if (income === null || income === undefined || isNaN(income)) {
+        return 'N/A';
+      }
+
+      const formattedIncome = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(income);
+
+      return formattedIncome;
+    },
   },
   {
     header: 'DOB',
     accessorKey: 'dateOfBirth',
-    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
-  },
-  {
-    header: 'PAN Number',
-    accessorKey: 'panNumber',
-    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
-  },
-  {
-    header: 'Created At',
-    accessorKey: 'createdAt',
     cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    },
+  },
+{
+  header: 'Created At',
+  accessorKey: 'createdAt',
+  cell: ({ getValue }) => {
     const dateStr = getValue();
     if (!dateStr) {
       return 'N/A';
     }
-    const [year, month, day] = dateStr.split('T')[0].split('-');
-    return `${day}-${month}-${year}`;
+
+    const date = new Date(dateStr);
+    const options = {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    };
+    
+    // Create a new formatter for the 'en-IN' locale (English - India)
+    const formatter = new Intl.DateTimeFormat('en-IN', options);
+
+    // Format the date and replace the space with a forward slash
+    const formattedDate = formatter.format(date).replace(/ /g, ' ');
+
+    return (
+      <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
+        {formattedDate}
+      </span>
+    );
   },
-  },
+},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -448,30 +569,110 @@ export const signInColumns = ({ handleEdit, handleDelete }) => [
     accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
-  {
-    header: 'Gender',
-    accessorKey: 'gender',
-    cell: ({ getValue }) => getValue() ? 'Male' : 'Female',
+ {
+  header: 'Gender',
+  accessorKey: 'gender',
+  cell: ({ getValue }) => {
+    const genderValue = getValue();
+    // Normalize the value to a consistent case (e.g., lowercase)
+    const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
+    
+    // Check for "male" or "female" using the normalized value
+    const isMale = normalizedGender === 'male';
+    const isFemale = normalizedGender === 'female';
+
+    let genderText = 'N/A';
+    let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
+
+    if (isMale) {
+      genderText = 'Male';
+      badgeColorClass = 'bg-blue-100 text-blue-800';
+    } else if (isFemale) {
+      genderText = 'Female';
+      badgeColorClass = 'bg-pink-100 text-pink-800';
+    }
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+        {genderText}
+      </span>
+    );
   },
-  {
-    header: 'Job Type',
-    accessorKey: 'jobType',
-    cell: ({ getValue }) => getValue(),
+},
+{
+  header: 'Job Type',
+  accessorKey: 'jobType',
+  cell: ({ getValue }) => {
+    const jobType = getValue();
+
+    // Function to convert to Title Case
+    const toTitleCase = (str) => {
+      if (!str) return 'N/A';
+      return str
+        .toLowerCase()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+    };
+
+    const formattedJobType = toTitleCase(jobType);
+
+    // Define a mapping of job types to badge styles
+    const badgeStyles = {
+      'Salaried': 'bg-blue-100 text-blue-800',
+      'Self-Employed': 'bg-green-100 text-green-800',
+      'Self-employed': 'bg-green-100 text-green-800',
+      'Business Owner': 'bg-purple-100 text-purple-800',
+      'Freelancer': 'bg-yellow-100 text-yellow-800',
+      'Student': 'bg-indigo-100 text-indigo-800',
+      'Other': 'bg-gray-100 text-gray-800',
+    };
+    
+    // Get the style for the formatted job type, defaulting to 'Other'
+    const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+
+    return (
+      <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+        {formattedJobType}
+      </span>
+    );
   },
+},
   {
     header: 'Income',
     accessorKey: 'monthlyIncome',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => {
+      const income = getValue();
+
+      if (income === null || income === undefined || isNaN(income)) {
+        return 'N/A';
+      }
+
+      const formattedIncome = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(income);
+
+      return formattedIncome;
+    },
   },
   {
     header: 'DOB',
     accessorKey: 'dateOfBirth',
-    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
-  },
-  {
-    header: 'PAN Number',
-    accessorKey: 'panNumber',
-    cell: ({ getValue }) => getValue().split('T')[0] || 'N/A',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    },
   },
   {
     header: 'Actions',
@@ -521,7 +722,7 @@ export const archiveColumns = ({ handleEdit, handleDelete }) => [
     accessorKey: 'isEmailVerified',
     cell: ({ getValue }) => getValue() ? 'True' : 'False',
   },
-  
+
   {
     header: 'Phone Verified',
     accessorKey: 'isPhoneVerified',
