@@ -9,9 +9,9 @@ import { useForm } from "react-hook-form";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import ValidatedLabel from "@components/Form/ValidatedLabel";
-import ImageUploadField from "@components/Form/ImageUploadField";
 import Drawer from "@components/Drawer"; 
 import SubmitBtn from '@components/Form/SubmitBtn'
+import Uploader from "../../../components/Form/Uploader";
 
 const Testimonials = () => {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
@@ -244,13 +244,21 @@ const Testimonials = () => {
             />
           </div>
           <ValidatedLabel label="Upload Image" />
-          <ImageUploadField
+          {/* <ImageUploadField
             name="image"
             control={control}
             label="Upload Image"
             errors={errors}
             rules={{ required: "Image is required" }}
-          />
+          /> */}
+
+            <Uploader
+               name="image"
+               control={control}
+               label="Upload Image"
+               errors={errors}
+               rules={{ required: "Image is required" }}
+           />
           <ValidatedTextArea
             name="testimonial"
             control={control}

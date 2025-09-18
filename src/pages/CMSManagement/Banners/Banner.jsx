@@ -12,6 +12,7 @@ import { AddBanner, getBanners, getBannerById, UpdateBanner, deleteBanner } from
 import { bannerColumn } from '../../../components/TableHeader';
 import SubmitBtn from '@components/Form/SubmitBtn'
 import ConfirmModal from '../../../components/ConfirmationationModal';
+import Uploader from '../../../components/Form/Uploader';
 
 
 const Banner = () => {
@@ -282,13 +283,21 @@ const Banner = () => {
           />
 
           <ValidatedLabel label="Image" />
-          <ImageUploadField
+          {/* <ImageUploadField
             name="bannerImage"
             control={control}
             label="Image"
             rules={{ required: true }}
             errors={errors}
-          />
+          /> */}
+
+          <Uploader
+                name="bannerImage"
+                control={control}
+                label="Image"
+                errors={errors}
+                rules={{ required: "Image is required" }}
+            />
 
           <div>
             <label className="block mb-1">Status</label>

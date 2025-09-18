@@ -10,7 +10,6 @@ import ToastNotification from '@components/Notification/ToastNotification'
 import CreateAuthorTagModal from '@components/Modal/CreateAuthorTagModal'
 import { GetTagById, getTags, AddTag } from '../../api-services/Modules/TagsApi';
 import { AddBlog, getBlogById, UpdateBlog } from '../../api-services/Modules/BlogsApi'
-import ImageUploadField from '@components/Form/ImageUploadField'
 import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
 import ValidatedTextArea from '@components/Form/ValidatedTextArea';
 import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
@@ -128,7 +127,7 @@ export default function BlogCreate() {
     try {
       const response = await getTags(1, 100, '')
       if (response?.data?.success) {
-        const mapped = response?.data?.data?.map(item => ({
+        const mapped = response?.data?.rows?.map(item => ({
           label: item?.Name?.toUpperCase(),
           value: item?.ID
         }))
@@ -146,7 +145,7 @@ export default function BlogCreate() {
     try {
       const response = await getAuthor(1, 10, '')
       if (response?.data?.success) {
-        const mapped = response?.data?.data?.data?.map(item => ({
+        const mapped = response?.data?.data?.rows?.map(item => ({
           label: item?.name?.toUpperCase(),
           value: item?.id
         }))

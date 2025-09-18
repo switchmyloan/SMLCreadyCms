@@ -10,6 +10,7 @@ import Drawer from "../../../components/Drawer";
 import { AddPress, getPress, UpdatePress } from "../../../api-services/Modules/PressApi";
 import ImageUploadField from "../../../components/Form/ImageUploadField";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
+import Uploader from "../../../components/Form/Uploader";
 
 const Press = () => {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
@@ -182,23 +183,24 @@ const Press = () => {
 
           {/* Image */}
             <ValidatedLabel label="Image" />
-          <ImageUploadField
-            name='image'
-            control={control}
-            label='Image URL'
-            rules={{ required: true }}
-            errors={errors}
-          />
+         
+            <Uploader 
+               name="image"
+               control={control}
+               label="Image URL"
+               errors={errors}
+               rules={{ required: "Image is required" }}
+           />
 
           {/* Source Logo */}
           <ValidatedLabel label="Source Logo" />
-            <ImageUploadField
-            name='sourceLogo'
-            control={control}
-            label='Source Logo'
-            rules={{ required: false }}
-            errors={errors}
-          />
+           <Uploader 
+               name="sourceLogo"
+               control={control}
+               label="Source Logo"
+               errors={errors}
+               rules={{ required: "Image is required" }}
+           /> 
 
           {/* Redirect Link */}
           <ValidatedTextField

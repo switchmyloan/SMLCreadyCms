@@ -54,7 +54,7 @@ const Uploader = ({ name, control, label, errors, rules }) => {
   return (
     <div className="mb-4">
       {/* <ValidatedLabel label={label} /> */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 cursor-pointer">
         {/* File Input */}
         <input
           type="file"
