@@ -24,7 +24,6 @@ const Blogs = () => {
   })
 
   const handleCreate = () => {
-
     navigate("/blogs/create");
   }
 
@@ -33,9 +32,9 @@ const Blogs = () => {
      setLoading(true); 
       const response = await getBlogs(query.page_no, query.limit, '');
 
-      console.log('Response:', response.data.data);
+      // console.log('Response:', response.data.data);
       if (response?.data?.success) {
-        setData(response?.data?.data?.blogs || []);
+        setData(response?.data?.data?.rows || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
@@ -56,13 +55,12 @@ const Blogs = () => {
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
+
   const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
     setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
       return {
         ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
+        page_no: pageNo.pageIndex + 1 
       };
     });
   };

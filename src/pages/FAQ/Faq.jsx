@@ -72,7 +72,7 @@ const Faq = () => {
         try {
             const response = await getFaq(query.page_no, query.limit, '');
             if (response?.data?.success) {
-                setData(response?.data?.data?.data || []); // Adjust based on actual response
+                setData(response?.data?.data?.rows || []); // Adjust based on actual response
                 setTotalDataCount(response?.data?.data?.pagination?.total || 0);
             } else {
                 ToastNotification.error('Error fetching data');
@@ -87,7 +87,7 @@ const Faq = () => {
         try {
             const response = await getCategory(query.page_no, query.limit, '');
             if (response?.data?.success) {
-                const mapped = response?.data?.data?.data?.map((item) => ({
+                const mapped = response?.data?.data?.rows?.map((item) => ({
                     label: item?.name?.toUpperCase(),
                     value: item?.id,
                 }));

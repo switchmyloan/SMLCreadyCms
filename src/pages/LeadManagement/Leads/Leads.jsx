@@ -34,10 +34,8 @@ const Leads = () => {
     try {
      setLoading(true); 
       const response = await getLeads(query.page_no, query.limit, '');
-
-      console.log('Response:', response.data.data);
       if (response?.data?.success) {
-        setData(response?.data?.data?.users || []);
+        setData(response?.data?.data?.rows || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
@@ -53,23 +51,23 @@ const Leads = () => {
 
   const handleEdit = (data) => {
     navigate(`/lead-detail/${data?.id}`, {
-    state: { lead: data }   // 👈 data pass ho gaya
+    state: { lead: data } 
   })
   }
 
-  useEffect(() => {
-    fetchBlogs();
-  }, [query.page_no]);
   const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
     setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
       return {
         ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
+        page_no: pageNo.pageIndex + 1 
       };
     });
   };
+
+  
+  useEffect(() => {
+    fetchBlogs();
+  }, [query.page_no]);
   return (
     <>
       <Toaster />

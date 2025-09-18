@@ -100,7 +100,7 @@ const Banner = () => {
 
       console.log('Response:', response.data.data.data);
       if (response?.data?.success) {
-        setData(response?.data?.data?.data || []);
+        setData(response?.data?.data?.rows || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");

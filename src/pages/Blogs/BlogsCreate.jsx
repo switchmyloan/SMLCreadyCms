@@ -14,6 +14,7 @@ import ImageUploadField from '@components/Form/ImageUploadField'
 import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
 import ValidatedTextArea from '@components/Form/ValidatedTextArea';
 import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
+import Uploader from '../../components/Form/Uploader'
 
 
 const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
@@ -423,13 +424,22 @@ console.log("FormData as object:", formDataObject);
             />
             <div>
               <ValidatedLabel label="Upload Image" />
-              <ImageUploadField
-                name="metaImage"
+              {/* <ImageUploadField
+                  name="metaImage"
+                  control={control}
+                  label="Upload Image"
+                  errors={errors}
+                  rules={{ required: "Image is required" }}
+              /> */}
+
+              <Uploader 
+               name="metaImage"
                 control={control}
                 label="Upload Image"
                 errors={errors}
                 rules={{ required: "Image is required" }}
               />
+
             </div>
           </div>
         </div>

@@ -37,15 +37,13 @@ const Blogs = () => {
 
       console.log('Response:', response.data);
       if (response?.data?.success) {
-        setData(response?.data?.data.data || []);
+        setData(response?.data?.data.rows || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
       }
     } catch (error) {
       console.error('Error fetching:', error);
-    //   ToastNotification.error('Failed to fetch data');
-      // router.push('/login');
     } finally {
       setLoading(false);
     }
