@@ -8,12 +8,12 @@ import ValidatedLabel from '@components/Form/ValidatedLabel'
 import SubmitBtn from '@components/Form/SubmitBtn'
 import ToastNotification from '@components/Notification/ToastNotification'
 import CreateAuthorTagModal from '@components/Modal/CreateAuthorTagModal'
-import { GetTagById, getTags, AddTag } from '../../api-services/Modules/TagsApi';
+import { getTags, AddTag } from '../../api-services/Modules/TagsApi';
 import { AddBlog, getBlogById, UpdateBlog } from '../../api-services/Modules/BlogsApi'
 import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
 import ValidatedTextArea from '@components/Form/ValidatedTextArea';
 import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
-import Uploader from '../../components/Form/Uploader'
+import Uploader from '../../components/Form/Uploader';
 
 
 const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
@@ -325,7 +325,7 @@ console.log("FormData as object:", formDataObject);
 
   return (
     <div className="">
-      <h2 className="text-2xl font-bold mb-6">{isEdit ? "Edit Blog" : "Create Blog"}</h2>
+      <h2 className="text-2xl font-bold mb-6">{id ? "Edit Blog" : "Create Blog"}</h2>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* LEFT COLUMN */}

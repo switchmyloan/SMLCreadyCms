@@ -320,14 +320,42 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Max Amount',
-    accessorKey: 'maximumLoanAmount',
-    cell: ({ getValue }) => getValue() || 'N/A',
-  },
-  {
     header: 'Min Amount',
     accessorKey: 'minimumLoanAmount',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => {
+      const income = getValue();
+
+      if (income === null || income === undefined || isNaN(income)) {
+        return 'N/A';
+      }
+
+      const formattedIncome = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(income);
+
+      return formattedIncome;
+    },
+  },
+    {
+    header: 'Max Amount',
+    accessorKey: 'maximumLoanAmount',
+    cell: ({ getValue }) => {
+      const income = getValue();
+
+      if (income === null || income === undefined || isNaN(income)) {
+        return 'N/A';
+      }
+
+      const formattedIncome = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(income);
+
+      return formattedIncome;
+    },
   },
   {
     header: 'Min Tenure',
