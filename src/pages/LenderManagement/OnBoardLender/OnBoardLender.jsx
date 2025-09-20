@@ -1,4 +1,4 @@
-import { useForm } from 'react-hook-form';
+import { Form, useForm } from 'react-hook-form';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ValidatedTextField from '@components/Form/ValidatedTextField';
@@ -11,17 +11,19 @@ import { uploadImage } from '../../../api-services/cms-services';
 import ToastNotification from '../../../components/Notification/ToastNotification';
 import { Toaster } from 'react-hot-toast';
 import { AddLender, getLenderById, UpdateLender } from '../../../api-services/Modules/LenderApi';
+import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
+import { Features } from '@components/Form/features';
 
 export default function LenderCreate() {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
   const navigate = useNavigate();
   const { id } = useParams();
-  console.log(id, "id");
   const [loading, setLoading] = useState(false);
   const [openAdvanced, setOpenAdvanced] = useState(false);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
   const [bannerImageKey, setBannerImageKey] = useState('');
   const [imgSrc, setImgSrc] = useState('');
+  const [features, setFeatures] = useState([]);
 
   const {
     control,
@@ -54,6 +56,7 @@ export default function LenderCreate() {
       aboutUsLink: '',
       sortedOrder: '',
       isActive: true,
+      features: [],
     },
   });
 
@@ -134,7 +137,8 @@ export default function LenderCreate() {
   const onSubmit = async (data) => {
     const submittedData = {
       ...data,
-      logo: bannerImageKey
+      logo: bannerImageKey,
+      lender_features: features
     };
 
     if (Object.keys(errors).length > 0) {
@@ -147,7 +151,7 @@ export default function LenderCreate() {
     }
     setLoading(true);
     try {
-      console.log(id , "id")
+      console.log(submittedData, "id")
       // const response = await AddLender(submittedData);
       const response = id
         ? await UpdateLender(id, submittedData)
@@ -199,6 +203,7 @@ export default function LenderCreate() {
             setValue('privacyPolicyLink', lender.privacyPolicyLink || '');
             setValue('faqLink', lender.faqLink || '');
             setValue('aboutUsLink', lender.aboutUsLink || '');
+            setValue('features', lender?.features)
             setValue('sortedOrder', lender.sortedOrder ? String(lender.sortedOrder) : '');
             setValue('isActive', lender.isActive !== undefined ? lender.isActive : true);
 
@@ -225,11 +230,37 @@ export default function LenderCreate() {
   return (
     <div>
       <Toaster />
-      <h2 className="text-2xl font-bold mb-6">{id ? 'Edit Lender' : 'Create Lender'}</h2>
+
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Info */}
         <div className="bg-white shadow p-6 rounded-xl space-y-4">
+
+          <div className="flex justify-between items-center ">
+            <h2 className="text-2xl font-bold mb-6">{id ? 'Edit Lender' : 'Create Lender'}</h2>
+
+            <div className='flex  items-center'>
+              <FormRow>
+                <div className="form-control ">
+                  <label className="label mr-3 font-medium">
+                    <span className="label-text">Is Active</span>
+                  </label>
+                  <input
+                    type="checkbox"
+                    {...control.register('isActive')}
+                    className="toggle toggle-primary"
+                  />
+                  {errors.isActive && (
+                    <span className="text-error text-sm">{errors.isActive.message}</span>
+                  )}
+                </div>
+              </FormRow>
+              <div>
+                <SubmitBtn loading={loading} label={id ? 'Update' : 'Submit'} />
+              </div>
+            </div>
+          </div>
+
+
           <FormRow cols={3}>
             <ValidatedTextField
               name="name"
@@ -263,7 +294,6 @@ export default function LenderCreate() {
           </FormRow>
 
           <FormRow cols={3}>
-
             <ValidatedTextField
               name="playStoreLink"
               control={control}
@@ -273,7 +303,10 @@ export default function LenderCreate() {
               helperText={errors.playStoreLink ? errors.playStoreLink.message : 'Enter the Play Store URL'}
               required
             />
+
+
           </FormRow>
+
           <div className="flex gap-4">
             <div className="w-2/3">
               <ValidatedTextArea
@@ -303,20 +336,17 @@ export default function LenderCreate() {
               />
             </div>
           </div>
-          <FormRow>
-            <div className="form-control mt-4">
-              <label className="label mr-3 font-medium">
-                <span className="label-text">Is Active</span>
-              </label>
-              <input
-                type="checkbox"
-                {...control.register('isActive')}
-                className="toggle toggle-primary"
-              />
-              {errors.isActive && (
-                <span className="text-error text-sm">{errors.isActive.message}</span>
-              )}
-            </div>
+          <FormRow cols={3}>
+            <Features
+              name="features"
+              control={control}
+              label="Features"
+              errors={errors}
+              keywords={features}
+              setKeywords={setFeatures}
+              setValue={setValue}
+              rules={{ required: false }}
+            />
           </FormRow>
         </div>
 
@@ -337,83 +367,83 @@ export default function LenderCreate() {
                     control={control}
                     label="Starting Interest Rate"
                     errors={errors}
-                    rules={{ required: 'Starting Interest Rate is required' }} // Fixed to match Postman JSON
+                    rules={{ required: false }} // Fixed to match Postman JSON
                     helperText={errors.startingInterestRate ? errors.startingInterestRate.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="processingFee"
                     control={control}
                     label="Processing Fee"
                     errors={errors}
-                    rules={{ required: 'Processing Fee is required' }} // Fixed to match Postman JSON
+                    rules={{ required: false }}  // Fixed to match Postman JSON
                     helperText={errors.processingFee ? errors.processingFee.message : ''}
-                    required
+                  // required
                   />
-                
+
                   <ValidatedTextField
                     name="minimumLoanAmount"
                     control={control}
                     label="Minimum Loan Amount"
                     errors={errors}
-                    rules={{ required: 'Minimum Loan Amount is required' }}
+                    rules={{ required: false }}
                     helperText={errors.minimumLoanAmount ? errors.minimumLoanAmount.message : ''}
-                    required
+                  // required
                   />
-                    <ValidatedTextField
+                  <ValidatedTextField
                     name="maximumLoanAmount"
                     control={control}
                     label="Maximum Loan Amount"
                     errors={errors}
-                    rules={{ required: 'Maximum Loan Amount is required' }}
+                    rules={{ required: false }}
                     helperText={errors.maximumLoanAmount ? errors.maximumLoanAmount.message : ''}
-                    required
+                  // required
                   />
-                 
+
                   <ValidatedTextField
                     name="minimumTenure"
                     control={control}
                     label="Minimum Tenure"
                     errors={errors}
-                    rules={{ required: 'Minimum Tenure is required' }}
+                    rules={{ required: false }}
                     helperText={errors.minimumTenure ? errors.minimumTenure.message : ''}
-                    required
+                  // required
                   />
-                   <ValidatedTextField
+                  <ValidatedTextField
                     name="maximumTenure"
                     control={control}
                     label="Maximum Tenure"
                     errors={errors}
-                    rules={{ required: 'Maximum Tenure is required' }}
+                    rules={{ required: false }}
                     helperText={errors.maximumTenure ? errors.maximumTenure.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="prepaymentCharges"
                     control={control}
                     label="Prepayment Charges"
                     errors={errors}
-                    rules={{ required: 'Prepayment Charges is required' }}
+                    rules={{ required: false }}
                     helperText={errors.prepaymentCharges ? errors.prepaymentCharges.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="latePaymentCharges"
                     control={control}
                     label="Late Payment Charges"
                     errors={errors}
-                    rules={{ required: 'Late Payment Charges is required' }}
+                    rules={{ required: false }}
                     helperText={errors.latePaymentCharges ? errors.latePaymentCharges.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="foreclosureCharges"
                     control={control}
                     label="Foreclosure Charges"
                     errors={errors}
-                    rules={{ required: 'Foreclosure Charges is required' }}
+                    rules={{ required: false }}
                     helperText={errors.foreclosureCharges ? errors.foreclosureCharges.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextArea
                     name="eligibilityCriteria"
@@ -421,9 +451,9 @@ export default function LenderCreate() {
                     label="Eligibility Criteria"
                     errors={errors}
                     rows={3}
-                    rules={{ required: 'Eligibility Criteria is required' }}
+                    rules={{ required: false }}
                     helperText={errors.eligibilityCriteria ? errors.eligibilityCriteria.message : ''}
-                    required
+                  // required
                   />
                 </FormRow>
               </div>
@@ -435,27 +465,27 @@ export default function LenderCreate() {
                     control={control}
                     label="Customer Support Number"
                     errors={errors}
-                    rules={{ required: 'Customer Support Number is required' }}
+                    rules={{ required: false }}
                     helperText={errors.customerSupportNumber ? errors.customerSupportNumber.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="customerSupportEmail"
                     control={control}
                     label="Customer Support Email"
                     errors={errors}
-                    rules={{ required: 'Customer Support Email is required' }}
+                    rules={{ required: false }}
                     helperText={errors.customerSupportEmail ? errors.customerSupportEmail.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="termsAndConditionsLink"
                     control={control}
                     label="Terms & Conditions Link"
                     errors={errors}
-                    rules={{ required: 'Terms & Conditions Link is required' }}
+                    rules={{ required: false }}
                     helperText={errors.termsAndConditionsLink ? errors.termsAndConditionsLink.message : ''}
-                    required
+                  // required
                   />
                 </FormRow>
 
@@ -465,27 +495,27 @@ export default function LenderCreate() {
                     control={control}
                     label="Privacy Policy Link"
                     errors={errors}
-                    rules={{ required: 'Privacy Policy Link is required' }}
+                    rules={{ required: false }}
                     helperText={errors.privacyPolicyLink ? errors.privacyPolicyLink.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="faqLink"
                     control={control}
                     label="FAQ Link"
                     errors={errors}
-                    rules={{ required: 'FAQ Link is required' }}
+                    rules={{ required: false }}
                     helperText={errors.faqLink ? errors.faqLink.message : ''}
-                    required
+                  // required
                   />
                   <ValidatedTextField
                     name="aboutUsLink"
                     control={control}
                     label="About Us Link"
                     errors={errors}
-                    rules={{ required: 'About Us Link is required' }}
+                    rules={{ required: false }}
                     helperText={errors.aboutUsLink ? errors.aboutUsLink.message : ''}
-                    required
+                  // required
                   />
                 </FormRow>
 
@@ -495,25 +525,18 @@ export default function LenderCreate() {
                     control={control}
                     label="Sorted Order"
                     errors={errors}
-                    rules={{ required: 'Sorted Order is required' }}
+                    rules={{ required: false }}
                     helperText={errors.sortedOrder ? errors.sortedOrder.message : ''}
-                    required
+                  // required
                   />
-
-
-
                 </FormRow>
               </div>
             </div>
           </div>
-
-          
         </div>
 
 
-        <div className="flex justify-end">
-          <SubmitBtn loading={loading} label={id ? 'Update' : 'Submit'} />
-        </div>
+
       </form>
     </div>
   );
