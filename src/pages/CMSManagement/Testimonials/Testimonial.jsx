@@ -2,19 +2,24 @@ import React, { useEffect, useState } from "react";
 import DataTable from "@components/Table/DataTable";
 import { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { getTestimonials, updateTestimonial,addTestimonial } from "../../../api-services/Modules/TestimonialsApi";
+import { getTestimonials, updateTestimonial, addTestimonial } from "../../../api-services/Modules/TestimonialsApi";
 import ToastNotification from "@components/Notification/ToastNotification";
 import { testimonialsColumn } from "@components/TableHeader";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { validationSchema } from "../../../schema";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import ValidatedLabel from "@components/Form/ValidatedLabel";
 import Drawer from "@components/Drawer"; 
-import SubmitBtn from '@components/Form/SubmitBtn'
+import SubmitBtn from '@components/Form/SubmitBtn';
 import Uploader from "../../../components/Form/Uploader";
 
+// Yup validation schema
+
+
 const Testimonials = () => {
-  const imageUrl = import.meta.env.VITE_IMAGE_URL
+  const imageUrl = import.meta.env.VITE_IMAGE_URL;
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
@@ -40,6 +45,7 @@ const Testimonials = () => {
     reset,
     setValue,
   } = useForm({
+    resolver: yupResolver(validationSchema),
     defaultValues: {
       name: "",
       designation: "",
@@ -58,7 +64,7 @@ const Testimonials = () => {
   };
 
   const handleEdit = (testimonial) => {
-    console.log(testimonial, "edit data")
+    console.log(testimonial, "edit data");
     setIsEditMode(true);
     setSelectedTestimonial(testimonial?.id);
     setIsDrawerOpen(true);
@@ -67,8 +73,8 @@ const Testimonials = () => {
     setValue("designation", testimonial.designation || "");
     setValue("testimonial", testimonial.testimonial || "");
 
-    const fullImageUrl = `${imageUrl + testimonial.image}`
-    console.log(fullImageUrl, "fullImageUrl")
+    const fullImageUrl = `${imageUrl + testimonial.image}`;
+    console.log(fullImageUrl, "fullImageUrl");
     setValue("image", fullImageUrl || null);
     setValue("order", testimonial.order || 1);
     setValue("isActive", testimonial.isActive ?? true);
@@ -92,7 +98,7 @@ const Testimonials = () => {
 
   const handleAddTestimonial = async (formData) => {
     setLoading(true);
-    console.log(formData, "dddd")
+    console.log(formData, "formData");
     try {
       const sanitizedData = {
         name: formData.name?.trim() || "",
@@ -119,7 +125,7 @@ const Testimonials = () => {
       }
     } catch (error) {
       ToastNotification.error(error.message || "Something went wrong!");
-         setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -138,8 +144,8 @@ const Testimonials = () => {
       formDataToSend.append("isActive", String(formData.isActive ?? true));
       formDataToSend.append("order", String(Number(formData.order) || 1));
 
-      console.table(formData, "formDataToSend")
-      const response = await updateTestimonial({ id: selectedTestimonial, ...formData});
+      console.table(formData, "formDataToSend");
+      const response = await updateTestimonial({ id: selectedTestimonial, ...formData });
       if (response?.data?.success) {
         ToastNotification.success("Testimonial updated successfully!");
         await fetchTestimonials();
@@ -164,8 +170,6 @@ const Testimonials = () => {
       await handleAddTestimonial(formData);
     }
   };
-
-  
 
   const onPageChange = (pageNo) => {
     setQuery((prevQuery) => ({
@@ -194,7 +198,6 @@ const Testimonials = () => {
         pagination={pagination}
       />
 
-      {/* ✅ Drawer replaces Modal */}
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => {
@@ -210,7 +213,6 @@ const Testimonials = () => {
             <ValidatedTextField
               name="name"
               control={control}
-              rules={{ required: "Name is required" }}
               label="Name"
               placeholder="Enter name"
               errors={errors}
@@ -218,7 +220,6 @@ const Testimonials = () => {
             <ValidatedTextField
               name="designation"
               control={control}
-              rules={{ required: "Designation is required" }}
               label="Designation"
               placeholder="Enter designation"
               errors={errors}
@@ -228,7 +229,6 @@ const Testimonials = () => {
             <ValidatedTextField
               name="company"
               control={control}
-              rules={{ required: "Company is required" }}
               label="Company"
               placeholder="Enter company"
               errors={errors}
@@ -237,32 +237,21 @@ const Testimonials = () => {
               name="order"
               type="number"
               control={control}
-              rules={{ required: "Order is required" }}
               label="Order"
               placeholder="Enter order"
               errors={errors}
             />
           </div>
           <ValidatedLabel label="Upload Image" />
-          {/* <ImageUploadField
+          <Uploader
             name="image"
             control={control}
             label="Upload Image"
             errors={errors}
-            rules={{ required: "Image is required" }}
-          /> */}
-
-            <Uploader
-               name="image"
-               control={control}
-               label="Upload Image"
-               errors={errors}
-               rules={{ required: "Image is required" }}
-           />
+          />
           <ValidatedTextArea
             name="testimonial"
             control={control}
-            rules={{ required: "Testimonial is required" }}
             label="Testimonial"
             placeholder="Write testimonial"
             rows={4}
@@ -292,15 +281,7 @@ const Testimonials = () => {
             >
               Cancel
             </button>
-            {/* <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={Object.keys(errors).length > 0}
-            >
-              {isEditMode ? "Update" : "Create"}
-            </button> */}
-
-              <SubmitBtn loading={loading} label={isEditMode ? "Update" : "Submit"} />
+            <SubmitBtn loading={loading} label={isEditMode ? "Update" : "Submit"} />
           </div>
         </form>
       </Drawer>

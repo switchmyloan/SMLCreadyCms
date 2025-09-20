@@ -480,7 +480,7 @@ console.log("FormData as object:", formDataObject);
           </div>
           <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/>
           <div className="flex justify-end">
-            <SubmitBtn loading={loading} label={isEdit ? "Update" : "Submit"} />
+            <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
           </div>
         </div>
       </form>
