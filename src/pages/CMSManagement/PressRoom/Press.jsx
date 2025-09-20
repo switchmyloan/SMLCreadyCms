@@ -8,12 +8,13 @@ import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import Drawer from "../../../components/Drawer";
 import { AddPress, getPress, UpdatePress } from "../../../api-services/Modules/PressApi";
-import ImageUploadField from "../../../components/Form/ImageUploadField";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
 import Uploader from "../../../components/Form/Uploader";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { validationPressSchema } from "../../../schema/Press/create.schema";
 
 const Press = () => {
-  const imageUrl = import.meta.env.VITE_IMAGE_URL
+  const imageUrl = import.meta.env.VITE_IMAGE_URL;
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [pagination, setPagination] = useState({
@@ -37,6 +38,7 @@ const Press = () => {
     reset,
     setValue,
   } = useForm({
+    resolver: yupResolver(validationPressSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -55,24 +57,21 @@ const Press = () => {
   };
 
   const handleEdit = (press) => {
-
-    console.log(press, "presssss")
+    console.log(press, "presssss");
     setIsEditMode(true);
     setSelectedPress(press?.id);
     setIsDrawerOpen(true);
 
     // prefill form values
-
-    
-    const fullImageUrl = `${imageUrl + press?.image}`
-    const fullSourceLogoUrl = `${imageUrl + press?.sourceLogo}`
+    const fullImageUrl = `${imageUrl + press?.image}`;
+    const fullSourceLogoUrl = `${imageUrl + press?.sourceLogo}`;
     setValue("title", press?.title);
     setValue("description", press?.description);
-    setValue("image",fullImageUrl);
+    setValue("image", fullImageUrl);
     setValue("sourceLogo", fullSourceLogoUrl);
     setValue("redirectLink", press?.redirectLink);
     setValue("status", press?.status);
-    // setValue("order". press?.order)
+    // setValue("order", press?.order);
   };
 
   const fetchPress = async () => {
@@ -92,27 +91,26 @@ const Press = () => {
 
   const onSubmit = async (formData) => {
     try {
-
-      console.table(formData, "formdata")
-        if (isEditMode) {
-          const response = await UpdatePress({ id: selectedPress, ...formData });
-          if (response?.data?.success) {
-            ToastNotification.success("Press updated successfully!");
-            fetchPress();
-            closeDrawer();
-          } else {
-            ToastNotification.error("Failed to update Press.");
-          }
+      console.table(formData, "formdata");
+      if (isEditMode) {
+        const response = await UpdatePress({ id: selectedPress, ...formData });
+        if (response?.data?.success) {
+          ToastNotification.success("Press updated successfully!");
+          fetchPress();
+          closeDrawer();
         } else {
-          const response = await AddPress(formData);
-          if (response?.data?.success) {
-            ToastNotification.success("Press created successfully!");
-            fetchPress();
-            closeDrawer();
-          } else {
-            ToastNotification.error("Failed to create Press.");
-          }
+          ToastNotification.error("Failed to update Press.");
         }
+      } else {
+        const response = await AddPress(formData);
+        if (response?.data?.success) {
+          ToastNotification.success("Press created successfully!");
+          fetchPress();
+          closeDrawer();
+        } else {
+          ToastNotification.error("Failed to create Press.");
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
       ToastNotification.error("Something went wrong!");
@@ -163,11 +161,9 @@ const Press = () => {
           <ValidatedTextField
             name="title"
             control={control}
-            rules={{ required: true }}
             label="Title"
             placeholder="Enter title"
             errors={errors}
-            helperText="Title is required!"
           />
 
           {/* Description */}
@@ -178,29 +174,25 @@ const Press = () => {
             errors={errors}
             placeholder="Enter description"
             rows={4}
-            rules={{ required: "Description is required" }}
           />
 
           {/* Image */}
-            <ValidatedLabel label="Image" />
-         
-            <Uploader 
-               name="image"
-               control={control}
-               label="Image URL"
-               errors={errors}
-               rules={{ required: "Image is required" }}
-           />
+          <ValidatedLabel label="Image" />
+          <Uploader
+            name="image"
+            control={control}
+            label="Image URL"
+            errors={errors}
+          />
 
           {/* Source Logo */}
           <ValidatedLabel label="Source Logo" />
-           <Uploader 
-               name="sourceLogo"
-               control={control}
-               label="Source Logo"
-               errors={errors}
-               rules={{ required: "Image is required" }}
-           /> 
+          <Uploader
+            name="sourceLogo"
+            control={control}
+            label="Source Logo"
+            errors={errors}
+          />
 
           {/* Redirect Link */}
           <ValidatedTextField
@@ -221,25 +213,17 @@ const Press = () => {
           {/* Status */}
           <div>
             <label className="block mb-1">Status</label>
-            <select
-              {...register("status")}
-              className="select select-bordered w-full"
-            >
+            <select {...register("status")} className="select select-bordered w-full">
               <option value="draft">Draft</option>
               <option value="published">Published</option>
               <option value="archived">Archived</option>
               <option value="reviewed">Reviewed</option>
-              
             </select>
           </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
-            <button
-              type="button"
-              onClick={closeDrawer}
-              className="btn btn-ghost"
-            >
+            <button type="button" onClick={closeDrawer} className="btn btn-ghost">
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
