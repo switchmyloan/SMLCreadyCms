@@ -8,7 +8,7 @@ export default function Tabs() {
 
     const [activeTab, setActiveTab] = useState("Basic");
 
-    const tabs = ["Basic", "MF"];
+    const tabs = ["Basic"];
 
     console.log("Lead Data:", lead); // 👈 Check if data is received correctly
     return (
@@ -59,12 +59,12 @@ export default function Tabs() {
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Phone Number:</p>
-                                        <p className="text-gray-700 font-medium">{lead.phoneNumber}</p>
+                                        <p className="text-gray-700 font-medium">{lead.phone}</p>
                                     </div>
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Email:</p>
-                                        <p className="text-gray-700 font-medium">{lead.emailAddress ?? "Not Provided"}</p>
+                                        <p className="text-gray-700 font-medium">{lead.email ?? "Not Provided"}</p>
                                     </div>
 
                                     <div>
@@ -74,97 +74,43 @@ export default function Tabs() {
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Date of Birth:</p>
-                                        <p className="text-gray-700 font-medium">{new Date(lead.dateOfBirth).toLocaleDateString()}</p>
+                                        <p className="text-gray-700 font-medium">{new Date(lead.dob).toLocaleDateString()}</p>
                                     </div>
 
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">Address:</p>
-                                        <p className="text-gray-700 font-medium">{lead.address ?? "Not Provided"}</p>
+                                        <p className="text-sm font-medium text-gray-700">Loan Amount:</p>
+                                        <p className="text-gray-700 font-medium">{lead.loanAmount ?? "Not Provided"}</p>
                                     </div>
 
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">City:</p>
-                                        <p className="text-gray-700 font-medium">{lead.city ?? "Not Provided"}</p>
+                                        <p className="text-sm font-medium text-gray-700">Salary:</p>
+                                        <p className="text-gray-700 font-medium">{lead.salary ?? "Not Provided"}</p>
                                     </div>
 
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">State:</p>
-                                        <p className="text-gray-700 font-medium">{lead.state ?? "Not Provided"}</p>
+                                        <p className="text-sm font-medium text-gray-700">Pin Code:</p>
+                                        <p className="text-gray-700 font-medium">{lead.pincode ?? "Not Provided"}</p>
                                     </div>
 
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Country:</p>
-                                        <p className="text-gray-700 font-medium">{lead.country ?? "Not Provided"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Postal Code:</p>
-                                        <p className="text-gray-700 font-medium">{lead.postalCode ?? "Not Provided"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Profile Image:</p>
-                                        <p className="text-gray-700 font-medium">{lead.profileImage ?? "Not Provided"}</p>
-                                    </div>
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">PAN Number:</p>
                                         <p className="text-gray-700 font-medium">{lead.panNumber}</p>
                                     </div>
 
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Job Type:</p>
-                                        <p className="text-gray-700 font-medium">{lead.jobType}</p>
-                                    </div>
 
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">Monthly Income:</p>
-                                        <p className="text-gray-700 font-medium">₹{Number(lead.monthlyIncome).toLocaleString()}</p>
+                                        <p className="text-sm font-medium text-gray-700">Profession:</p>
+                                        <p className="text-gray-700 font-medium">{lead.profession ?? "Not Provided"}</p>
                                     </div>
 
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Biometric:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isBioMetricEnabled ? "Enabled" : "Disabled"}</p>
-                                    </div>
+                    
 
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Email Verification:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isEmailVerified ? "Verified" : "Not Verified"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Getting Offers:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isGettingOffers ? "Enabled" : "Disabled"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">M-Pin:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isMpinEnabled ? "Verified" : "Not Verified"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">PAN Verification:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isPANVerified ? "Enabled" : "Disabled"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Phone Verification:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isPhoneVerified ? "Verified" : "Not Verified"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Profile Completion:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isProfileCompleted ? "Enabled" : "Disabled"}</p>
-                                    </div>
-
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-700">Suspended:</p>
-                                        <p className="text-gray-700 font-medium">{lead.isSuspended ? "Yes" : "No"}</p>
-                                    </div>
+                                  
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Created At:</p>
-                                        <p className="text-gray-700 font-medium">{new Date(lead.createdAt).toLocaleString()}</p>
+                                        <p className="text-gray-700 font-medium">{new Date(lead.consentDatetime).toLocaleString()}</p>
                                     </div>
                                 </div>
                             ) : (
