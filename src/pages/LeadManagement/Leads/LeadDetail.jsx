@@ -85,7 +85,7 @@ const LenderCard = ({ lenderName, response }) => {
         <div className="p-6 border border-gray-200 rounded-xl shadow-lg bg-white transition-shadow hover:shadow-xl">
             <h3 className="text-lg font-bold text-indigo-700 mb-4">{lenderName} Response</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 border-b pb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6  pb-4">
                 {mainDetails.map((item) => (
                     <div key={item.label}>
                         <p className="text-sm font-semibold text-gray-600">{item.label}</p>
@@ -300,9 +300,7 @@ export default function Tabs() {
                         <div>
                             <h2 className="text-xl font-bold text-gray-800 mb-6">Lender Responses</h2>
                             {lead?.lenderresponse && Object.keys(lead.lenderresponse).length > 0 ? (
-                                // 💡 CORRECTED: Changed 'space-y-6 grid grid-cols-2' to 'grid grid-cols-1 md:grid-cols-2 gap-6'
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {/* Map through each lender's response and filter out technical errors */}
                                     {Object.entries(lead.lenderresponse)
                                         .filter(([_, response]) => !shouldHideResponse(response))
                                         .map(([lenderName, response]) => (
@@ -313,9 +311,8 @@ export default function Tabs() {
                                             />
                                         ))}
 
-                                    {/* Optional: Add a message if everything was filtered out */}
                                     {Object.entries(lead.lenderresponse).filter(([_, response]) => !shouldHideResponse(response)).length === 0 && (
-                                        <div className="md:col-span-2"> {/* Make sure the message spans both columns */}
+                                        <div className="md:col-span-2"> 
                                             <p className="text-gray-500 p-4 border border-gray-200 rounded-lg">No meaningful lender responses to display. All responses were filtered out due to technical errors.</p>
                                         </div>
                                     )}

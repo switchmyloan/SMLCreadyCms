@@ -106,16 +106,16 @@ function DataTable({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
 
           <div className="relative group inline-block">
-            <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()}>
+            <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()} title='Refresh'>
               <RefreshCcw size={16} />
             </button>
 
 
-            <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-2 text-sm text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+            {/* <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-2 text-sm text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
               Refresh
 
               <span className="absolute left-full top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></span>
-            </span>
+            </span> */}
           </div>
 
           {/* NEW: EXPORT Button (Tooltip is also left-aligned) */}
@@ -124,6 +124,7 @@ function DataTable({
               <button
                 className="p-2 rounded-md hover:bg-gray-300 transition cursor-pointer"
                 onClick={onExport}
+                title='Export Data'
                 // disabled={loading || totalDataCount == 0} 
               >
                 <Download size={16} />
