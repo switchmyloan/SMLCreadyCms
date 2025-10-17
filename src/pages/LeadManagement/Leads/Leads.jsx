@@ -20,7 +20,8 @@ const Leads = () => {
   const [query, setQuery] = useState({
     limit: 10,
     page_no: 1,
-    search: ''
+    search: '',
+
   })
 
   const handleCreate = () => {
@@ -28,12 +29,19 @@ const Leads = () => {
     navigate("/blogs/create");
   }
 
+  
+
   const fetchBlogs = async () => {
     try {
-     setLoading(true); 
+      setLoading(true);
       const response = await getLeads(query.page_no, query.limit, '');
       if (response?.data?.success) {
-        setData(response?.data?.data || []);
+        let blogs = response?.data?.data || [];
+
+        // Sort by createdAt ascending
+        blogs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        setData(blogs);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
@@ -47,22 +55,23 @@ const Leads = () => {
     }
   };
 
+
   const handleEdit = (data) => {
     navigate(`/lead-detail/${data?.id}`, {
-    state: { lead: data } 
-  })
+      state: { lead: data }
+    })
   }
 
   const onPageChange = (pageNo) => {
     setQuery((prevQuery) => {
       return {
         ...prevQuery,
-        page_no: pageNo.pageIndex + 1 
+        page_no: pageNo.pageIndex + 1
       };
     });
   };
 
-  
+
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
