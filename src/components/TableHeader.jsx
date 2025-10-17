@@ -427,81 +427,27 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
   },
   {
     header: 'Number',
-    accessorKey: 'phoneNumber',
+    accessorKey: 'phone',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-  header: 'Gender',
-  accessorKey: 'gender',
-  cell: ({ getValue }) => {
-    const genderValue = getValue();
-    // Normalize the value to a consistent case (e.g., lowercase)
-    const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
-    
-    // Check for "male" or "female" using the normalized value
-    const isMale = normalizedGender === 'male';
-    const isFemale = normalizedGender === 'female';
-
-    let genderText = 'N/A';
-    let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
-
-    if (isMale) {
-      genderText = 'Male';
-      badgeColorClass = 'bg-blue-100 text-blue-800';
-    } else if (isFemale) {
-      genderText = 'Female';
-      badgeColorClass = 'bg-pink-100 text-pink-800';
-    }
-
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-        {genderText}
-      </span>
-    );
+    header: 'Profession',
+    accessorKey: 'profession',
+    cell: ({ getValue }) => getValue() || 'N/A',
   },
-},
   {
-  header: 'Job Type',
-  accessorKey: 'jobType',
-  cell: ({ getValue }) => {
-    const jobType = getValue();
-
-    // Function to convert to Title Case
-    const toTitleCase = (str) => {
-      if (!str) return 'N/A';
-      return str
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    };
-
-    const formattedJobType = toTitleCase(jobType);
-
-    // Define a mapping of job types to badge styles
-    const badgeStyles = {
-      'Salaried': 'bg-blue-100 text-blue-800',
-      'Self-Employed': 'bg-green-100 text-green-800',
-      'Self-employed': 'bg-green-100 text-green-800',
-      'Business Owner': 'bg-purple-100 text-purple-800',
-      'Freelancer': 'bg-yellow-100 text-yellow-800',
-      'Student': 'bg-indigo-100 text-indigo-800',
-      'Other': 'bg-gray-100 text-gray-800',
-    };
-    
-    // Get the style for the formatted job type, defaulting to 'Other'
-    const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
-
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
-        {formattedJobType}
-      </span>
-    );
+    header: 'Gender',
+    accessorKey: 'gender',
+    cell: ({ getValue }) => getValue() || 'N/A',
   },
-},
   {
-    header: 'Income',
-    accessorKey: 'monthlyIncome',
+    header: 'Pincode',
+    accessorKey: 'pincode',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Salary',
+    accessorKey: 'salary',
     cell: ({ getValue }) => {
       const income = getValue();
 
@@ -520,7 +466,7 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
   },
   {
     header: 'DOB',
-    accessorKey: 'dateOfBirth',
+    accessorKey: 'dob',
     cell: ({ getValue }) => {
       const dateStr = getValue();
       if (!dateStr) {

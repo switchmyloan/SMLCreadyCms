@@ -2,7 +2,7 @@ import Api from "../api";
 
 
 export const getLeads = async (pageNo, limit, globalFilter) => {
-    return Api().get(`/leads/admin/in-web-leads?currentPage=${pageNo}&perPage=${limit}&search=${globalFilter}`,
+    return Api().get(`/leads`,
         {
             skipAdminAppend: true,
         }

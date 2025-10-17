@@ -1,7 +1,7 @@
 import { X, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
-import logo from "../../assets/cready.webp";
+import logo from "../../assets/rupyMoney.png";
 import shortLogo from "../../assets/shortLogo.svg";
 import {
   Home,
@@ -134,11 +134,11 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
         } relative sidebar`}
     >
       {/* Header */}
-      <div className="p-[15px] flex justify-between items-center border-b border-gray-200">
+      <div className="p-[15px] flex justify-between items-center border-b border-gray-200 bg-black">
         {!collapsed ? (
-          <img src={logo} alt="Logo" className="w-28 h-auto" />
+          <img src={logo} alt="Logo" className="w-28 h-auto bg-black" />
         ) : (
-          <img src={shortLogo} alt="Logo" className="w-5 h-auto" />
+          <img src={logo} alt="Logo" className="w-5 h-auto" />
         )}
         <div className="flex items-center gap-2">
           <button
@@ -252,11 +252,11 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
         })}
       </ul>
 
-      {!collapsed && (
+      {/* {!collapsed && (
         <div className="p-4 text-xs text-gray-500 border-t border-gray-200">
           © 2025 Cready CMS
         </div>
-      )}
+      )} */}
 
       {/* Dropdown Menu */}
       {dropdownData && collapsed && sidebarRef.current && (

@@ -35,7 +35,7 @@ const Leads = () => {
      setLoading(true); 
       const response = await getLeads(query.page_no, query.limit, '');
       if (response?.data?.success) {
-        setData(response?.data?.data?.rows || []);
+        setData(response?.data?.data || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
       } else {
         ToastNotification.error("Error fetching data");
