@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
 import ToastNotification from '@components/Notification/ToastNotification';
-import { blogColumn } from '@components/TableHeader';
-import { getBlogs } from '../../../api-services/Modules/BlogsApi';
 import { getLeads } from '../../../api-services/Modules/Leads';
 import { leadsColumn } from '../../../components/TableHeader';
 
