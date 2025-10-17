@@ -441,8 +441,8 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Pincode',
-    accessorKey: 'pincode',
+    header: 'loan Amount',
+    accessorKey: 'loanAmount',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
