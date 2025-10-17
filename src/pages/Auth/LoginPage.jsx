@@ -127,7 +127,7 @@ function LoginPage() {
   const { login, logout } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "deepak@gmail.com",
+    email: "",
     password: "",
   });
   const [error, setError] = useState("");
