@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RefreshCcw } from 'lucide-react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,16 +9,18 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 
-function DataTable({ 
-  columns, 
-  data, 
-  onCreate, 
-  createLabel = 'Create', 
+function DataTable({
+  columns,
+  data,
+  onCreate,
+  createLabel = 'Create',
+  onRefresh,
   totalDataCount,
-   onPageChange, 
-   title="Page",
-   loading = false, 
-  }) {
+  onPageChange,
+  title = "Page",
+  loading = false,
+
+}) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
@@ -28,10 +30,10 @@ function DataTable({
   const table = useReactTable({
     data,
     columns,
-    state: { 
-      sorting, 
-      globalFilter, 
-      pagination 
+    state: {
+      sorting,
+      globalFilter,
+      pagination
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -53,7 +55,7 @@ function DataTable({
   //     prevPaginationRef.current = pagination;
   //   }
   // }, [pagination, onPageChange, table]);
-   useEffect(() => {
+  useEffect(() => {
     setPagination(prev => ({
       ...prev,
       totalDataCount: totalDataCount || 0 // Ensure total data count is up-to-date
@@ -101,6 +103,25 @@ function DataTable({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">{title}</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+          {/* <button data-tooltip-target="Refresh" onClick={() => onRefresh()} className='hover:bg-gray-300 p-2 rounded-md'><RefreshCcw size={16} /></button>
+
+          <div id="tooltip-default" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
+            Tooltip content
+            <div class="tooltip-arrow" data-popper-arrow></div>
+          </div> */}
+          <div className="relative group inline-block">
+            <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()}>
+              <RefreshCcw size={16} />
+            </button>
+
+
+            <span className="absolute right-full mr-2 top-1/2 -translate-y-1/2 px-3 py-2 text-sm text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50">
+              Refresh
+
+              <span className="absolute left-full top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></span>
+            </span>
+          </div>
+
           <input
             type="text"
             placeholder="Search..."
@@ -155,33 +176,33 @@ function DataTable({
         <tbody className="text-gray-700 text-sm">
           {
             loading ? (
-            // Render skeleton rows when loading
-            Array.from({ length: pagination.pageSize }).map((_, idx) => (
-              <SkeletonRow key={idx} />
-            ))
-          ) :
-          table.getRowModel().rows.length === 0 ? (
-            <tr>
-              <td colSpan={table.getVisibleFlatColumns().length} className="text-center py-6 text-gray-500 italic">
-                No data available
-              </td>
-            </tr>
-          ) : (
-            table.getRowModel().rows.map((row, idx) => (
-              <tr
-                key={row.id}
-                className={`transition-colors duration-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                  } hover:bg-purple-50`}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-4 py-0 border-b border-gray-200 text-sm">
-                    {/* px-4 py-3 */}
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              // Render skeleton rows when loading
+              Array.from({ length: pagination.pageSize }).map((_, idx) => (
+                <SkeletonRow key={idx} />
+              ))
+            ) :
+              table.getRowModel().rows.length === 0 ? (
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className="text-center py-6 text-gray-500 italic">
+                    No data available
                   </td>
-                ))}
-              </tr>
-            ))
-          )}
+                </tr>
+              ) : (
+                table.getRowModel().rows.map((row, idx) => (
+                  <tr
+                    key={row.id}
+                    className={`transition-colors duration-200 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'
+                      } hover:bg-purple-50`}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="px-4 py-0 border-b border-gray-200 text-sm">
+                        {/* px-4 py-3 */}
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
         </tbody>
       </table>
 

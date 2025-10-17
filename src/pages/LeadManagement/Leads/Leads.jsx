@@ -29,7 +29,6 @@ const Leads = () => {
     navigate("/blogs/create");
   }
 
-  
 
   const fetchBlogs = async () => {
     try {
@@ -91,6 +90,7 @@ const Leads = () => {
         setPagination={setPagination}
         pagination={pagination}
         loading={loading}
+        onRefresh={fetchBlogs}
       />
     </>
   )
