@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import ToastNotification from '@components/Notification/ToastNotification';
 import { getLeads } from '../../../api-services/Modules/Leads';
 import { leadsColumn } from '../../../components/TableHeader';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 
 const Leads = () => {
@@ -71,6 +73,63 @@ const Leads = () => {
   };
 
 
+  const handleExport = () => {
+    if (data.length === 0) {
+      ToastNotification.info("No data to export.");
+      console.log("No data to export.");
+      return;
+    }
+
+   const exportData = data.map(lead => ({
+        // 1. Basic Info
+        'Lead ID': lead.id,
+        'Created At': new Date(lead.createdAt).toLocaleString(),
+        'Is Active': lead.isActive ? 'Yes' : 'No',
+        
+        // 2. Personal/Contact Info
+        'First Name': lead.firstName,
+        'Last Name': lead.lastName,
+        'Full Name': `${lead.firstName} ${lead.lastName}`, // Combined field for convenience
+        'Email': lead.email,
+        'Phone': lead.phone,
+        'Gender': lead.gender,
+        'Date of Birth': lead.dob ? new Date(lead.dob).toLocaleDateString() : 'N/A',
+        
+        // 3. Financial/Identity Info
+        'PAN Number': lead.panNumber,
+        'Profession': lead.profession,
+        'Salary': lead.salary,
+        'Loan Amount': lead.loanAmount,
+        
+        // 4. Location
+        'Pincode': lead.pincode,
+        
+        // 5. System/Consent/UTM Data
+        'Consent Date': lead.consentDatetime ? new Date(lead.consentDatetime).toLocaleString() : 'N/A',
+        'IP Address': lead.ipAddress,
+        'Lender Response': lead.lenderresponse || 'N/A',
+        'UTM Source': lead.utm_source || 'N/A',
+        'UTM Medium': lead.utm_medium || 'N/A',
+        'UTM Campaign': lead.utm_campaign || 'N/A',
+        'UTM Content': lead.utm_content || 'N/A',
+        'UTM Link': lead.utm_link || 'N/A',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = { Sheets: { 'data': worksheet }, SheetNames: ['data'] };
+
+    // Convert Workbook to Binary Excel Data (Buffer)
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+    // Save the File using file-saver
+    const fileName = `leads_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    const dataBlob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(dataBlob, fileName);
+
+    ToastNotification.success("Export successful!");
+  };
+
+
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
@@ -91,9 +150,12 @@ const Leads = () => {
         pagination={pagination}
         loading={loading}
         onRefresh={fetchBlogs}
+        onExport={handleExport}
       />
     </>
   )
 }
 
 export default Leads
+
+

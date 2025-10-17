@@ -1,171 +1,3 @@
-// "use client";
-// import { useState } from "react";
-// import { useLocation } from "react-router-dom";
-
-// export default function Tabs() {
-//     const location = useLocation();
-//     const lead = location.state?.lead; // 👈 yahan pe data mil jayega
-
-//     const [activeTab, setActiveTab] = useState("Basic");
-
-//     const tabs = ["Basic", "Lender Details"];
-
-//     console.log("Lead Data:", lead); // 👈 Check if data is received correctly
-//     return (
-//         <>
-//             <div className="w-full">
-//                 <div className="rounded-lg shadow-sm px-4">
-//                     <div className="flex space-x-8 ">
-//                         {tabs.map((tab) => (
-//                             <button
-//                                 key={tab}
-//                                 onClick={() => setActiveTab(tab)}
-//                                 className={`relative pb-2 text-sm font-medium transition-colors
-//                   ${activeTab === tab
-//                                         ? "text-indigo-600"
-//                                         : "text-gray-600 hover:text-indigo-600"
-//                                     }`}
-//                             >
-//                                 {tab}
-//                                 {activeTab === tab && (
-//                                     <span className="absolute left-0 -bottom-[1px] h-0.5 w-full bg-indigo-600 rounded"></span>
-//                                 )}
-//                             </button>
-//                         ))}
-//                     </div>
-//                 </div>
-
-
-
-
-
-//                 {/* 🔹 Tab Content */}
-//                 <div className="mt-4 p-4 rounded-lg shadow-sm">
-//                     {activeTab === "Basic" && (
-//                         <div>
-//                             <h2 className="text-lg font-semibold text-gray-800 mb-4">Basic Info</h2>
-//                             {lead ? (
-//                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-y-4 gap-x-12">
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">First Name:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.firstName}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Last Name:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.lastName}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Phone Number:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.phone}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Email:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.email ?? "Not Provided"}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Gender:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.gender}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Date of Birth:</p>
-//                                         <p className="text-gray-700 font-medium">{new Date(lead.dob).toLocaleDateString()}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Loan Amount:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.loanAmount ?? "Not Provided"}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Salary:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.salary ?? "Not Provided"}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Pin Code:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.pincode ?? "Not Provided"}</p>
-//                                     </div>
-
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">PAN Number:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.panNumber}</p>
-//                                     </div>
-
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Profession:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.profession ?? "Not Provided"}</p>
-//                                     </div>
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">UTM Campaign:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.utm_campaign ?? "-"}</p>
-//                                     </div>
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">UTM Content:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.utm_content ?? "-"}</p>
-//                                     </div>
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">UTM Link:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.utm_link ?? "-"}</p>
-//                                     </div>
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">UTM Medium:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.utm_medium ?? "-"}</p>
-//                                     </div>
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">UTM Source:</p>
-//                                         <p className="text-gray-700 font-medium">{lead.utm_source ?? "-"}</p>
-//                                     </div>
-
-//                                     <div>
-//                                         <p className="text-sm font-medium text-gray-700">Created At:</p>
-//                                         <p className="text-gray-700 font-medium">{new Date(lead.consentDatetime).toLocaleString()}</p>
-//                                     </div>
-//                                 </div>
-//                             ) : (
-//                                 <p className="text-gray-500">No lead data available.</p>
-//                             )}
-//                         </div>
-//                     )}
-
-//                     {activeTab === "Lender Details" && (
-//                          <div>
-//                             <h2 className="text-xl font-bold text-gray-800 mb-6">Lender Integration Responses</h2>
-//                             {lead?.lenderresponse && Object.keys(lead.lenderresponse).length > 0 ? (
-//                                 <div className="space-y-6">
-//                                     {Object.entries(lead.lenderresponse).map(([lenderName, response]) => (
-//                                         renderLenderDetails(lenderName, response)
-//                                     ))}
-//                                 </div>
-//                             ) : (
-//                                 <p className="text-gray-500">No lender response data available for this lead.</p>
-//                             )}
-//                         </div>
-//                     )}
-//                     {activeTab === "Settings" && (
-//                         <div>
-//                             <h2 className="text-lg font-semibold text-gray-800">Settings</h2>
-//                             <p className="text-gray-600 mt-2">
-//                                 Content for the <strong>Settings</strong> tab goes here.
-//                             </p>
-//                         </div>
-//                     )}
-//                 </div>
-//             </div>
-
-//         </>
-//     );
-// }
-
-
-
 "use client";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -191,21 +23,12 @@ const shouldHideResponse = (response) => {
     const statusCode = response.statusCode;
     const message = String(response.message || '');
 
-    // Condition 1: Technical Status Code indicates a server/API issue
-    // Hiding common HTTP server errors (4xx, 5xx) that aren't business logic errors
     if (statusCode >= 400 && statusCode < 600) {
-        // We only hide if 'success' is false AND we have a technical status code
         if (response.success === false) {
-            // Exception: Don't hide if the error is a known BUSINESS rejection
-            // Example: LendingPlate's "Existing user" often comes with 200, but if it has a 4xx, 
-            // we still consider it a technical error for filtering purposes here.
-
-            // We prioritize hiding if it's a 4xx/5xx code or has raw HTML.
             return true;
         }
     }
 
-    // Condition 2: Message contains raw HTML error (like the "Cannot POST /..." error)
     if (containsHtml(message)) {
         return true;
     }
@@ -213,20 +36,17 @@ const shouldHideResponse = (response) => {
     return false;
 };
 
-
-// 💡 Component for a single Lender's response details
 const LenderCard = ({ lenderName, response }) => {
     const [showRawData, setShowRawData] = useState(false);
 
     if (!response) {
-        return null; // This case should be handled by shouldHideResponse in the parent
+        return null;
     }
 
     const statusCodeString = String(response.statusCode || 'N/A');
     const messageString = String(response.message || 'N/A');
     const isHtmlMessage = containsHtml(messageString);
 
-    // Common fields to display upfront
     const mainDetails = [
         {
             label: "Success Status",
@@ -234,7 +54,6 @@ const LenderCard = ({ lenderName, response }) => {
         }
     ];
 
-    // Lender-specific fields
     const specificDetails = [];
     if (lenderName === 'smartCoin' && response.isDuplicate !== undefined) {
         specificDetails.push({
@@ -249,7 +68,6 @@ const LenderCard = ({ lenderName, response }) => {
         });
     }
 
-    // Helper function to stringify objects/arrays for clean display
     const safeStringify = (data) => {
         if (data === null || data === undefined) return 'N/A';
         try {
@@ -337,7 +155,7 @@ export default function Tabs() {
 
     const [activeTab, setActiveTab] = useState("Basic");
 
-    const tabs = ["Basic", "Lender Details"];
+    const tabs = ["Basic", "Lender Details", "Consent Data"];
 
     // Check if lead data exists overall
     if (!lead) {
@@ -348,6 +166,12 @@ export default function Tabs() {
             </div>
         );
     }
+
+    const formatConsentTime = (timestamp) => {
+        const timeInMs = Number(timestamp);
+        if (isNaN(timeInMs)) return "Invalid Time";
+        return new Date(timeInMs).toLocaleString();
+    };
 
     // ... rest of the component
     return (
@@ -499,6 +323,35 @@ export default function Tabs() {
                                 </div>
                             ) : (
                                 <p className="text-gray-500 p-4 border border-gray-200 rounded-lg">No lender response data is available for this lead.</p>
+                            )}
+                        </div>
+                    )}
+
+
+                    {activeTab === "Consent Data" && (
+                        <div>
+                            <h2 className="text-lg font-semibold text-gray-800 mb-6">Consent Records</h2>
+                            {lead?.consentData && lead.consentData.length > 0 ? (
+                                <div className="space-y-6">
+                                    {lead.consentData.map((consentItem, index) => (
+                                        <div key={index} className="border border-green-200 bg-green-50 p-4 rounded-lg shadow-sm">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-md font-medium text-green-800">Consent #{index + 1}</h3>
+                                                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${consentItem.consentIsGiven ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                                    {consentItem.consentIsGiven ? 'GIVEN' : 'NOT GIVEN'}
+                                                </span>
+                                            </div>
+
+                                            <p className="text-sm font-medium text-gray-700">Time Recorded:</p>
+                                            <p className="text-gray-600 mb-4">{formatConsentTime(consentItem.consentTime)}</p>
+
+                                            <p className="text-sm font-medium text-gray-700">Consent Statement:</p>
+                                            <p className="text-gray-600 italic text-wrap">{consentItem.consent}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-gray-500 p-4 border border-gray-200 rounded-lg">No explicit consent data records were found for this lead.</p>
                             )}
                         </div>
                     )}

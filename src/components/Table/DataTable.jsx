@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RefreshCcw } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, RefreshCcw, Download } from 'lucide-react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -19,6 +19,7 @@ function DataTable({
   onPageChange,
   title = "Page",
   loading = false,
+  onExport
 
 }) {
   const [sorting, setSorting] = React.useState([]);
@@ -103,12 +104,7 @@ function DataTable({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-800">{title}</h1>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-          {/* <button data-tooltip-target="Refresh" onClick={() => onRefresh()} className='hover:bg-gray-300 p-2 rounded-md'><RefreshCcw size={16} /></button>
 
-          <div id="tooltip-default" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-sm font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-xs opacity-0 tooltip dark:bg-gray-700">
-            Tooltip content
-            <div class="tooltip-arrow" data-popper-arrow></div>
-          </div> */}
           <div className="relative group inline-block">
             <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()}>
               <RefreshCcw size={16} />
@@ -121,6 +117,19 @@ function DataTable({
               <span className="absolute left-full top-1/2 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45"></span>
             </span>
           </div>
+
+          {/* NEW: EXPORT Button (Tooltip is also left-aligned) */}
+          {onExport && (
+            <div className="relative group inline-block cursor-pointer">
+              <button
+                className="p-2 rounded-md hover:bg-gray-300 transition cursor-pointer"
+                onClick={onExport}
+                // disabled={loading || totalDataCount == 0} 
+              >
+                <Download size={16} />
+              </button>
+            </div>
+          )}
 
           <input
             type="text"
