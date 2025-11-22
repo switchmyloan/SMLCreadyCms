@@ -53,10 +53,10 @@ const validationSchema = Yup.object().shape({
       .required('Category is required')
       .oneOf(['backend', 'frontend', 'fullstack'], 'Invalid category'),
   }),
-  author_xid: Yup.string().required('Author is required').trim(),
-  tags: Yup.array()
-    .min(1, 'At least one tag is required')
-    .required('Tags are required'),
+  // author_xid: Yup.string().required('Author is required').trim(),
+  // tags: Yup.array()
+  //   .min(1, 'At least one tag is required')
+  //   .required('Tags are required'),
   metaKeywords: Yup.string()
   .notRequired()
   .default('')
@@ -328,9 +328,9 @@ export default function BlogCreate() {
       });
 
       // Tags ko properly append karna
-      if (payload.tags?.length) {
-        formData.append("tags", JSON.stringify(payload.tags));
-      }
+      // if (payload.tags?.length) {
+      //   formData.append("tags", JSON.stringify(payload.tags));
+      // }
 
       // Metadata ko bhi JSON me append karna
       if (payload.metadata) {
