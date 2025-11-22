@@ -29,7 +29,7 @@ const Blogs = () => {
 
       if (response?.data?.success) {
         const blogsData = response?.data?.data?.rows;
-
+        console.log(blogsData, "ssss")
         if (Array.isArray(blogsData)) {
           setData(blogsData);
         } else {
@@ -97,7 +97,7 @@ const Blogs = () => {
             <div
               key={blog.id}
               className="flex flex-col sm:flex-row bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-              onClick={() => handleEdit(blog.id)}
+              onClick={() => handleEdit(blog?.id)}
             >
               <div className="w-full sm:w-1/3 h-48 sm:h-40">
                 <img
@@ -105,19 +105,19 @@ const Blogs = () => {
                     `${BASE_URL}${blog.metaImage}` ||
                     "https://via.placeholder.com/150"
                   }
-                  alt={blog.title}
+                  alt={blog?.title}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1 p-4 sm:p-6 flex flex-col justify-center sm:pt-0 sm:pb-0">
                 <h3 className="text-sm sm:text-lg font-bold mb-1">
-                  {blog.title}
+                  {blog?.title}
                 </h3>
 
-                <p className="text-sm text-gray-700 mb-2">{blog.description}</p>
+                <p className="text-sm text-gray-700 mb-2">{blog?.description}</p>
 
                 <p className="text-sm text-gray-500">
-                  {blog.readTime} min read · {blog.author.name}
+                  {blog?.readTime} min read · {blog?.author?.name}
                 </p>
 
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -127,7 +127,7 @@ const Blogs = () => {
                         key={tag.id}
                         className="bg-gray-200 text-gray-700 text-xs font-semibold px-2 py-1 rounded-full"
                       >
-                        {tag.name}
+                        {tag?.name}
                       </span>
                     ))}
                 </div>
@@ -141,7 +141,7 @@ const Blogs = () => {
         : "bg-green-100 text-green-800"
     }`}
                 >
-                  {blog.status === "draft" ? "Draft" : "Published"}
+                  {blog?.status === "draft" ? "Draft" : "Published"}
                 </span>
                 <button
                   className="bg-transparent border-none text-gray-500 hover:text-gray-700 text-xl cursor-pointer mt-4"
