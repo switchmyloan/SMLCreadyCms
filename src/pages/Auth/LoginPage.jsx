@@ -7,8 +7,9 @@ import { useAuth } from "../../custom-hooks/useAuth";
 function LoginPage() {
   const { login, logout } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
-    email: "deepak@gmail.com",
+    email: "",
     password: "",
   });
 
@@ -27,14 +28,24 @@ function LoginPage() {
     const dummyUser = {
       id: 1,
       name: "John Doe",
-      email: formData.email,
+      email: "admin@gmail.com",
+      password: "admin@123",
     };
 
-    // save in storage via useAuth
-    login(dummyToken, dummyUser);
+    const enteredEmail = (formData.email || "").trim().toLowerCase();
+    const expectedEmail = (dummyUser.email || "").trim().toLowerCase();
+    const enteredPassword = formData.password || "";
 
-    // redirect to home page
-    navigate("/");
+    if (enteredEmail === expectedEmail && enteredPassword === dummyUser.password) {
+      // save in storage via useAuth
+      login(dummyToken, dummyUser);
+
+      // redirect to home page
+      navigate("/");
+    } else {
+      setError("Invalid email or password. Please try again.");
+    }
+
   };
 
   useEffect(() => {
@@ -91,6 +102,9 @@ function LoginPage() {
             <span className="text-gray-700">Remember me</span>
           </div> */}
 
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>
+          )}
           {/* Login Button */}
           <button
             type="submit"
