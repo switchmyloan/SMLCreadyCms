@@ -81,7 +81,7 @@ const handleFormSubmit = (data) => {
                   </label>
                   <input
                     type="text"
-                    {...register("name", { required: "Author Name is required" })}
+                    {...register("name", { required: false })}
                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
                       errors.name
                         ? "border-red-500 focus:ring-red-500"
@@ -98,7 +98,7 @@ const handleFormSubmit = (data) => {
                   </label>
                   <input
                     type="text"
-                    {...register("designation", { required: "Designation is required" })}
+                    {...register("designation", false)}
                     className={`mt-1 block w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
                       errors.designation
                         ? "border-red-500 focus:ring-red-500"
