@@ -5,7 +5,7 @@ import DataTable from "../../components/Table/DataTable";
 // Import the fixed SelectableDataTable component
 import SelectableDataTable from "../../components/Table/SelectableDataTable";
 
-export default function PushNotificationPage() {
+export default function PushNotificationCreate() {
   const { register, handleSubmit, reset } = useForm();
 
   // State for the audience chips (e.g., "Android Users")

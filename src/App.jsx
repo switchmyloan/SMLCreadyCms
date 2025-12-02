@@ -23,8 +23,12 @@ import NotFound from '@pages/NotFound';
 import PrivacyPolicy from '@pages/CMSManagement/Privacy/PrivacyPolicy';
 import Roles from "@pages/AdminManagement/Roles/Roles"
 import Users from '@pages/AdminManagement/Users/Users';
-import PushNotification from '@pages/PushNotification/PushNotification';
+
 import LeadDetail from '@pages/LeadManagement/Leads/LeadDetail';
+import PushNotificationList from './pages/PushNotification/PushNotificationsList';
+import PushNotificationCreate from './pages/PushNotification/PushNotificationCreate';
+import GroupList from './pages/PushNotification/GroupsList';
+import GroupCreate from './pages/PushNotification/GroupCreate';
 
 function App() {
   return (
@@ -56,7 +60,10 @@ function App() {
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
             <Route path="roles" element={<Roles />} />
             <Route path="users" element={<Users />} />
-            <Route path="push-notification" element={<PushNotification />} />
+            <Route path="push-notification" element={<PushNotificationList/>} />
+            <Route path="push-notification/create" element={<PushNotificationCreate/>} />
+            <Route path="group" element={<GroupList/>}/>
+            <Route path="group/create" element={<GroupCreate/>}/>
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

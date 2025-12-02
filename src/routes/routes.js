@@ -181,4 +181,13 @@ export const routes = [
     groupOrder: 6,
     order: 1,
   },
+  {
+    path: "/group",
+    label: "Groups",
+    icon: "ShieldCheck", // ✅ roles/permissions
+    showInSidebar: true,
+    group: "Push Notification",
+    groupOrder: 6,
+    order: 2,
+  },
 ];

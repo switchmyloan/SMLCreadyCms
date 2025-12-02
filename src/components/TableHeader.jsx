@@ -1,5 +1,6 @@
 import { Edit2, Image, Trash2, Eye } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
+import { FaUserPlus } from "react-icons/fa";
 
 export const blogColumn = ({ handleEdit }) => [
   {
@@ -776,6 +777,88 @@ export const archiveColumns = ({ handleEdit, handleDelete }) => [
           >
             <Eye size={20} />
           </button>
+        </div>
+      );
+    },
+  },
+];
+
+// export const groupListColumn = ({ handleEdit }) => [
+//   {
+//     header: 'Group Title',
+//     accessorKey: 'title',
+//     cell: ({ getValue }) => getValue() || 'N/A',
+//   },
+
+//   {
+//     header: 'Actions',
+//     accessorKey: 'actions',
+//     cell: ({ row }) => {
+//       return (
+//         <div className="flex space-x-3">
+//           <button
+//             onClick={() => handleEdit(row.original)}
+//             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+//           >
+//             <Edit2 size={20} />
+//           </button>
+//           {/* <button
+//             onClick={() => console.log('Delete', row.original)}
+//             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+//           >
+//             <Trash2 size={20} />
+//           </button> */}
+//         </div>
+//       );
+//     },
+//   },
+// ];
+
+
+
+
+export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
+  {
+    header: "Group Title",
+    accessorKey: "title",
+    cell: ({ getValue }) => getValue() || "N/A",
+  },
+  {
+    header: "Users",
+    accessorKey: "audienceCount",
+    cell: ({ getValue }) => getValue() || "0",
+  },
+  {
+    header: "Created On",
+    accessorKey: "createdAt",
+    cell: ({ getValue }) => getValue(),
+  },
+
+  // ACTION BUTTONS (Edit + Add Users)
+  {
+    header: "Actions",
+    accessorKey: "actions",
+    cell: ({ row }) => {
+      const item = row.original;
+      return (
+        <div className="flex space-x-3 items-center">
+
+          {/* EDIT */}
+          <button
+            onClick={() => handleEdit(item)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Edit2 size={18} />
+          </button>
+
+          {/* ADD USERS */}
+          <button
+            onClick={() => handleAddUsers(item.id)}
+            className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+          >
+            <FaUserPlus size={18} />
+          </button>
+
         </div>
       );
     },
