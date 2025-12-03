@@ -783,40 +783,6 @@ export const archiveColumns = ({ handleEdit, handleDelete }) => [
   },
 ];
 
-// export const groupListColumn = ({ handleEdit }) => [
-//   {
-//     header: 'Group Title',
-//     accessorKey: 'title',
-//     cell: ({ getValue }) => getValue() || 'N/A',
-//   },
-
-//   {
-//     header: 'Actions',
-//     accessorKey: 'actions',
-//     cell: ({ row }) => {
-//       return (
-//         <div className="flex space-x-3">
-//           <button
-//             onClick={() => handleEdit(row.original)}
-//             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
-//           >
-//             <Edit2 size={20} />
-//           </button>
-//           {/* <button
-//             onClick={() => console.log('Delete', row.original)}
-//             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
-//           >
-//             <Trash2 size={20} />
-//           </button> */}
-//         </div>
-//       );
-//     },
-//   },
-// ];
-
-
-
-
 export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
   {
     header: "Group Title",
@@ -857,6 +823,58 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
           {/* ADD USERS */}
           <button
             onClick={() => handleAddUsers(item.id)}
+            className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+          >
+            <FaUserPlus size={18} />
+          </button>
+
+        </div>
+      );
+    },
+  },
+];
+
+
+export const pushNotificationColumns = ({sendNotification}) => [
+  {
+    header: "Title",
+    accessorKey: "title",
+    cell: ({ getValue }) => getValue() || "N/A",
+  },
+  {
+    header: "Message",
+    accessorKey: "message",
+    cell: ({ getValue }) => getValue() || "0",
+  },
+  {
+    header: "group_xid",
+    accessorKey: "group_xid",
+    cell: ({ getValue }) => getValue(),
+  },
+
+  // ACTION BUTTONS (Edit + Add Users)
+  {
+    header: "Actions",
+    accessorKey: "actions",
+    cell: ({ row }) => {
+      const item = row.original;
+      return (
+        <div className="flex space-x-3 items-center">
+
+          {/* EDIT */}
+          <button
+            onClick={(row) => {
+              console.log(item, "items")
+              // handleEdit(item)
+            }}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Edit2 size={18} />
+          </button>
+
+          {/* ADD USERS */}
+          <button
+            onClick={() => sendNotification(item.id)}
             className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
           >
             <FaUserPlus size={18} />

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/Table/DataTable";
+import { pushNotificationColumns } from "../../components/TableHeader";
+import {sendPushNotification} from "../../api-services/Modules/Leads"
 
 export default function PushNotificationList() {
   const navigate = useNavigate();
@@ -9,38 +11,50 @@ export default function PushNotificationList() {
   const [loading, setLoading] = useState(true);
 
   // Fetch group list from backend
-  useEffect(() => {
-    async function fetchGroups() {
-      try {
-        const res = await fetch("/api/push-notification-groups");
-        const data = await res.json();
-        setGroups(data);
-      } catch (error) {
-        console.error("Error fetching groups:", error);
-      }
-      setLoading(false);
-    }
 
+  async function fetchGroups() {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/templates`);
+      const response = await res.json();
+      if (response?.success) {
+        setGroups(response?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching groups:", error);
+    }
+    setLoading(false);
+  }
+
+  async function sendNotification(templateId) {
+    console.log(templateId, "templateId")
+
+    const response = await sendPushNotification({templateId : templateId});
+    console.log(response)
+    if (response?.success) {
+      ToastNotification.success(`Notification Send Successfully!`);
+    } else {
+      ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
+    }
+  }
+
+
+  useEffect(() => {
     fetchGroups();
   }, []);
-
-  const columns = [
-    { accessorKey: "title", header: "Group Title" },
-    { accessorKey: "audienceCount", header: "Users" },
-    { accessorKey: "createdAt", header: "Created On" },
-  ];
 
   return (
     <div className="p-6">
       <DataTable
-        columns={columns}
+        columns={pushNotificationColumns({
+          sendNotification
+        })}
         data={groups}
         loading={loading}
         totalDataCount={groups.length}
         title="Push Notification Groups"
         onCreate={() => navigate("/push-notification/create")} // ✅ Create button callback
         createLabel="Create Template"
-        onPageChange={() => {}}
+        onPageChange={() => { }}
       />
     </div>
   );

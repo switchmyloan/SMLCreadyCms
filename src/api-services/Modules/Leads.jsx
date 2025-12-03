@@ -16,7 +16,24 @@ export const getInAppLeads = async (pageNo, limit, globalFilter) => {
     )
 };
 export const addGroupUsers = async (payload) => {
-    return Api().post(`/push-notification/admin/groups/add-users`,payload,
+    return Api().post(`/push-notification/admin/groups/add-users`, payload,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
+export const createTemplate = async (payload) => {
+    return Api().post(`/push-notification/admin/templates`, payload,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            skipAdminAppend: true,
+        }
+    )
+};
+export const sendPushNotification = async (payload) => {
+    return Api().post(`/push-notification/admin/send`, payload,
         {
             skipAdminAppend: true,
         }

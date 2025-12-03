@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import SelectableDataTable from "../../components/Table/SelectableDataTable";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { addGroupUsers, getInAppLeads } from "../../api-services/Modules/Leads";
 
 export default function GroupCreate() {
@@ -16,6 +16,7 @@ export default function GroupCreate() {
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false)
+   const navigate = useNavigate()
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10
