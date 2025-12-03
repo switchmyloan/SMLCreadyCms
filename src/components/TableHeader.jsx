@@ -845,7 +845,10 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
 
           {/* EDIT */}
           <button
-            onClick={() => handleEdit(item)}
+            onClick={(row) => {
+              console.log(item, "items")
+              handleEdit(item)
+            }}
             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
           >
             <Edit2 size={18} />

@@ -15,6 +15,13 @@ export const getInAppLeads = async (pageNo, limit, globalFilter) => {
         }
     )
 };
+export const addGroupUsers = async (payload) => {
+    return Api().post(`/push-notification/admin/groups/add-users`,payload,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
 
 export const AddLender = async (formData) => {
     console.log(formData, "fffsss")

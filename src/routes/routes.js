@@ -179,7 +179,7 @@ export const routes = [
     showInSidebar: true,
     group: "Push Notification",
     groupOrder: 6,
-    order: 1,
+    order: 2,
   },
   {
     path: "/group",
@@ -188,6 +188,6 @@ export const routes = [
     showInSidebar: true,
     group: "Push Notification",
     groupOrder: 6,
-    order: 2,
+    order: 1,
   },
 ];
