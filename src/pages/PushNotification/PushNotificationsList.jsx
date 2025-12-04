@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/Table/DataTable";
 import { pushNotificationColumns } from "../../components/TableHeader";
 import {sendPushNotification} from "../../api-services/Modules/Leads"
+import { Toaster } from "react-hot-toast";
+import ToastNotification from "../../components/Notification/ToastNotification";
 
 export default function PushNotificationList() {
   const navigate = useNavigate();
@@ -29,8 +31,9 @@ export default function PushNotificationList() {
     console.log(templateId, "templateId")
 
     const response = await sendPushNotification({templateId : templateId});
-    console.log(response)
-    if (response?.success) {
+ 
+    if (response?.data?.success) {
+         console.log(response?.data?.success)
       ToastNotification.success(`Notification Send Successfully!`);
     } else {
       ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
@@ -44,6 +47,7 @@ export default function PushNotificationList() {
 
   return (
     <div className="p-6">
+      <Toaster />
       <DataTable
         columns={pushNotificationColumns({
           sendNotification

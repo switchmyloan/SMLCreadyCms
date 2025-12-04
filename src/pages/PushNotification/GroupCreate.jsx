@@ -16,7 +16,7 @@ export default function GroupCreate() {
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false)
-   const navigate = useNavigate()
+  const navigate = useNavigate()
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10
@@ -62,7 +62,8 @@ export default function GroupCreate() {
     const payload = {
       ...data,
       groupId: parseInt(groupId),
-      userIds: selectedUsers.map(u => u.id),
+      userIds: selectedUsers,
+      // userIds: selectedUsers.map(u => u.id),
     };
 
     console.log("Notification Payload Sent:", payload);
@@ -85,11 +86,16 @@ export default function GroupCreate() {
     setSelectedUsers([]);
   };
 
-  const handleRowSelection = (rows) => {
-    setSelectedUsers(rows);
+  // const handleRowSelection = (rows) => {
+  //   setSelectedUsers(rows);
+  // };
+  const handleRowSelection = (selectedRows) => {
+    setSelectedUsers(selectedRows.map(r => r.id));  // IDs only
   };
 
-  const fetchSingleGroup = async (id) => {
+
+
+  const fetchSingleGroup = async () => {
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/push-notification/admin/group/${groupId}`
@@ -97,13 +103,24 @@ export default function GroupCreate() {
       const json = await res.json();
 
       if (json?.success) {
-        setGroupName(json?.data?.groupName); // Autofill modal
-        setValue("title", json?.data?.groupName)
+        const members = json?.data?.members || [];
+        const memberIds = members.map(m => m.id);
+
+        setSelectedUsers(memberIds);
+
+       const selectionObj = {};
+            memberIds.forEach(id => { // <-- memberIds का उपयोग
+                selectionObj[id] = true;
+            });
+        setRowSelection(selectionObj);
+        setGroupName(json?.data?.groupName);
+        setValue("title", json?.data?.groupName);
       }
     } catch (err) {
       console.error("Error fetching group:", err);
     }
   };
+  console.log(rowSelection, "rowww")
 
   const fetchLeads = async () => {
     try {
@@ -128,6 +145,7 @@ export default function GroupCreate() {
     fetchSingleGroup();
     fetchLeads()
   }, [groupId])
+  
 
   return (
     <>
@@ -135,7 +153,7 @@ export default function GroupCreate() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-blue-800">Add User 📢</h2>
+            <h2 className="text-2xl font-bold text-blue-800">Add User in Group</h2>
 
             <button
               type="submit"
@@ -182,7 +200,7 @@ export default function GroupCreate() {
         </form>
       </div>
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-3">Select Individual Users (Optional) 👇</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-800 mb-3">Select Users 👇</h2> */}
 
       {selectedUsers.length > 0 && (
         <div className="p-3 mb-4 bg-purple-50 border-l-4 border-purple-500 text-purple-800 rounded">
@@ -190,26 +208,20 @@ export default function GroupCreate() {
         </div>
       )}
 
-      {/* -----------------------------------------
-              SelectableDataTable for User List
-          ------------------------------------------ */}
+
       <SelectableDataTable
         columns={columns}
         data={data}
         totalDataCount={data.length}
         onPageChange={() => { }}
-        title="User Directory"
+        title="Users"
         loading={false}
-        // Selection Props: These states are shared with the SelectableDataTable
         rowSelection={rowSelection}
         setRowSelection={setRowSelection}
         onRowSelect={handleRowSelection}
         createLabel="Add New User"
       />
-
       <hr className="my-10" />
-
-
     </>
   );
 }
