@@ -847,9 +847,13 @@ export const pushNotificationColumns = ({sendNotification}) => [
     cell: ({ getValue }) => getValue() || "0",
   },
   {
-    header: "group_xid",
-    accessorKey: "group_xid",
-    cell: ({ getValue }) => getValue(),
+    header: "group",
+    accessorKey: "group",
+    cell: ({ row }) => {
+      console.log(row.original.group.groupName, "gervale")
+      // getValue()
+      return row.original.group.groupName
+    }
   },
 
   // ACTION BUTTONS (Edit + Add Users)
