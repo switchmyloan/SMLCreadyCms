@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import DataTable from "@components/Table/DataTable";
 import { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -185,6 +185,13 @@ const PrivacyPolicyModal = ({ isOpen, onClose, onSave }) => {
   );
 };
 
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 // ------------------- Privacy Policy Table Page -------------------
 const PrivacyPolicy = () => {
@@ -199,11 +206,19 @@ const PrivacyPolicy = () => {
     pageSize: 10,
   });
 
-  const [query, setQuery] = useState({
-    limit: 10,
-    page_no: 1,
-    search: "",
-  });
+  const [tablePagination, setTablePagination] = useState({
+     pageIndex: 0,
+     pageSize: 10,
+   });
+   const [query, setQuery] = useState({
+     page_no: 1,
+     limit: 10,
+     search: '',
+     filter_date: '',
+     startDate: null,
+     endDate: null,
+     status: 'success'
+   });
 
   // Open Modal on Create
   const handleCreate = () => {
@@ -240,16 +255,54 @@ const PrivacyPolicy = () => {
     navigate(`/blogs/${data?.id}`);
   };
 
+    const onPageChange = useCallback((pageInfo) => {
+          setTablePagination({
+            pageIndex: pageInfo.pageIndex,
+            pageSize: pageInfo.pageSize,
+          });
+          setQuery((prevQuery) => {
+            return {
+              ...prevQuery,
+              page_no: pageInfo.pageIndex + 1, // 1-based index for query
+              limit: pageInfo.pageSize, // new limit
+            };
+          });
+        }, []);
+      
+        const handleStatusFilter = useCallback(newStatus => {
+          setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
+        }, []);
+      
+        const onSearchHandler = useCallback(term => {
+          setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
+        }, []);
+      
+        const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
+      
+        const onFilterByDate = useCallback(type => {
+          setQuery(prev => ({
+            ...prev,
+            filter_date: prev.filter_date === type ? '' : type,
+            startDate: null,
+            endDate: null,
+            page_no: 1
+          }));
+        }, []);
+      
+        const onFilterByRange = useCallback(range => {
+          setQuery(prev => ({
+            ...prev,
+            startDate: range.startDate,
+            endDate: range.endDate,
+            filter_date: '',
+            page_no: 1
+          }));
+        }, []);
+
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
 
-  const onPageChange = (pageNo) => {
-    setQuery((prevQuery) => ({
-      ...prevQuery,
-      page_no: pageNo.pageIndex + 1,
-    }));
-  };
 
   return (
     <>
@@ -265,6 +318,18 @@ const PrivacyPolicy = () => {
         setPagination={setPagination}
         pagination={pagination}
         loading={loading}
+
+            // Filters
+        onSearch={debouncedSearch}
+        onRefresh={fetchBlogs}
+        onFilterByDate={onFilterByDate}
+        activeFilter={query.filter_date}
+        onFilterByRange={onFilterByRange}
+        activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
+
+        // STATUS FILTER
+        // onFilterChange={handleStatusFilter}
+        activeStatusFilter={query.status}
       />
 
       {/* Modal */}

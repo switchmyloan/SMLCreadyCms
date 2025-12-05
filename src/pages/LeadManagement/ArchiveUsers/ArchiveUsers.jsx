@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom'
@@ -6,21 +6,36 @@ import { getBlogs } from '@api/Modules/BlogsApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { archiveColumns } from '@components/TableHeader';
 
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 const Blogs = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
-  const [loading, setLoading] = useState(false); // N
+  const [loading, setLoading] = useState(false); 
+  const [tablePagination, setTablePagination] = useState({
+      pageIndex: 0,
+      pageSize: 10,
+    });
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
     // totalDataCount: totalDataCount ? totalDataCount : 1
   })
   const [query, setQuery] = useState({
-    limit: 10,
     page_no: 1,
-    search: ''
+    limit: 10,
+    search: '',
+    filter_date: '',
+    startDate: null,
+    endDate: null,
+    status: 'success'
   })
 
   const handleCreate = () => {
@@ -53,19 +68,54 @@ const Blogs = () => {
     navigate(`/blogs/${data?.id}`)
   }
 
+  const onPageChange = useCallback((pageInfo) => {
+      setTablePagination({
+        pageIndex: pageInfo.pageIndex,
+        pageSize: pageInfo.pageSize,
+      });
+      setQuery((prevQuery) => {
+        return {
+          ...prevQuery,
+          page_no: pageInfo.pageIndex + 1, // 1-based index for query
+          limit: pageInfo.pageSize, // new limit
+        };
+      });
+    }, []);
+  
+    const handleStatusFilter = useCallback(newStatus => {
+      setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
+    }, []);
+  
+    const onSearchHandler = useCallback(term => {
+      setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
+    }, []);
+  
+    const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
+  
+    const onFilterByDate = useCallback(type => {
+      setQuery(prev => ({
+        ...prev,
+        filter_date: prev.filter_date === type ? '' : type,
+        startDate: null,
+        endDate: null,
+        page_no: 1
+      }));
+    }, []);
+  
+    const onFilterByRange = useCallback(range => {
+      setQuery(prev => ({
+        ...prev,
+        startDate: range.startDate,
+        endDate: range.endDate,
+        filter_date: '',
+        page_no: 1
+      }));
+    }, []);
+
   useEffect(() => {
     fetchBlogs();
   }, [query.page_no]);
-  const onPageChange = (pageNo) => {
-    // console.log(pageNo.pageIndex, 'onPageChange');
-    setQuery((prevQuery) => {
-      // console.log(prevQuery); // Log the previous query state
-      return {
-        ...prevQuery,
-        page_no: pageNo.pageIndex + 1 // Increment page number by 1
-      };
-    });
-  };
+
   return (
     <>
       <Toaster />
@@ -82,6 +132,18 @@ const Blogs = () => {
         setPagination={setPagination}
         pagination={pagination}
         loading={loading}
+
+         // Filters
+        onSearch={debouncedSearch}
+        onRefresh={fetchBlogs}
+        onFilterByDate={onFilterByDate}
+        activeFilter={query.filter_date}
+        onFilterByRange={onFilterByRange}
+        activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
+
+        // STATUS FILTER
+        // onFilterChange={handleStatusFilter}
+        activeStatusFilter={query.status}
       />
     </>
   )

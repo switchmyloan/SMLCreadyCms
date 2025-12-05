@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
 import { AddFaq, DeleteFaq, getFaq, updateFaq } from '../../api-services/Modules/FaqApi';
@@ -36,6 +36,14 @@ const validationSchema = Yup.object().shape({
   isFeatured: Yup.boolean(),
 });
 
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
+
 const Faq = () => {
 
   const [data, setData] = useState([]);
@@ -51,14 +59,22 @@ const Faq = () => {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [tablePagination, setTablePagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const [query, setQuery] = useState({
-    limit: 10,
     page_no: 1,
+    limit: 10,
     search: '',
+    filter_date: '',
+    startDate: null,
+    endDate: null,
+    status: 'success'
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false); 
-  const [selectedFaq, setSelectedFaq] = useState(null); 
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedFaq, setSelectedFaq] = useState(null);
 
   const {
     control,
@@ -66,7 +82,7 @@ const Faq = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue, 
+    setValue,
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -79,13 +95,13 @@ const Faq = () => {
 
   const handleCreate = () => {
     setIsModalOpen(true);
-    setIsEditMode(false); 
-    reset(); 
+    setIsEditMode(false);
+    reset();
   };
 
   const handleEdit = (faq) => {
     console.log(faq, 'faqqq');
-    setIsEditMode(true); 
+    setIsEditMode(true);
     setSelectedFaq(faq?.id);
     setIsModalOpen(true);
     // Populate form with FAQ data
@@ -100,7 +116,7 @@ const Faq = () => {
       setLoading(true);
       const response = await getFaq(query.page_no, query.limit, '');
       if (response?.data?.success) {
-        setData(response?.data?.data?.rows || []); 
+        setData(response?.data?.data?.rows || []);
         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
         setLoading(false);
       } else {
@@ -134,7 +150,7 @@ const Faq = () => {
 
   const onSubmit = async (formData) => {
     try {
-        setLoading(true);
+      setLoading(true);
       if (isEditMode) {
         const data = {
           question: formData.question,
@@ -152,7 +168,7 @@ const Faq = () => {
           setLoading(false);
           reset();
         } else {
-            setLoading(false);
+          setLoading(false);
           ToastNotification.error('Failed to update FAQ.');
         }
       } else {
@@ -170,24 +186,61 @@ const Faq = () => {
           reset();
           setLoading(false);
         } else {
-            setLoading(false);
+          setLoading(false);
           ToastNotification.error('Failed to add FAQ.');
         }
       }
     } catch (error) {
-        setLoading(false);
+      setLoading(false);
       console.error('Error:', error);
       ToastNotification.error('Something went wrong!');
     }
   };
 
-  const onPageChange = (pageNo) => {
-    setQuery((prevQuery) => ({
-      ...prevQuery,
-      page_no: pageNo.pageIndex + 1,
-      limit: pagination.pageSize, // Sync limit with pageSize
+
+  const onPageChange = useCallback((pageInfo) => {
+    setTablePagination({
+      pageIndex: pageInfo.pageIndex,
+      pageSize: pageInfo.pageSize,
+    });
+    setQuery((prevQuery) => {
+      return {
+        ...prevQuery,
+        page_no: pageInfo.pageIndex + 1, // 1-based index for query
+        limit: pageInfo.pageSize, // new limit
+      };
+    });
+  }, []);
+
+  const handleStatusFilter = useCallback(newStatus => {
+    setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
+  }, []);
+
+  const onSearchHandler = useCallback(term => {
+    setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
+  }, []);
+
+  const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
+
+  const onFilterByDate = useCallback(type => {
+    setQuery(prev => ({
+      ...prev,
+      filter_date: prev.filter_date === type ? '' : type,
+      startDate: null,
+      endDate: null,
+      page_no: 1
     }));
-  };
+  }, []);
+
+  const onFilterByRange = useCallback(range => {
+    setQuery(prev => ({
+      ...prev,
+      startDate: range.startDate,
+      endDate: range.endDate,
+      filter_date: '',
+      page_no: 1
+    }));
+  }, []);
 
   useEffect(() => {
     fetchFaqs();
@@ -195,41 +248,41 @@ const Faq = () => {
 
   useEffect(() => {
     // if (isModalOpen) {
-      fetchCategory();
+    fetchCategory();
     // }
   }, []);
 
   console.log(data, 'data???');
 
-  const handleDelete = (faq) =>{
+  const handleDelete = (faq) => {
     console.log(faq)
     setDeleteFaq(faq.id)
     setConfirmOpen(true)
   }
 
-   const deleteConfirm = async () => {
+  const deleteConfirm = async () => {
 
-      setLoading(true);
-      try {
-        const response = await DeleteFaq(deleteFaq);
-        if (response?.data?.success) {
-          ToastNotification.success("Deleted successfully!");
-          fetchFaqs();
-        } else {
-          ToastNotification.error("Failed to delete!");
-        }
-      } catch (error) {
-        console.error("Delete error:", error);
-        ToastNotification.error("Something went wrong!");
-      } finally {
-        setLoading(false);
-        setConfirmOpen(false);
+    setLoading(true);
+    try {
+      const response = await DeleteFaq(deleteFaq);
+      if (response?.data?.success) {
+        ToastNotification.success("Deleted successfully!");
+        fetchFaqs();
+      } else {
+        ToastNotification.error("Failed to delete!");
       }
-    };
+    } catch (error) {
+      console.error("Delete error:", error);
+      ToastNotification.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+    }
+  };
   return (
     <>
       <Toaster />
-        <ConfirmModal
+      <ConfirmModal
         isOpen={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         onConfirm={deleteConfirm}
@@ -245,12 +298,24 @@ const Faq = () => {
         title="FAQ"
         data={data}
         totalDataCount={totalDataCount}
-        onCreate={handleCreate}
+        // onCreate={handleCreate}
         createLabel="Create"
         onPageChange={onPageChange}
         setPagination={setPagination}
         pagination={pagination}
         loading={loading}
+
+        // Filters
+        onSearch={debouncedSearch}
+        onRefresh={fetchFaqs}
+        // onFilterByDate={onFilterByDate}
+        activeFilter={query.filter_date}
+        // onFilterByRange={onFilterByRange}
+        activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
+
+        // STATUS FILTER
+        // onFilterChange={handleStatusFilter}
+        activeStatusFilter={query.status}
       />
 
       <Drawer
@@ -331,10 +396,10 @@ const Faq = () => {
             >
               Cancel
             </button>
-               <button
+            <button
               type="submit"
-              className={`btn btn-primary `} 
-              disabled={loading} 
+              className={`btn btn-primary `}
+              disabled={loading}
             >
               {loading ? 'Loading...' : isEditMode ? 'Update' : 'Create'}
             </button>

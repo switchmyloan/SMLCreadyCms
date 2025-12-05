@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import DataTable from "@components/Table/DataTable";
 import { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -11,12 +11,17 @@ import { validationSchema } from "../../../schema";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import ValidatedLabel from "@components/Form/ValidatedLabel";
-import Drawer from "@components/Drawer"; 
+import Drawer from "@components/Drawer";
 import SubmitBtn from '@components/Form/SubmitBtn';
 import Uploader from "../../../components/Form/Uploader";
 
-// Yup validation schema
-
+const debounce = (func, delay) => {
+  let timeoutId;
+  return (...args) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  };
+};
 
 const Testimonials = () => {
   const imageUrl = import.meta.env.VITE_IMAGE_URL;
@@ -28,10 +33,18 @@ const Testimonials = () => {
     pageIndex: 0,
     pageSize: 10,
   });
+  const [tablePagination, setTablePagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
   const [query, setQuery] = useState({
-    limit: 10,
     page_no: 1,
-    search: "",
+    limit: 10,
+    search: '',
+    filter_date: '',
+    startDate: null,
+    endDate: null,
+    status: 'success'
   });
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -171,13 +184,49 @@ const Testimonials = () => {
     }
   };
 
-  const onPageChange = (pageNo) => {
-    setQuery((prevQuery) => ({
-      ...prevQuery,
-      page_no: pageNo.pageIndex + 1,
-      limit: pagination.pageSize,
+  const onPageChange = useCallback((pageInfo) => {
+    setTablePagination({
+      pageIndex: pageInfo.pageIndex,
+      pageSize: pageInfo.pageSize,
+    });
+    setQuery((prevQuery) => {
+      return {
+        ...prevQuery,
+        page_no: pageInfo.pageIndex + 1, // 1-based index for query
+        limit: pageInfo.pageSize, // new limit
+      };
+    });
+  }, []);
+
+  const handleStatusFilter = useCallback(newStatus => {
+    setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
+  }, []);
+
+  const onSearchHandler = useCallback(term => {
+    setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
+  }, []);
+
+  const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
+
+  const onFilterByDate = useCallback(type => {
+    setQuery(prev => ({
+      ...prev,
+      filter_date: prev.filter_date === type ? '' : type,
+      startDate: null,
+      endDate: null,
+      page_no: 1
     }));
-  };
+  }, []);
+
+  const onFilterByRange = useCallback(range => {
+    setQuery(prev => ({
+      ...prev,
+      startDate: range.startDate,
+      endDate: range.endDate,
+      filter_date: '',
+      page_no: 1
+    }));
+  }, []);
 
   useEffect(() => {
     fetchTestimonials();
@@ -196,6 +245,18 @@ const Testimonials = () => {
         onPageChange={onPageChange}
         setPagination={setPagination}
         pagination={pagination}
+
+        // Filters
+        onSearch={debouncedSearch}
+        onRefresh={fetchTestimonials}
+        onFilterByDate={onFilterByDate}
+        activeFilter={query.filter_date}
+        onFilterByRange={onFilterByRange}
+        activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
+
+        // STATUS FILTER
+        // onFilterChange={handleStatusFilter}
+        activeStatusFilter={query.status}
       />
 
       <Drawer
