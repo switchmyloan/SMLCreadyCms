@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DataTable from '@components/Table/DataTable';
 import { Toaster } from 'react-hot-toast';
-import { AddFaq, getFaq, updateFaq } from '../../api-services/Modules/FaqApi';
+import { AddFaq, DeleteFaq, getFaq, updateFaq } from '../../api-services/Modules/FaqApi';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { faqColumn } from '@components/TableHeader';
 import { useForm } from 'react-hook-form';
@@ -14,6 +14,7 @@ import { getCategory } from '../../api-services/Modules/CategoryApi';
 import { AddCategory } from '../../api-services/Modules/CategoryApi';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import ConfirmModal from '../../components/ConfirmationationModal';
 
 // Yup validation schema
 const validationSchema = Yup.object().shape({
@@ -43,6 +44,8 @@ const Faq = () => {
   const [categoryData, setCategoryData] = useState([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteFaq, setDeleteFaq] = useState(null)
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -191,18 +194,53 @@ const Faq = () => {
   }, [query.page_no, query.limit]);
 
   useEffect(() => {
-    if (isModalOpen) {
+    // if (isModalOpen) {
       fetchCategory();
-    }
-  }, [isModalOpen]);
+    // }
+  }, []);
 
   console.log(data, 'data???');
+
+  const handleDelete = (faq) =>{
+    console.log(faq)
+    setDeleteFaq(faq.id)
+    setConfirmOpen(true)
+  }
+
+   const deleteConfirm = async () => {
+
+      setLoading(true);
+      try {
+        const response = await DeleteFaq(deleteFaq);
+        if (response?.data?.success) {
+          ToastNotification.success("Deleted successfully!");
+          fetchFaqs();
+        } else {
+          ToastNotification.error("Failed to delete!");
+        }
+      } catch (error) {
+        console.error("Delete error:", error);
+        ToastNotification.error("Something went wrong!");
+      } finally {
+        setLoading(false);
+        setConfirmOpen(false);
+      }
+    };
   return (
     <>
       <Toaster />
+        <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={deleteConfirm}
+        title="Delete fAQ"
+        message="Are you sure you want to delete this data? This action cannot be undone."
+        loading={loading}
+      />
       <DataTable
         columns={faqColumn({
           handleEdit,
+          handleDelete
         })}
         title="FAQ"
         data={data}
@@ -295,8 +333,8 @@ const Faq = () => {
             </button>
                <button
               type="submit"
-              className={`btn btn-primary `} // Add loading class
-              disabled={loading} // Disable button while loading
+              className={`btn btn-primary `} 
+              disabled={loading} 
             >
               {loading ? 'Loading...' : isEditMode ? 'Update' : 'Create'}
             </button>

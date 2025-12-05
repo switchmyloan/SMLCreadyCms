@@ -11,3 +11,5 @@ export const updateFaq = async payload => {
   const { id, ...data } = payload
   return Api().patch(`/faq/${id}`, data)
 }
+
+export const DeleteFaq = async id => Api().delete(`/faq/${id}`);

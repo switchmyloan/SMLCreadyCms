@@ -65,23 +65,23 @@ export const blogColumn = ({ handleEdit }) => [
       )
     },
   },
-{
-  header: 'Status',
-  accessorKey: 'isActive',
-  cell: ({ getValue }) => {
-    const isActive = getValue(); // This returns a boolean: true or false
-    
-    // Determine the text and badge color based on the boolean value
-    const statusText = isActive ? 'Active' : 'Inactive';
-    const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  {
+    header: 'Status',
+    accessorKey: 'isActive',
+    cell: ({ getValue }) => {
+      const isActive = getValue(); // This returns a boolean: true or false
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-        {statusText}
-      </span>
-    );
+      // Determine the text and badge color based on the boolean value
+      const statusText = isActive ? 'Active' : 'Inactive';
+      const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+          {statusText}
+        </span>
+      );
+    },
   },
-},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -105,7 +105,7 @@ export const blogColumn = ({ handleEdit }) => [
     },
   },
 ];
-export const faqColumn = ({ handleEdit }) => [
+export const faqColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Questions',
     accessorKey: 'question',
@@ -135,7 +135,9 @@ export const faqColumn = ({ handleEdit }) => [
   {
     header: 'Category',
     accessorKey: 'category_xid',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ row }) => {
+      return row.original.category ? row.original.category.name : 'N/A'
+    }
   },
   {
     header: 'Featured',
@@ -154,12 +156,12 @@ export const faqColumn = ({ handleEdit }) => [
           >
             <Edit2 size={20} />
           </button>
-          {/* <button
-            onClick={() => console.log('Delete', row.original)}
+          <button
+            onClick={() => handleDelete(row.original)}
             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
           >
             <Trash2 size={20} />
-          </button> */}
+          </button>
         </div>
       );
     },
@@ -339,7 +341,7 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
       return formattedIncome;
     },
   },
-    {
+  {
     header: 'Max Amount',
     accessorKey: 'maximumLoanAmount',
     cell: ({ getValue }) => {
@@ -375,23 +377,23 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
   },
 
 
- {
-  header: 'Status',
-  accessorKey: 'isActive',
-  cell: ({ getValue }) => {
-    const isActive = getValue(); // This returns a boolean: true or false
-    
-    // Determine the text and badge color based on the boolean value
-    const statusText = isActive ? 'Active' : 'Inactive';
-    const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  {
+    header: 'Status',
+    accessorKey: 'isActive',
+    cell: ({ getValue }) => {
+      const isActive = getValue(); // This returns a boolean: true or false
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-        {statusText}
-      </span>
-    );
+      // Determine the text and badge color based on the boolean value
+      const statusText = isActive ? 'Active' : 'Inactive';
+      const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+          {statusText}
+        </span>
+      );
+    },
   },
-},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -432,74 +434,74 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-  header: 'Gender',
-  accessorKey: 'gender',
-  cell: ({ getValue }) => {
-    const genderValue = getValue();
-    // Normalize the value to a consistent case (e.g., lowercase)
-    const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
-    
-    // Check for "male" or "female" using the normalized value
-    const isMale = normalizedGender === 'male';
-    const isFemale = normalizedGender === 'female';
+    header: 'Gender',
+    accessorKey: 'gender',
+    cell: ({ getValue }) => {
+      const genderValue = getValue();
+      // Normalize the value to a consistent case (e.g., lowercase)
+      const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
 
-    let genderText = 'N/A';
-    let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
+      // Check for "male" or "female" using the normalized value
+      const isMale = normalizedGender === 'male';
+      const isFemale = normalizedGender === 'female';
 
-    if (isMale) {
-      genderText = 'Male';
-      badgeColorClass = 'bg-blue-100 text-blue-800';
-    } else if (isFemale) {
-      genderText = 'Female';
-      badgeColorClass = 'bg-pink-100 text-pink-800';
-    }
+      let genderText = 'N/A';
+      let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-        {genderText}
-      </span>
-    );
+      if (isMale) {
+        genderText = 'Male';
+        badgeColorClass = 'bg-blue-100 text-blue-800';
+      } else if (isFemale) {
+        genderText = 'Female';
+        badgeColorClass = 'bg-pink-100 text-pink-800';
+      }
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+          {genderText}
+        </span>
+      );
+    },
   },
-},
   {
-  header: 'Job Type',
-  accessorKey: 'jobType',
-  cell: ({ getValue }) => {
-    const jobType = getValue();
+    header: 'Job Type',
+    accessorKey: 'jobType',
+    cell: ({ getValue }) => {
+      const jobType = getValue();
 
-    // Function to convert to Title Case
-    const toTitleCase = (str) => {
-      if (!str) return 'N/A';
-      return str
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    };
+      // Function to convert to Title Case
+      const toTitleCase = (str) => {
+        if (!str) return 'N/A';
+        return str
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      };
 
-    const formattedJobType = toTitleCase(jobType);
+      const formattedJobType = toTitleCase(jobType);
 
-    // Define a mapping of job types to badge styles
-    const badgeStyles = {
-      'Salaried': 'bg-blue-100 text-blue-800',
-      'Self-Employed': 'bg-green-100 text-green-800',
-      'Self-employed': 'bg-green-100 text-green-800',
-      'Business Owner': 'bg-purple-100 text-purple-800',
-      'Freelancer': 'bg-yellow-100 text-yellow-800',
-      'Student': 'bg-indigo-100 text-indigo-800',
-      'Other': 'bg-gray-100 text-gray-800',
-    };
-    
-    // Get the style for the formatted job type, defaulting to 'Other'
-    const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+      // Define a mapping of job types to badge styles
+      const badgeStyles = {
+        'Salaried': 'bg-blue-100 text-blue-800',
+        'Self-Employed': 'bg-green-100 text-green-800',
+        'Self-employed': 'bg-green-100 text-green-800',
+        'Business Owner': 'bg-purple-100 text-purple-800',
+        'Freelancer': 'bg-yellow-100 text-yellow-800',
+        'Student': 'bg-indigo-100 text-indigo-800',
+        'Other': 'bg-gray-100 text-gray-800',
+      };
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
-        {formattedJobType}
-      </span>
-    );
+      // Get the style for the formatted job type, defaulting to 'Other'
+      const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+          {formattedJobType}
+        </span>
+      );
+    },
   },
-},
   {
     header: 'Income',
     accessorKey: 'monthlyIncome',
@@ -536,35 +538,35 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
       return `${day}/${month}/${year}`;
     },
   },
-{
-  header: 'Created At',
-  accessorKey: 'createdAt',
-  cell: ({ getValue }) => {
-    const dateStr = getValue();
-    if (!dateStr) {
-      return 'N/A';
-    }
+  {
+    header: 'Created At',
+    accessorKey: 'createdAt',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
 
-    const date = new Date(dateStr);
-    const options = {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    };
-    
-    // Create a new formatter for the 'en-IN' locale (English - India)
-    const formatter = new Intl.DateTimeFormat('en-IN', options);
+      const date = new Date(dateStr);
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      };
 
-    // Format the date and replace the space with a forward slash
-    const formattedDate = formatter.format(date).replace(/ /g, ' ');
+      // Create a new formatter for the 'en-IN' locale (English - India)
+      const formatter = new Intl.DateTimeFormat('en-IN', options);
 
-    return (
-      <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
-        {formattedDate}
-      </span>
-    );
+      // Format the date and replace the space with a forward slash
+      const formattedDate = formatter.format(date).replace(/ /g, ' ');
+
+      return (
+        <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
+          {formattedDate}
+        </span>
+      );
+    },
   },
-},
   {
     header: 'Actions',
     accessorKey: 'actions',
@@ -598,75 +600,75 @@ export const signInColumns = ({ handleEdit, handleDelete }) => [
     accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
- {
-  header: 'Gender',
-  accessorKey: 'gender',
-  cell: ({ getValue }) => {
-    const genderValue = getValue();
-    // Normalize the value to a consistent case (e.g., lowercase)
-    const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
-    
-    // Check for "male" or "female" using the normalized value
-    const isMale = normalizedGender === 'male';
-    const isFemale = normalizedGender === 'female';
+  {
+    header: 'Gender',
+    accessorKey: 'gender',
+    cell: ({ getValue }) => {
+      const genderValue = getValue();
+      // Normalize the value to a consistent case (e.g., lowercase)
+      const normalizedGender = typeof genderValue === 'string' ? genderValue.toLowerCase() : genderValue;
 
-    let genderText = 'N/A';
-    let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
+      // Check for "male" or "female" using the normalized value
+      const isMale = normalizedGender === 'male';
+      const isFemale = normalizedGender === 'female';
 
-    if (isMale) {
-      genderText = 'Male';
-      badgeColorClass = 'bg-blue-100 text-blue-800';
-    } else if (isFemale) {
-      genderText = 'Female';
-      badgeColorClass = 'bg-pink-100 text-pink-800';
-    }
+      let genderText = 'N/A';
+      let badgeColorClass = 'bg-gray-100 text-gray-800'; // Default for N/A
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-        {genderText}
-      </span>
-    );
+      if (isMale) {
+        genderText = 'Male';
+        badgeColorClass = 'bg-blue-100 text-blue-800';
+      } else if (isFemale) {
+        genderText = 'Female';
+        badgeColorClass = 'bg-pink-100 text-pink-800';
+      }
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
+          {genderText}
+        </span>
+      );
+    },
   },
-},
-{
-  header: 'Job Type',
-  accessorKey: 'jobType',
-  cell: ({ getValue }) => {
-    const jobType = getValue();
+  {
+    header: 'Job Type',
+    accessorKey: 'jobType',
+    cell: ({ getValue }) => {
+      const jobType = getValue();
 
-    // Function to convert to Title Case
-    const toTitleCase = (str) => {
-      if (!str) return 'N/A';
-      return str
-        .toLowerCase()
-        .split(' ')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-    };
+      // Function to convert to Title Case
+      const toTitleCase = (str) => {
+        if (!str) return 'N/A';
+        return str
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      };
 
-    const formattedJobType = toTitleCase(jobType);
+      const formattedJobType = toTitleCase(jobType);
 
-    // Define a mapping of job types to badge styles
-    const badgeStyles = {
-      'Salaried': 'bg-blue-100 text-blue-800',
-      'Self-Employed': 'bg-green-100 text-green-800',
-      'Self-employed': 'bg-green-100 text-green-800',
-      'Business Owner': 'bg-purple-100 text-purple-800',
-      'Freelancer': 'bg-yellow-100 text-yellow-800',
-      'Student': 'bg-indigo-100 text-indigo-800',
-      'Other': 'bg-gray-100 text-gray-800',
-    };
-    
-    // Get the style for the formatted job type, defaulting to 'Other'
-    const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+      // Define a mapping of job types to badge styles
+      const badgeStyles = {
+        'Salaried': 'bg-blue-100 text-blue-800',
+        'Self-Employed': 'bg-green-100 text-green-800',
+        'Self-employed': 'bg-green-100 text-green-800',
+        'Business Owner': 'bg-purple-100 text-purple-800',
+        'Freelancer': 'bg-yellow-100 text-yellow-800',
+        'Student': 'bg-indigo-100 text-indigo-800',
+        'Other': 'bg-gray-100 text-gray-800',
+      };
 
-    return (
-      <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
-        {formattedJobType}
-      </span>
-    );
+      // Get the style for the formatted job type, defaulting to 'Other'
+      const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+          {formattedJobType}
+        </span>
+      );
+    },
   },
-},
   {
     header: 'Income',
     accessorKey: 'monthlyIncome',
@@ -835,7 +837,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
 ];
 
 
-export const pushNotificationColumns = ({sendNotification}) => [
+export const pushNotificationColumns = ({ sendNotification }) => [
   {
     header: "Title",
     accessorKey: "title",
@@ -851,7 +853,6 @@ export const pushNotificationColumns = ({sendNotification}) => [
     accessorKey: "group",
     cell: ({ row }) => {
       console.log(row.original.group.groupName, "gervale")
-      // getValue()
       return row.original.group.groupName
     }
   },
