@@ -70,11 +70,14 @@ const Faq = () => {
     filter_date: '',
     startDate: null,
     endDate: null,
-    status: 'success'
+    status: 'success',
+    category_xid: '',
+    is_featured: '',
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [selectedFaq, setSelectedFaq] = useState(null);
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState('');
 
   const {
     control,
@@ -99,6 +102,15 @@ const Faq = () => {
     reset();
   };
 
+  const handleFeaturedFilter = useCallback(newValue => {
+    console.log(newValue, "newalue")
+    setQuery(prev => ({
+      ...prev,
+      is_featured: newValue, // Update the new filter
+      page_no: 1
+    }));
+  }, []);
+
   const handleEdit = (faq) => {
     console.log(faq, 'faqqq');
     setIsEditMode(true);
@@ -111,24 +123,107 @@ const Faq = () => {
     setValue('isFeatured', faq.isFeatured || false);
   };
 
+  // const fetchFaqs = async () => {
+  //   try {
+  //     setLoading(true);
+  //     const response = await getFaq(query.page_no, query.limit, '');
+  //     if (response?.data?.success) {
+  //       setData(response?.data?.data?.rows || []);
+  //       setTotalDataCount(response?.data?.data?.pagination?.total || 0);
+  //       setLoading(false);
+  //     } else {
+  //       setLoading(false);
+  //       ToastNotification.error('Error fetching data');
+  //     }
+  //   } catch (error) {
+  //     setLoading(false);
+  //     console.error('Error fetching:', error);
+  //     ToastNotification.error('Failed to fetch data');
+  //   }
+  // };
+
   const fetchFaqs = async () => {
     try {
       setLoading(true);
-      const response = await getFaq(query.page_no, query.limit, '');
+
+      // Normal API call — no filters
+      const response = await getFaq(query.page_no, query.limit, "");
+
       if (response?.data?.success) {
-        setData(response?.data?.data?.rows || []);
-        setTotalDataCount(response?.data?.data?.pagination?.total || 0);
-        setLoading(false);
-      } else {
-        setLoading(false);
-        ToastNotification.error('Error fetching data');
+        let rows = response?.data?.data?.rows || [];
+
+        // FRONTEND FILTERING START ---------------------
+
+        // Global Search Filter
+        if (query.search) {
+          rows = rows.filter(item =>
+            item.question.toLowerCase().includes(query.search.toLowerCase()) ||
+            item.answer.toLowerCase().includes(query.search.toLowerCase())
+          );
+        }
+
+        // Category Filter
+        if (query.category_xid) {
+          rows = rows.filter(item =>
+            item?.category?.id == query.category_xid
+          );
+        }
+
+        if (query.is_featured) {
+          const isFeaturedFilter = query.is_featured == 'true'; // Convert 'true'/'false' string to boolean
+
+          rows = rows.filter(item => {
+            // Filter based on the boolean value of item.isFeatured
+            return item.isFeatured === isFeaturedFilter;
+          });
+        }
+
+        console.log(query.category_xid, "category")
+
+        // Date Filter
+        if (query.filter_date === "today") {
+          const today = new Date().toDateString();
+          rows = rows.filter(item =>
+            new Date(item.createdAt).toDateString() === today
+          );
+        }
+
+        if (query.filter_date === "yesterday") {
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const y = yesterday.toDateString();
+
+          rows = rows.filter(item =>
+            new Date(item.createdAt).toDateString() === y
+          );
+        }
+
+        // Custom Range filter
+        if (query.startDate && query.endDate) {
+          const start = new Date(query.startDate);
+          const end = new Date(query.endDate);
+
+          rows = rows.filter(item => {
+            const c = new Date(item.createdAt);
+            return c >= start && c <= end;
+          });
+        }
+
+
+
+        // FRONTEND FILTERING END ---------------------
+
+        setData(rows);
+        setTotalDataCount(rows.length);
       }
+
     } catch (error) {
+      console.log("Fetch error:", error);
+    } finally {
       setLoading(false);
-      console.error('Error fetching:', error);
-      ToastNotification.error('Failed to fetch data');
     }
   };
+
 
   const fetchCategory = async () => {
     try {
@@ -225,26 +320,26 @@ const Faq = () => {
   const onFilterByDate = useCallback(type => {
     setQuery(prev => ({
       ...prev,
-      filter_date: prev.filter_date === type ? '' : type,
+      filter_date: prev.filter_date === type ? "" : type,
       startDate: null,
-      endDate: null,
-      page_no: 1
+      endDate: null
     }));
   }, []);
+
 
   const onFilterByRange = useCallback(range => {
     setQuery(prev => ({
       ...prev,
       startDate: range.startDate,
       endDate: range.endDate,
-      filter_date: '',
-      page_no: 1
+      filter_date: ""
     }));
   }, []);
 
+
   useEffect(() => {
     fetchFaqs();
-  }, [query.page_no, query.limit]);
+  }, [query.page_no, query.limit, query.category_xid, query.is_featured]);
 
   useEffect(() => {
     // if (isModalOpen) {
@@ -279,6 +374,41 @@ const Faq = () => {
       setConfirmOpen(false);
     }
   };
+
+  const handleCategoryFilter = useCallback(newCategoryXid => {
+    setActiveCategoryFilter(newCategoryXid); // Update for UI display
+    setQuery(prev => ({
+      ...prev,
+      category_xid: newCategoryXid, // Update API filter value
+      page_no: 1 // Reset to the first page when filter changes
+    }));
+  }, []);
+
+
+  const featuredOptions = useMemo(() => ([
+    { value: true, label: 'True' },
+    { value: false, label: 'False' },
+  ]), []);
+
+  const dynamicFiltersArray = useMemo(() => [
+    // 1. Category Filter (using existing data and handler)
+    {
+      key: 'category_filter',
+      label: 'Filter by Category',
+      activeValue: query.category_xid,
+      options: categoryData, // This is your fetched category data
+      onChange: handleCategoryFilter,
+    },
+    // 2. Featured Filter (using new state and handler)
+    {
+      key: 'featured_filter',
+      label: 'Featured Status',
+      activeValue: query.is_featured,
+      options: featuredOptions,
+      onChange: handleFeaturedFilter,
+    },
+    // ... You can add more filters here easily
+  ], [categoryData, query.category_xid, query.is_featured, handleCategoryFilter, handleFeaturedFilter]);
   return (
     <>
       <Toaster />
@@ -316,6 +446,8 @@ const Faq = () => {
         // STATUS FILTER
         // onFilterChange={handleStatusFilter}
         activeStatusFilter={query.status}
+
+        dynamicFilters={dynamicFiltersArray}
       />
 
       <Drawer

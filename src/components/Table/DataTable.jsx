@@ -273,11 +273,11 @@
 
 import { Search } from "lucide-react";
 
-const DebouncedInput = ({ value: initialValue, onChange, onSearch, debounce = 1000,placeholder = "Search...", ...props }) => {
+const DebouncedInput = ({ value: initialValue, onChange, onSearch, debounce = 1000, placeholder = "Search...", ...props }) => {
   // States
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef(null);
-  const mode  = "light"
+  const mode = "light"
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
@@ -344,7 +344,7 @@ function DataTable({
   onRefresh,
   totalDataCount,
   onPageChange,
-  onSearch, 
+  onSearch,
   title = "Page",
   loading = false,
   onExport,
@@ -355,12 +355,14 @@ function DataTable({
   activeDateRange = { startDate: null, endDate: null },
   activeStatusFilter = 'success',
   onFilterChange,
+
+  dynamicFilters 
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
   const [selectedGoTo, setSelectedGoTo] = React.useState(pagination.pageIndex + 1);
-  const dropdownRef = useRef(null); 
+  const dropdownRef = useRef(null);
   const [showDateRangeInputs, setShowDateRangeInputs] = React.useState(false);
 
   const formatDateForInput = (date) => {
@@ -382,7 +384,7 @@ function DataTable({
     if (!activeDateRange.startDate && !activeDateRange.endDate && showDateRangeInputs) {
       // setShowDateRangeInputs(false); // Commenting out might cause flicker, but keeping it ensures state consistency
     }
-  }, [activeDateRange.startDate, activeDateRange.endDate]); 
+  }, [activeDateRange.startDate, activeDateRange.endDate]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -503,7 +505,7 @@ function DataTable({
       ))}
     </tr>
   );
-  
+
   const handleSearch = (value) => {
     setGlobalFilter(value);
   };
@@ -516,6 +518,29 @@ function DataTable({
           <span className="text-gray-600 text-sm">
             {totalDataCount} entries
           </span>
+
+          {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
+          {dynamicFilters && dynamicFilters.length > 0 && (
+            dynamicFilters.map((filter) => (
+              <div key={filter.key} className="z-20 flex flex-col w-38">
+                <select
+                  onChange={(e) => filter.onChange(e.target.value)}
+                  value={filter.activeValue}
+                  className="p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                >
+                  <option value="">{filter.label || 'Select Filter'}</option>
+
+                  {/* Dynamically render options */}
+                  {filter.options.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))
+          )}
+          {/* END NEW DYNAMIC DROPDOWN FILTER UI */}
 
           {onFilterChange && (
             <div className="z-20 flex flex-col w-38">
@@ -543,8 +568,8 @@ function DataTable({
                   setShowDateRangeInputs(!showDateRangeInputs);
                 }}
                 className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border transition ${activeDateRange.startDate
-                    ? 'bg-purple-600 text-white border-purple-600' 
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400'
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400'
                   } disabled:opacity-50`}
                 disabled={loading}
               >
@@ -638,12 +663,12 @@ function DataTable({
               </button>
             </div>
           )}
-           <DebouncedInput
-              value={globalFilter}
-              onChange={setGlobalFilter}
-              onSearch={handleSearch}
-              placeholder="Search..."
-            />
+          <DebouncedInput
+            value={globalFilter}
+            onChange={setGlobalFilter}
+            onSearch={handleSearch}
+            placeholder="Search..."
+          />
           {onCreate && (
             <button
               onClick={onCreate}
