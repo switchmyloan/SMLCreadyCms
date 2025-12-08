@@ -174,7 +174,7 @@ const Faq = () => {
 
           rows = rows.filter(item => {
             // Filter based on the boolean value of item.isFeatured
-            return item.isFeatured === isFeaturedFilter;
+            return item.isFeatured == isFeaturedFilter;
           });
         }
 
@@ -214,7 +214,7 @@ const Faq = () => {
         // FRONTEND FILTERING END ---------------------
 
         setData(rows);
-        setTotalDataCount(rows.length);
+        setTotalDataCount(response?.data?.data?.pagination?.total);
       }
 
     } catch (error) {
