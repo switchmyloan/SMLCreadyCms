@@ -428,7 +428,7 @@ const Faq = () => {
         title="FAQ"
         data={data}
         totalDataCount={totalDataCount}
-        // onCreate={handleCreate}
+        onCreate={handleCreate}
         createLabel="Create"
         onPageChange={onPageChange}
         setPagination={setPagination}
