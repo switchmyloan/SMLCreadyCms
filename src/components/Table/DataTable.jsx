@@ -672,9 +672,7 @@ function DataTable({
           {onCreate && (
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-[6px] bg-gradient-to-r 
-             from-purple-600 to-purple-700 text-white font-medium 
-             rounded-lg shadow-md hover:from-purple-700 hover:to-purple-800 
+              className="flex items-center gap-2 px-4 py-[6px] bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg shadow-md hover:from-purple-700 hover:to-purple-800 
              hover:shadow-lg transition-all duration-300"
               disabled={loading}
             >
