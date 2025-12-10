@@ -1,15 +1,10 @@
-// src/pages/HomePage.jsx
-
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Users, CheckCircle, PlusCircle, Lock } from 'lucide-react'; 
 import DashboardCard from '../components/DashboardCard';
-// Assuming PrincipalDonutChart and LoanAmountBarChart are available in this path
 import { PrincipalDonutChart, LoanAmountBarChart } from '../components/DashboardChart'; 
+import { getSummary } from '../api-services/Modules/DashboardApi';
 
-// --- Data and Fetch function (As provided by you) ---
-// Note: You must ensure this data structure is in a file that is NOT imported with type syntax.
 export const dashboardSummaryData = {
-    // ... (rest of the data structure remains the same)
     kpis: { totalPrincipals: 12500, activePrincipals: 1200, newThisMonth: 450, blockedPrincipals: 60 },
     verificationStatus: [
         { name: 'Email Verified', value: 8500 }, 
@@ -41,29 +36,57 @@ export const dashboardSummaryData = {
     ],
 };
 
-const fetchDashboardData = () => {
-    return new Promise((resolve) => {
-        setTimeout(() => resolve(dashboardSummaryData), 500);
-    });
-};
+
+
 // ---------------------------------------------------
 
 const HomePage = () => {
-    // Type annotations removed. useState is now pure JavaScript syntax.
     const [data, setData] = useState(null); 
+    // State for managing loading status
+    const [isLoading, setIsLoading] = useState(true);
+    // State for managing errors
+    const [error, setError] = useState(null); 
+
+    const fetchDashboardData = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            // ✅ API Call to your Interactor/Controller endpoint
+            const response = await getSummary();
+            
+            // Assuming the API response structure is { data: { summary: DashboardSummary }, ... }
+            const summaryData = response.data.data.summary; 
+            
+            setData(summaryData); 
+
+        } catch (err) {
+            console.error("Failed to fetch dashboard data:", err);
+            setError("Could not load dashboard data. Please try again.");
+            setData(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        fetchDashboardData().then((result) => {
-            // Type assertion removed. The component now trusts the result shape.
-            setData(result); 
-        });
+        fetchDashboardData();
     }, []);
 
-    if (!data) {
-        return <div className="p-8 text-center">Loading Dashboard...</div>;
+    if (isLoading) {
+        // Updated loading state
+        return <div className="p-8 text-center text-xl font-semibold">
+            <p>📊 Loading IAM Dashboard Data...</p>
+        </div>;
     }
 
-    // Object destructuring is safe and clean in JavaScript
+    if (error) {
+        // Display error message if the API call failed
+        return <div className="p-8 text-center text-red-600 border border-red-300 bg-red-50 m-4 rounded">
+            {error}
+        </div>;
+    }
+
+
     const { 
         kpis, 
         principalTypeDistribution, 
