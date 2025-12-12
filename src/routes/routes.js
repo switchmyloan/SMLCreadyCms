@@ -36,6 +36,15 @@ export const routes = [
     groupOrder: 1, 
     order: 3,
   },
+  {
+    path: "/contact",
+    label: "Contact US",
+    icon: "ContactUs", // ✅ archived users
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1, 
+    order: 4,
+  },
 
   // --- Lender Management ---
   {

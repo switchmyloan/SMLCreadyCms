@@ -50,6 +50,16 @@ const Faq = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [globalFilter, setGlobalFilter] = useState('');
   const [categoryData, setCategoryData] = useState([]);
+  const [module, setModule] = useState([
+    {
+      label: "FAQ",
+      value: 'faq'
+    },
+    {
+      label: "BLOG",
+      value: 'blog'
+    },
+  ]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -79,6 +89,7 @@ const Faq = () => {
   const [selectedFaq, setSelectedFaq] = useState(null);
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('');
 
+
   const {
     control,
     register,
@@ -92,6 +103,7 @@ const Faq = () => {
       category_xid: '',
       question: '',
       answer: '',
+      module:'',
       isFeatured: false,
     },
   });
@@ -116,31 +128,13 @@ const Faq = () => {
     setIsEditMode(true);
     setSelectedFaq(faq?.id);
     setIsModalOpen(true);
-    // Populate form with FAQ data
+
     setValue('question', faq.question);
     setValue('answer', faq.answer);
+    setValue('module', faq?.module);
     setValue('category_xid', faq?.category?.id);
     setValue('isFeatured', faq.isFeatured || false);
   };
-
-  // const fetchFaqs = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await getFaq(query.page_no, query.limit, '');
-  //     if (response?.data?.success) {
-  //       setData(response?.data?.data?.rows || []);
-  //       setTotalDataCount(response?.data?.data?.pagination?.total || 0);
-  //       setLoading(false);
-  //     } else {
-  //       setLoading(false);
-  //       ToastNotification.error('Error fetching data');
-  //     }
-  //   } catch (error) {
-  //     setLoading(false);
-  //     console.error('Error fetching:', error);
-  //     ToastNotification.error('Failed to fetch data');
-  //   }
-  // };
 
   const fetchFaqs = async () => {
     try {
@@ -248,10 +242,11 @@ const Faq = () => {
       setLoading(true);
       if (isEditMode) {
         const data = {
-          question: formData.question,
-          answer: formData.answer,
-          category_xid: formData.category_xid,
-          isFeatured: formData.isFeatured,
+          question: formData?.question,
+          answer: formData?.answer,
+          category_xid: formData?.category_xid,
+          isFeatured: formData?.isFeatured,
+          module : formData?.module
         };
         const response = await updateFaq({ id: selectedFaq, ...data });
         if (response?.data?.success) {
@@ -269,10 +264,11 @@ const Faq = () => {
       } else {
         // Create FAQ
         const response = await AddFaq({
-          question: formData.question,
-          answer: formData.answer,
-          category_xid: formData.category_xid,
-          isFeatured: formData.isFeatured,
+          question: formData?.question,
+          answer: formData?.answer,
+          category_xid: formData?.category_xid,
+          isFeatured: formData?.isFeatured,
+          module : formData?.module
         });
         if (response?.data?.success) {
           ToastNotification.success('FAQ added successfully!');
@@ -513,6 +509,21 @@ const Faq = () => {
             globalFilter={globalFilter}
             placeholder="Select category"
           />
+
+
+          <div>
+            <ValidatedLabel label="Select module" />
+
+            <ValidatedSearchableSelectField
+              name="module"
+              control={control}
+              options={module}
+              errors={errors}
+              setGlobalFilter={setGlobalFilter}
+              globalFilter={globalFilter}
+              placeholder="Select module"
+            />
+          </div>
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
