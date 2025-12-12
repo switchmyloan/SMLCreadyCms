@@ -68,70 +68,70 @@ const validationSchema = Yup.object().shape({
     }),
 });
 
-const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
+// const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
  
-  const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';
-  const selectedTags = formData.tags
-    ?.map(tagId => tags.find(t => t.value === tagId)?.label)
-    .filter(Boolean)
-    .join(', ') || 'No tags selected';
+//   const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';
+//   const selectedTags = formData.tags
+//     ?.map(tagId => tags.find(t => t.value === tagId)?.label)
+//     .filter(Boolean)
+//     .join(', ') || 'No tags selected';
 
-  // Determine the image URL based on create or edit mode
-  const imageUrl = formData.metaImage
-    ? formData.metaImage instanceof File
-      ? URL.createObjectURL(formData.metaImage) // Create mode: File object
-      : `${formData.metaImage}` // Edit mode: Prepend base URL
-    : 'https://via.placeholder.com/150?text=No+Image'; // Fallback image
+//   // Determine the image URL based on create or edit mode
+//   const imageUrl = formData.metaImage
+//     ? formData.metaImage instanceof File
+//       ? URL.createObjectURL(formData.metaImage) // Create mode: File object
+//       : `${formData.metaImage}` // Edit mode: Prepend base URL
+//     : 'https://via.placeholder.com/150?text=No+Image'; // Fallback image
 
-     console.log(imageUrl, "imageUrl")
-  // Clean up object URL to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (formData.metaImage instanceof File) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [formData.metaImage, imageUrl]);
+//      console.log(imageUrl, "imageUrl")
+//   // Clean up object URL to prevent memory leaks
+//   useEffect(() => {
+//     return () => {
+//       if (formData.metaImage instanceof File) {
+//         URL.revokeObjectURL(imageUrl);
+//       }
+//     };
+//   }, [formData.metaImage, imageUrl]);
 
-  return (
-    <div className="bg-white shadow p-4 rounded-xl">
-      <h3 className="font-semibold mb-2">Blog Preview</h3>
-      <div className="border rounded-lg p-4">
-        <div className="flex gap-3">
-          {/* Image fixed size */}
-          <div className="flex-shrink-0">
-            <img
-              src={imageUrl}
-              alt="Blog preview"
-              className="object-cover rounded mb-4 w-24 h-24"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }} // Fallback for broken images
-            />
-          </div>
+//   return (
+//     <div className="bg-white shadow p-4 rounded-xl">
+//       <h3 className="font-semibold mb-2">Blog Preview</h3>
+//       <div className="border rounded-lg p-4">
+//         <div className="flex gap-3">
+//           {/* Image fixed size */}
+//           <div className="flex-shrink-0">
+//             <img
+//               src={imageUrl}
+//               alt="Blog preview"
+//               className="object-cover rounded mb-4 w-24 h-24"
+//               onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=No+Image'; }} // Fallback for broken images
+//             />
+//           </div>
 
-          {/* Text always wrap hogi */}
-          <div className="flex-1 min-w-0">
-            <h4 className="text-lg font-bold">
-              {formData.title || "Blog Title"}
-            </h4>
-            <p className="text-sm text-gray-600 mb-2 break-all">
-              {formData.description || "Blog description will appear here..."}
-            </p>
-          </div>
-        </div>
+//           {/* Text always wrap hogi */}
+//           <div className="flex-1 min-w-0">
+//             <h4 className="text-lg font-bold">
+//               {formData.title || "Blog Title"}
+//             </h4>
+//             <p className="text-sm text-gray-600 mb-2 break-all">
+//               {formData.description || "Blog description will appear here..."}
+//             </p>
+//           </div>
+//         </div>
 
-        <p className="text-sm">
-          <strong>Author:</strong> {selectedAuthor}
-        </p>
-        <p className="text-sm">
-          <strong>Level:</strong> {formData.metadata?.level || "No level"}
-        </p>
-        <p className="text-sm mt-2">
-          {formData.content || "Blog content will appear here..."}
-        </p>
-      </div>
-    </div>
-  );
-};
+//         <p className="text-sm">
+//           <strong>Author:</strong> {selectedAuthor}
+//         </p>
+//         <p className="text-sm">
+//           <strong>Level:</strong> {formData.metadata?.level || "No level"}
+//         </p>
+//         <p className="text-sm mt-2">
+//           {formData.content || "Blog content will appear here..."}
+//         </p>
+//       </div>
+//     </div>
+//   );
+// };
 
 export default function BlogCreate() {
   const imageUrl = import.meta.env.VITE_IMAGE_URL
@@ -162,14 +162,14 @@ export default function BlogCreate() {
       description: '',
       content: '',
       status: 'draft',
-      readTime: '',
+      // readTime: null,
       isFeatured: false,
       metaTitle: '',
       metaDescription: '',
       metaImage: '',
       metaKeywords: '',
       metadata: { category: '', level: '' },
-      author_xid: '',
+      // author_xid: null,
       tags: []
     }
   })
@@ -242,7 +242,7 @@ export default function BlogCreate() {
             setValue('status', blog.status)
             setValue('metadata.level', metadata.level || '');
             setValue('metadata.category', metadata.category || '');
-            setValue('author_xid', blog.author.id || '')
+            // setValue('author_xid', blog.author.id || '')
             setValue('tags', blog.tags?.map(t => t.id) || [])
             const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',').filter(keyword => keyword.trim() !== '') : [];
             setKeywords(keywordArray);
@@ -475,8 +475,8 @@ export default function BlogCreate() {
 
         {/* RIGHT COLUMN */}
         <div className="space-y-6 lg:sticky lg:top-10 self-start">
-          <div className="bg-white shadow p-4 rounded-xl">
-            <div className="flex justify-between items-center mb-2">
+          {/* <div className="bg-white shadow p-4 rounded-xl">
+            {/* <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Author</h3>
               <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
                 className="px-3 py-1 text-sm border rounded">Create</button>
@@ -489,7 +489,7 @@ export default function BlogCreate() {
               setGlobalFilter={setGlobalFilter}
               globalFilter={globalFilter}
             />
-          </div>
+          </div> */} 
           <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
@@ -506,7 +506,7 @@ export default function BlogCreate() {
               globalFilter={globalFilter}
             />
           </div>
-          <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/>
+          {/* <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/> */}
           <div className="flex justify-end">
             <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
           </div>

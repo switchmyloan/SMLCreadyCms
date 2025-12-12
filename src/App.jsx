@@ -29,6 +29,7 @@ import PushNotificationList from './pages/PushNotification/PushNotificationsList
 import PushNotificationCreate from './pages/PushNotification/PushNotificationCreate';
 import GroupList from './pages/PushNotification/GroupsList';
 import GroupCreate from './pages/PushNotification/GroupCreate';
+import Contact from './pages/LeadManagement/Contact/Contact';
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="push-notification/create" element={<PushNotificationCreate/>} />
             <Route path="group" element={<GroupList/>}/>
             <Route path="group/create" element={<GroupCreate/>}/>
+            <Route path="contact" element={<Contact />}/>
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
