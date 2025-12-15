@@ -58,8 +58,8 @@ const Press = () => {
     defaultValues: {
       title: "",
       description: "",
-      image: "",
-      sourceLogo: "",
+      image: null,
+      sourceLogo: null,
       redirectLink: "",
       status: "draft",
       // order: 0
