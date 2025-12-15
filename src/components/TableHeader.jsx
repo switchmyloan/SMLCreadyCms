@@ -207,15 +207,45 @@ export const testimonialsColumn = ({ handleEdit }) => [
   },
 ];
 export const pressColumn = ({ handleEdit }) => [
-  {
-    header: 'Title',
-    accessorKey: 'title',
-    cell: ({ getValue }) => getValue() || 'N/A',
+   {
+    header: "Title",
+    accessorKey: "title",
+    cell: ({ getValue }) => (
+      <div
+        style={{
+          minWidth: "150px",
+          maxWidth: "200px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        className="tooltip cursor-pointer "
+        data-tip={getValue() || "N/A"}
+        title={getValue() || "N/A"}
+      >
+        {getValue() || "N/A"}
+      </div>
+    ),
   },
   {
-    header: 'Description',
-    accessorKey: 'description',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    header: "Description",
+    accessorKey: "description",
+    cell: ({ getValue }) => (
+      <div
+        style={{
+          minWidth: "150px",
+          maxWidth: "200px",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+        className="tooltip cursor-pointer "
+        data-tip={getValue() || "N/A"}
+        title={getValue() || "N/A"}
+      >
+        {getValue() || "N/A"}
+      </div>
+    ),
   },
   {
     header: 'Status',

@@ -21,7 +21,7 @@ export const validationPressSchema = Yup.object().shape({
         .test("is-valid-image", "Source Logo must be a valid file or URL", (value) => {
           return typeof value === "string" || value instanceof File;
         }),
-      redirectLink: Yup.string().trim(),
+      redirectLink: Yup.string().trim().required("Link is required"),
       status: Yup.string()
         .required("Status is required")
         .oneOf(["draft", "published", "archived", "reviewed"], "Invalid status"),
