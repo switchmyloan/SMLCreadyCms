@@ -83,6 +83,14 @@ const Faq = () => {
       label: "Faq",
       value: 'faq'
     },
+    {
+      label: "Home",
+      value: 'home'
+    },
+    {
+      label: "Other",
+      value: 'other'
+    },
   ]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
