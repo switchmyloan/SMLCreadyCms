@@ -52,12 +52,36 @@ const Faq = () => {
   const [categoryData, setCategoryData] = useState([]);
   const [module, setModule] = useState([
     {
-      label: "FAQ",
-      value: 'faq'
+      label: "Emergency Loan",
+      value: 'emergency_loan'
     },
     {
-      label: "BLOG",
+      label: "Home Renovation Loan",
+      value: 'home_renovation_loan'
+    },
+    {
+      label: "Wedding Loan",
+      value: 'wedding_loan'
+    },
+    {
+      label: "Travel & Vacation Loan",
+      value: 'travel_vacation_loan'
+    },
+    {
+      label: "Instant Personal Loan",
+      value: 'instant_personal_loan'
+    },
+    {
+      label: "Credit Card",
+      value: 'credit_card'
+    },
+    {
+      label: "Blog",
       value: 'blog'
+    },
+    {
+      label: "Faq",
+      value: 'faq'
     },
   ]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
