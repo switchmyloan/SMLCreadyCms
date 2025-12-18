@@ -46,7 +46,7 @@ const Blogs = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await getLender(query.page_no, query.limit, '');
+      const response = await getLender(query.page_no, query.limit, query.search);
 
       console.log('Response:', response.data);
       if (response?.data?.success) {
@@ -113,7 +113,7 @@ const Blogs = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [query.page_no]);
+  }, [query.page_no, query.search]);
 
 
   console.log(data, 'blogColumnblogColumnblogColumn')

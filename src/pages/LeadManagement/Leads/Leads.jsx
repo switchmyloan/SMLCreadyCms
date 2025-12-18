@@ -321,7 +321,7 @@ const Leads = () => {
     fetchBlogs();
   }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate]);
 
-
+  console.log(query.search, "query.search")
   return (
     <>
       <Toaster />
