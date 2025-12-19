@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useCallback,useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import DataTable from "@components/Table/DataTable";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "@components/Notification/ToastNotification";
@@ -7,11 +7,12 @@ import { useForm } from "react-hook-form";
 import ValidatedTextField from "@components/Form/ValidatedTextField";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
 import Drawer from "../../../components/Drawer";
-import { AddPress, getPress, UpdatePress } from "../../../api-services/Modules/PressApi";
+import { AddPress, DeletePress, getPress, UpdatePress } from "../../../api-services/Modules/PressApi";
 import ValidatedLabel from "../../../components/Form/ValidatedLabel";
 import Uploader from "../../../components/Form/Uploader";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { validationPressSchema } from "../../../schema/Press/create.schema";
+import ConfirmModal from "../../../components/ConfirmationationModal";
 
 const debounce = (func, delay) => {
   let timeoutId;
@@ -25,11 +26,14 @@ const Press = () => {
   const imageUrl = import.meta.env.VITE_IMAGE_URL;
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleteData, setDeleteData] = useState(null)
+   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
- const [tablePagination, setTablePagination] = useState({
+  const [tablePagination, setTablePagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
@@ -141,48 +145,76 @@ const Press = () => {
   };
 
   const onPageChange = useCallback((pageInfo) => {
-      setTablePagination({
-        pageIndex: pageInfo.pageIndex,
-        pageSize: pageInfo.pageSize,
-      });
-      setQuery((prevQuery) => {
-        return {
-          ...prevQuery,
-          page_no: pageInfo.pageIndex + 1, // 1-based index for query
-          limit: pageInfo.pageSize, // new limit
-        };
-      });
-    }, []);
-  
-    const handleStatusFilter = useCallback(newStatus => {
-      setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
-    }, []);
-  
-    const onSearchHandler = useCallback(term => {
-      setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
-    }, []);
-  
-    const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
-  
-    const onFilterByDate = useCallback(type => {
-      setQuery(prev => ({
-        ...prev,
-        filter_date: prev.filter_date === type ? '' : type,
-        startDate: null,
-        endDate: null,
-        page_no: 1
-      }));
-    }, []);
-  
-    const onFilterByRange = useCallback(range => {
-      setQuery(prev => ({
-        ...prev,
-        startDate: range.startDate,
-        endDate: range.endDate,
-        filter_date: '',
-        page_no: 1
-      }));
-    }, []);
+    setTablePagination({
+      pageIndex: pageInfo.pageIndex,
+      pageSize: pageInfo.pageSize,
+    });
+    setQuery((prevQuery) => {
+      return {
+        ...prevQuery,
+        page_no: pageInfo.pageIndex + 1, // 1-based index for query
+        limit: pageInfo.pageSize, // new limit
+      };
+    });
+  }, []);
+
+  const handleStatusFilter = useCallback(newStatus => {
+    setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
+  }, []);
+
+  const onSearchHandler = useCallback(term => {
+    setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
+  }, []);
+
+  const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
+
+  const onFilterByDate = useCallback(type => {
+    setQuery(prev => ({
+      ...prev,
+      filter_date: prev.filter_date === type ? '' : type,
+      startDate: null,
+      endDate: null,
+      page_no: 1
+    }));
+  }, []);
+
+  const onFilterByRange = useCallback(range => {
+    setQuery(prev => ({
+      ...prev,
+      startDate: range.startDate,
+      endDate: range.endDate,
+      filter_date: '',
+      page_no: 1
+    }));
+  }, []);
+
+  const handleDelete = (data) => {
+    console.log(data)
+    setDeleteData(data?.id)
+    setConfirmOpen(true)
+  }
+
+
+
+  const deleteConfirm = async () => {
+
+    setLoading(true);
+    try {
+      const response = await DeletePress(deleteData);
+      if (response?.data?.success) {
+        ToastNotification.success("Deleted successfully!");
+        fetchFaqs();
+      } else {
+        ToastNotification.error("Failed to delete!");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      ToastNotification.error("Something went wrong!");
+    } finally {
+      setLoading(false);
+      setConfirmOpen(false);
+    }
+  };
 
   useEffect(() => {
     fetchPress();
@@ -191,8 +223,16 @@ const Press = () => {
   return (
     <>
       <Toaster />
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={deleteConfirm}
+        title="Delete Press"
+        message="Are you sure you want to delete this data? This action cannot be undone."
+        loading={loading}
+      />
       <DataTable
-        columns={pressColumn({ handleEdit })}
+        columns={pressColumn({ handleEdit, handleDelete })}
         title="Press Room"
         data={data}
         totalDataCount={totalDataCount}
@@ -202,7 +242,7 @@ const Press = () => {
         setPagination={setPagination}
         pagination={pagination}
 
-           // Filters
+        // Filters
         onSearch={debouncedSearch}
         onRefresh={fetchPress}
         onFilterByDate={onFilterByDate}

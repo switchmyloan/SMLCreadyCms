@@ -19,3 +19,5 @@ export const UpdatePress = async (formData) => {
     }
   });
 };
+
+export const DeletePress = async id => Api().delete(`/press/${id}`);

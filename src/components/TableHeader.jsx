@@ -111,32 +111,39 @@ export const faqColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'question',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
-  {
-    header: "Answers",
-    accessorKey: "answer",
-    cell: ({ getValue }) => (
-      <div
-        style={{
-          minWidth: "150px",
-          maxWidth: "200px",
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-        className="tooltip cursor-pointer "
-        data-tip={getValue() || "N/A"}
-        title={getValue() || "N/A"}
-      >
-        {getValue() || "N/A"}
-      </div>
-    ),
-  },
+  // {
+  //   header: "Answers",
+  //   accessorKey: "answer",
+  //   cell: ({ getValue }) => (
+  //     <div
+  //       style={{
+  //         minWidth: "150px",
+  //         maxWidth: "200px",
+  //         whiteSpace: "nowrap",
+  //         overflow: "hidden",
+  //         textOverflow: "ellipsis",
+  //       }}
+  //       className="tooltip cursor-pointer "
+  //       data-tip={getValue() || "N/A"}
+  //       title={getValue() || "N/A"}
+  //     >
+  //       {getValue() || "N/A"}
+  //     </div>
+  //   ),
+  // },
 
   {
     header: 'Category',
     accessorKey: 'category_xid',
     cell: ({ row }) => {
-      return row.original.category ? row.original.category.name : 'N/A'
+      return row?.original?.category ? row?.original?.category.name : 'N/A'
+    }
+  },
+  {
+    header: 'Module',
+    accessorKey: 'module',
+      cell: ({ row }) => {
+      return row?.original?.module ? (row?.original?.module).toUpperCase().split('_').join(' ') : 'N/A'
     }
   },
   {
@@ -206,7 +213,7 @@ export const testimonialsColumn = ({ handleEdit }) => [
     },
   },
 ];
-export const pressColumn = ({ handleEdit }) => [
+export const pressColumn = ({ handleEdit,handleDelete }) => [
    {
     header: "Title",
     accessorKey: "title",
@@ -269,12 +276,12 @@ export const pressColumn = ({ handleEdit }) => [
           >
             <Edit2 size={20} />
           </button>
-          {/* <button
-            onClick={() => console.log('Delete', row.original)}
+        <button
+            onClick={() => handleDelete(row.original)}
             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
           >
             <Trash2 size={20} />
-          </button> */}
+          </button>
         </div>
       );
     },
