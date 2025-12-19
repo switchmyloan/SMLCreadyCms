@@ -72,6 +72,10 @@ const Faq = () => {
       value: 'instant_personal_loan'
     },
     {
+      label: "Debt Consolidation Loan",
+      value: 'debt_consolidation_loan'
+    },
+    {
       label: "Credit Card",
       value: 'credit_card'
     },
