@@ -203,7 +203,7 @@ const Press = () => {
       const response = await DeletePress(deleteData);
       if (response?.data?.success) {
         ToastNotification.success("Deleted successfully!");
-        fetchFaqs();
+        fetchPress();
       } else {
         ToastNotification.error("Failed to delete!");
       }
