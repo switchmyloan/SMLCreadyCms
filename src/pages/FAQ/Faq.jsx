@@ -50,52 +50,101 @@ const Faq = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [globalFilter, setGlobalFilter] = useState('');
   const [categoryData, setCategoryData] = useState([]);
+  // const [module, setModule] = useState([
+  //   {
+  //     label: "Emergency Loan",
+  //     value: 'emergency_loan'
+  //   },
+  //   {
+  //     label: "Home Renovation Loan",
+  //     value: 'home_renovation_loan'
+  //   },
+  //   {
+  //     label: "Wedding Loan",
+  //     value: 'wedding_loan'
+  //   },
+  //   {
+  //     label: "Travel & Vacation Loan",
+  //     value: 'travel_vacation_loan'
+  //   },
+  //   {
+  //     label: "Instant Personal Loan",
+  //     value: 'instant_personal_loan'
+  //   },
+  //   {
+  //     label: "Debt Consolidation Loan",
+  //     value: 'debt_consolidation_loan'
+  //   },
+  //   {
+  //     label: "Credit Card",
+  //     value: 'credit_card'
+  //   },
+  //   {
+  //     label: "Blog",
+  //     value: 'blog'
+  //   },
+  //   {
+  //     label: "Faq",
+  //     value: 'faq'
+  //   },
+  //   {
+  //     label: "Home",
+  //     value: 'home'
+  //   },
+  //   {
+  //     label: "Other",
+  //     value: 'other'
+  //   },
+  // ]);
+
+
   const [module, setModule] = useState([
-    {
-      label: "Emergency Loan",
-      value: 'emergency_loan'
-    },
-    {
-      label: "Home Renovation Loan",
-      value: 'home_renovation_loan'
-    },
-    {
-      label: "Wedding Loan",
-      value: 'wedding_loan'
-    },
-    {
-      label: "Travel & Vacation Loan",
-      value: 'travel_vacation_loan'
-    },
-    {
-      label: "Instant Personal Loan",
-      value: 'instant_personal_loan'
-    },
-    {
-      label: "Debt Consolidation Loan",
-      value: 'debt_consolidation_loan'
-    },
-    {
-      label: "Credit Card",
-      value: 'credit_card'
-    },
-    {
-      label: "Blog",
-      value: 'blog'
-    },
-    {
-      label: "Faq",
-      value: 'faq'
-    },
-    {
-      label: "Home",
-      value: 'home'
-    },
-    {
-      label: "Other",
-      value: 'other'
-    },
+    { label: "Faq", value: "faq" },
+    { label: "Blog", value: "blog" },
+    { label: "Loan", value: "loan" },
+    { label: "Credit Card", value: "credit_card" },
+
+    { label: "Instant Personal Loan", value: "instant_personal_loan" },
+    { label: "Travel Vacation Loan", value: "travel_vacation_loan" },
+    { label: "Wedding Loan", value: "wedding_loan" },
+    { label: "Home Renovation Loan", value: "home_renovation_loan" },
+    { label: "Emergency Loan", value: "emergency_loan" },
+    { label: "Debt Consolidation Loan", value: "debt_consolidation_loan" },
+
+    { label: "Home", value: "home" },
+    { label: "Other", value: "other" },
+
+    { label: "Debt Consolidation Loan Bangalore", value: "debt_consolidation_loan_bangalore" },
+    { label: "Debt Consolidation Loan Chennai", value: "debt_consolidation_loan_chennai" },
+    { label: "Debt Consolidation Loan Delhi", value: "debt_consolidation_loan_delhi" },
+    { label: "Debt Consolidation Loan Hyderabad", value: "debt_consolidation_loan_hyderabad" },
+    { label: "Debt Consolidation Loan Mumbai", value: "debt_consolidation_loan_mumbai" },
+
+    { label: "Emergency Loan Bangalore", value: "emergency_loan_bangalore" },
+    { label: "Emergency Loan Chennai", value: "emergency_loan_chennai" },
+    { label: "Emergency Loan Pune", value: "emergency_loan_pune" },
+    { label: "Emergency Loan Delhi", value: "emergency_loan_delhi" },
+    { label: "Emergency Loan Mumbai", value: "emergency_loan_mumbai" },
+
+    { label: "Instant Personal Loan Bangalore", value: "instant_personal_loan_bangalore" },
+    { label: "Instant Personal Loan Chennai", value: "instant_personal_loan_chennai" },
+    { label: "Instant Personal Loan Delhi", value: "instant_personal_loan_delhi" },
+    { label: "Instant Personal Loan Hyderabad", value: "instant_personal_loan_hyderabad" },
+    { label: "Instant Personal Loan Ahmedabad", value: "instant_personal_loan_ahmedabad" },
+    { label: "Instant Personal Loan Jaipur", value: "instant_personal_loan_jaipur" },
+    { label: "Instant Personal Loan Mumbai", value: "instant_personal_loan_mumbai" },
+    { label: "Instant Personal Loan Pune", value: "instant_personal_loan_pune" },
+    { label: "Instant Personal Loan Surat", value: "instant_personal_loan_surat" },
+    { label: "Instant Personal Loan Kolkata", value: "instant_personal_loan_kolkata" },
+
+    { label: "Personal Loan Bangalore", value: "personal_loan_bangalore" },
+    { label: "Personal Loan Chennai", value: "personal_loan_chennai" },
+    { label: "Personal Loan Delhi", value: "personal_loan_delhi" },
+    { label: "Personal Loan Hyderabad", value: "personal_loan_hyderabad" },
+    { label: "Personal Loan Mumbai", value: "personal_loan_mumbai" },
+    { label: "Personal Loan Pune", value: "personal_loan_pune" },
   ]);
+
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -139,7 +188,7 @@ const Faq = () => {
       category_xid: '',
       question: '',
       answer: '',
-      module:'',
+      module: '',
       isFeatured: false,
     },
   });
@@ -282,7 +331,7 @@ const Faq = () => {
           answer: formData?.answer,
           category_xid: formData?.category_xid,
           isFeatured: formData?.isFeatured,
-          module : formData?.module
+          module: formData?.module
         };
         const response = await updateFaq({ id: selectedFaq, ...data });
         if (response?.data?.success) {
@@ -304,7 +353,7 @@ const Faq = () => {
           answer: formData?.answer,
           category_xid: formData?.category_xid,
           isFeatured: formData?.isFeatured,
-          module : formData?.module
+          module: formData?.module
         });
         if (response?.data?.success) {
           ToastNotification.success('FAQ added successfully!');
