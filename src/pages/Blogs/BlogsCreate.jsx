@@ -238,6 +238,8 @@ export default function BlogCreate() {
             setValue('title', blog.title)
             setValue('metaTitle', blog.metaTitle)
             setValue('description', blog.description)
+            setValue('metaDescription', blog.metaDescription)
+            setValue('slug', blog.slug)
             setValue('content', blog.content)
             setValue('status', blog.status)
             setValue('metadata.level', metadata.level || '');
@@ -292,7 +294,8 @@ export default function BlogCreate() {
         file: data.file,
         description: data.description,
         designation: data.designation,
-        socialLink: data.socialLink
+        socialLink: data.socialLink,
+        metaDescription: data.metaDescription
       });
       if (response) {
         ToastNotification.success("Author added successfully!");
@@ -387,12 +390,20 @@ export default function BlogCreate() {
               placeholder="Enter blog title"
             />
             <ValidatedTextField
+              name="slug"
+              control={control}
+              label="Slug"
+              errors={errors}
+              placeholder="Enter slug"
+            />
+            <ValidatedTextField
               name="metaTitle"
               control={control}
               label="Meta Title"
               errors={errors}
               placeholder="Enter meta title"
             />
+          
             <ValidatedTextArea
               name="description"
               control={control}
@@ -409,6 +420,15 @@ export default function BlogCreate() {
               errors={errors}
               className="col-span-2"
               placeholder="Enter blog content"
+              rows={4}
+            />
+            <ValidatedTextArea
+              name="metaDescription"
+              control={control}
+              label="Meta Description"
+              errors={errors}
+              className="col-span-2"
+              placeholder="Enter  content"
               rows={4}
             />
             <div>
