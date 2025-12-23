@@ -6,6 +6,7 @@ export const routes = [
     icon: "Home",
     showInSidebar: false,
     order: 0,
+    roles: ["admin", "super-admin"],
   },
 
   // --- Lead Management ---
@@ -15,8 +16,9 @@ export const routes = [
     icon: "UserCheck", // ✅ login-related
     showInSidebar: true,
     group: "Lead Management",
-    groupOrder: 1, 
+    groupOrder: 1,
     order: 1,
+    roles: ["admin"]
   },
   {
     path: "/leads",
@@ -24,8 +26,9 @@ export const routes = [
     icon: "ClipboardList", // ✅ leads list
     showInSidebar: true,
     group: "Lead Management",
-    groupOrder: 1, 
+    groupOrder: 1,
     order: 2,
+    roles: ["admin", "super-admin"],
   },
   {
     path: "/archive-users",
@@ -33,8 +36,9 @@ export const routes = [
     icon: "UserMinus", // ✅ archived users
     showInSidebar: true,
     group: "Lead Management",
-    groupOrder: 1, 
+    groupOrder: 1,
     order: 3,
+    roles: ["super-admin"],
   },
   {
     path: "/contact",
@@ -42,8 +46,9 @@ export const routes = [
     icon: "ContactUs", // ✅ archived users
     showInSidebar: true,
     group: "Lead Management",
-    groupOrder: 1, 
+    groupOrder: 1,
     order: 4,
+    roles: ["super-admin"],
   },
 
   // --- Lender Management ---
@@ -53,8 +58,9 @@ export const routes = [
     icon: "UserPlus", // ✅ add new lender
     showInSidebar: true,
     group: "Lender Management",
-    groupOrder: 2, 
+    groupOrder: 2,
     order: 2,
+    roles: ["super-admin"],
   },
   {
     path: "/list-of-lenders",
@@ -62,8 +68,9 @@ export const routes = [
     icon: "Building2", // ✅ lenders
     showInSidebar: true,
     group: "Lender Management",
-    groupOrder: 2, 
+    groupOrder: 2,
     order: 1,
+    roles: ["super-admin"],
   },
 
   // --- Blogs ---
@@ -74,7 +81,8 @@ export const routes = [
     showInSidebar: true,
     order: 1,
     group: "Blogs",
-    groupOrder: 3, 
+    groupOrder: 3,
+    roles: ["super-admin"],
   },
   {
     path: "/blog/create",
@@ -83,7 +91,8 @@ export const routes = [
     showInSidebar: true,
     order: 2,
     group: "Blogs",
-    groupOrder: 3, 
+    groupOrder: 3,
+    roles: ["super-admin"],
   },
 
   // --- FAQ ---
@@ -94,7 +103,8 @@ export const routes = [
     showInSidebar: true,
     order: 1,
     group: "FAQ",
-    groupOrder: 4, 
+    groupOrder: 4,
+    roles: ["super-admin"],
   },
 
   // --- CMS Management ---
@@ -106,6 +116,7 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 1,
+    roles: ["super-admin"],
   },
   {
     path: "/testimonials",
@@ -115,16 +126,17 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 2,
+    roles: ["super-admin"],
   },
-    // {
-    //   path: "/social-icons",
-    //   label: "Social Icons",
-    //   icon: "Settings", // ✅ generic icons/social
-    //   showInSidebar: true,
-    //   group: "CMS Management",
-    //   groupOrder: 5,
-    //   order: 3,
-    // },
+  // {
+  //   path: "/social-icons",
+  //   label: "Social Icons",
+  //   icon: "Settings", // ✅ generic icons/social
+  //   showInSidebar: true,
+  //   group: "CMS Management",
+  //   groupOrder: 5,
+  //   order: 3,
+  // },
   // {
   //   path: "/offer",
   //   label: "Offers",
@@ -142,6 +154,7 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 5,
+    roles: ["super-admin"],
   },
   {
     path: "/terms-conditions",
@@ -151,6 +164,7 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 6,
+    roles: ["super-admin"],
   },
   // {
   //   path: "/privacy-policy",
@@ -171,6 +185,7 @@ export const routes = [
     group: "Admin Management",
     groupOrder: 7,
     order: 2,
+    roles: ["super-admin"],
   },
   {
     path: "/roles",
@@ -180,6 +195,7 @@ export const routes = [
     group: "Admin Management",
     groupOrder: 7,
     order: 1,
+    roles: ["super-admin"],
   },
   {
     path: "/push-notification",
@@ -189,6 +205,7 @@ export const routes = [
     group: "Push Notification",
     groupOrder: 6,
     order: 2,
+    roles: ["admin", "super-admin"],
   },
   {
     path: "/group",
@@ -198,5 +215,6 @@ export const routes = [
     group: "Push Notification",
     groupOrder: 6,
     order: 1,
+    roles: ["admin", "super-admin"],
   },
 ];
