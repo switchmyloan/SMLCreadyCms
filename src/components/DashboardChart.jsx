@@ -62,7 +62,7 @@ export const LoanAmountBarChart = ({ data, title }) => (
           <YAxis />
           <Tooltip />
           <Legend />
-          <Bar dataKey="count" fill="#4f46e5" name="Principals Count" />
+          <Bar dataKey="count" fill="#4f46e5" name="Users Count" />
         </BarChart>
       </ResponsiveContainer>
     </ChartWrapper>

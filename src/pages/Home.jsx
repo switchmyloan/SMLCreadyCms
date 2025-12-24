@@ -28,12 +28,12 @@ export const dashboardSummaryData = {
         { name: 'Female', value: 4500 },
         { name: 'Other', value: 1200 },
     ],
-    loanAmountBuckets: [
-        { range: '0-50k', count: 1500 },
-        { range: '50k-1L', count: 2200 },
-        { range: '1L-5L', count: 3500 },
-        { range: '5L+', count: 1800 },
-    ],
+    // loanAmountBuckets: [
+    //     { range: '0-50k', count: 1500 },
+    //     { range: '50k-1L', count: 2200 },
+    //     { range: '1L-5L', count: 3500 },
+    //     { range: '5L+', count: 1800 },
+    // ],
 };
 
 
@@ -93,8 +93,28 @@ const HomePage = () => {
         loanAmountBuckets, 
         verificationStatus,
         principalSourceDistribution, 
-        genderDistribution 
+        genderDistribution,
+          lenderWiseLeads
     } = data;
+
+    // Normalize and aggregate genderDistribution
+const normalizedGenderDistribution = genderDistribution
+    .reduce((acc, curr) => {
+        // Normalize name to title case
+        const name = curr.name.toLowerCase() === "male" ? "Male" :
+                     curr.name.toLowerCase() === "female" ? "Female" :
+                     "Unspecified";
+
+        // Check if entry already exists
+        const existing = acc.find(item => item.name === name);
+        if (existing) {
+            existing.value += curr.value;
+        } else {
+            acc.push({ name, value: curr.value });
+        }
+
+        return acc;
+    }, []);
 
     // Assuming PrincipalDonutChart is a reusable component for distribution
     const DistributionChart = PrincipalDonutChart; 
@@ -172,11 +192,44 @@ const HomePage = () => {
                 {/* 3b. Gender Distribution Chart (Takes up 1 column) */}
                 <div className="col-span-1">
                     <DistributionChart 
-                        data={genderDistribution} 
+                        data={normalizedGenderDistribution} 
                         title="Gender Distribution"
                     />
                 </div>
             </div>
+
+             {/* --- Lender-wise Leads Table --- */}
+      <div className="mt-8 bg-white shadow rounded p-4">
+        <h2 className="text-xl font-semibold mb-4">Lender-wise Leads</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 text-left">Lender</th>
+                <th className="px-4 py-2 text-right">Total Leads</th>
+                <th className="px-4 py-2 text-right">Success</th>
+                <th className="px-4 py-2 text-right">Rejected</th>
+                <th className="px-4 py-2 text-right">Success Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lenderWiseLeads && lenderWiseLeads.map((lender, idx) => {
+                const total = lender.success + lender.rejected;
+                const successRate = total ? ((lender.success / total) * 100).toFixed(1) : "0";
+                return (
+                  <tr key={idx} className="border-t">
+                    <td className="px-4 py-2">{lender.lenderName}</td>
+                    <td className="px-4 py-2 text-right">{lender.totalLeads}</td>
+                    <td className="px-4 py-2 text-right">{lender.success}</td>
+                    <td className="px-4 py-2 text-right">{lender.rejected}</td>
+                    <td className="px-4 py-2 text-right">{successRate}%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
         </div>
     );
 };
