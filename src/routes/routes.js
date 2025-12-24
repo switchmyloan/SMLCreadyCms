@@ -48,7 +48,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 4,
-    roles: ["super-admin"],
+    roles: ["admin","super-admin"],
   },
 
   // --- Lender Management ---

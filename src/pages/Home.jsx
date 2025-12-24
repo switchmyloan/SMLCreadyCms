@@ -106,13 +106,13 @@ const HomePage = () => {
             {/* --- 1. KPI Cards Section --- */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <DashboardCard 
-                    title="Total Principals"
+                    title="Total Users"
                     value={kpis.totalPrincipals}
                     icon={<Users size={24} />}
                     color="text-blue-600"
                 />
                 <DashboardCard 
-                    title="Active Principals"
+                    title="Active Users"
                     value={kpis.activePrincipals}
                     icon={<CheckCircle size={24} />}
                     color="text-green-600"
@@ -124,7 +124,7 @@ const HomePage = () => {
                     color="text-purple-600"
                 />
                 <DashboardCard 
-                    title="Blocked Principals"
+                    title="Blocked users"
                     value={kpis.blockedPrincipals}
                     icon={<Lock size={24} />}
                     color="text-red-600"
@@ -137,28 +137,28 @@ const HomePage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
                 
                 {/* 2a. Principal Type Distribution Chart */}
-                <div className="col-span-1">
+                {/* <div className="col-span-1">
                     <DistributionChart 
                         data={principalTypeDistribution} 
                         title="Principal Type Distribution (Type)"
                     />
-                </div>
+                </div> */}
 
                 {/* 2b. Principal Source Distribution Chart */}
-                <div className="col-span-1">
+                {/* <div className="col-span-1">
                     <DistributionChart 
                         data={principalSourceDistribution} 
                         title="Principal Source Distribution (Source)"
                     />
-                </div>
+                </div> */}
 
                 {/* 2c. Verification Status Distribution Chart */}
-                <div className="col-span-1">
+                {/* <div className="col-span-1">
                     <DistributionChart 
                         data={verificationStatus} 
                         title="Verification Status Summary (Flags)"
                     />
-                </div>
+                </div> */}
             </div>
 
             {/* --- 3. Secondary Charts (Row 2) --- */}
