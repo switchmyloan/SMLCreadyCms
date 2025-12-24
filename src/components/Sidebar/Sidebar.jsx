@@ -312,6 +312,8 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { routes } from "../../routes/routes";
 import { useAuth } from "../../custom-hooks/useAuth";
+import logo from "../../assets/cready.webp";
+import shortLogo from "../../assets/shortLogo.svg";
 
 import {
   Home,
@@ -408,13 +410,25 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
       className={`h-full bg-white text-gray-700 flex flex-col shadow-lg transition-all duration-300 ${collapsed ? "w-20" : "w-64"} relative sidebar`}
     >
       {/* Header */}
-      <div className="p-[15px] flex justify-between items-center border-b border-gray-200 bg-black">
-        <h1 className="text-white">{collapsed ? "SML" : "SML Moneyview"}</h1>
+      <div className="p-[15px] flex justify-between items-center border-b border-gray-200">
+        {!collapsed ? (
+          <img src={logo} alt="Logo" className="w-28 h-auto" />
+        ) : (
+          <img src={shortLogo} alt="Logo" className="w-5 h-auto" />
+        )}
         <div className="flex items-center gap-2">
-          <button onClick={onToggleCollapse} className="text-gray-500 hover:text-primary">
+          <button
+            onClick={onToggleCollapse}
+            className="text-gray-500 hover:text-primary"
+            title={collapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
             {collapsed ? <ChevronRight size={22} /> : <ChevronLeft size={22} />}
           </button>
-          <button onClick={onClose} className="md:hidden text-gray-500 hover:text-primary">
+          <button
+            onClick={onClose}
+            className="md:hidden text-gray-500 hover:text-primary"
+            title="Close Sidebar"
+          >
             <X size={22} />
           </button>
         </div>
