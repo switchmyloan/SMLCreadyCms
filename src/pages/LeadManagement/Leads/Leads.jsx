@@ -207,13 +207,22 @@ const Leads = () => {
   ], []);
 
   // 1️⃣ Define income ranges somewhere in your parent or inside DataTable
+  // const incomeRanges = [
+  //   { label: 'All', value: '' },
+  //   { label: 'Less than ₹20,000', value: '0-20000' },
+  //   { label: '₹20,001 - ₹50,000', value: '20001-50000' },
+  //   { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
+  //   { label: 'Above ₹1,00,000', value: '100001-' },
+  // ];
+
   const incomeRanges = [
-    { label: 'All', value: '' },
-    { label: 'Less than ₹20,000', value: '0-20000' },
-    { label: '₹20,001 - ₹50,000', value: '20001-50000' },
-    { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
-    { label: 'Above ₹1,00,000', value: '100001-' },
-  ];
+  { label: 'All', value: '' },
+  { label: 'Less than ₹20,000', value: '0-20000' },
+  { label: '₹20,001 - ₹50,000', value: '20001-50000' },
+  { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
+  { label: 'Above ₹1,00,000', value: '100001-100000000' }, // 👈 FIX
+];
+
 
 
 
@@ -235,7 +244,7 @@ const Leads = () => {
       setLoading(true);
 
       // Fetch without date filter
-      const response = await getLeads(query.page_no, query.limit, query.search, query.gender,   query.minIncome,query.maxIncome);
+      const response = await getLeads(query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome);
 
       if (response?.data?.success) {
         let rows = response?.data?.data?.rows || [];
@@ -349,7 +358,7 @@ const Leads = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender,query.minIncome, query.maxIncome]);
+  }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome]);
 
   console.log(query.search, "query.search")
 
@@ -367,22 +376,30 @@ const Leads = () => {
   const handleIncomeFilter = (value) => {
   setActiveIncomeFilter(value);
 
-  let minIncome = undefined;
-  let maxIncome = undefined;
-
-  if (value) {
-    const [min, max] = value.split('-');
-    minIncome = Number(min);
-    maxIncome = max ? Number(max) : undefined;
+  // Reset
+  if (!value) {
+    setQuery(prev => ({
+      ...prev,
+      minIncome: undefined,
+      maxIncome: undefined,
+      page_no: 1,
+    }));
+    return;
   }
+
+  const [min, max] = value.split('-');
+
+  const minIncome = Number(min);
+  const maxIncome = Number(max); // 👈 ALWAYS number
 
   setQuery(prev => ({
     ...prev,
     minIncome,
     maxIncome,
-    page_no: 1
+    page_no: 1,
   }));
 };
+
 
 
 
