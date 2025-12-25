@@ -142,7 +142,7 @@ export const faqColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Module',
     accessorKey: 'module',
-      cell: ({ row }) => {
+    cell: ({ row }) => {
       return row?.original?.module ? (row?.original?.module).toUpperCase().split('_').join(' ') : 'N/A'
     }
   },
@@ -213,8 +213,8 @@ export const testimonialsColumn = ({ handleEdit }) => [
     },
   },
 ];
-export const pressColumn = ({ handleEdit,handleDelete }) => [
-   {
+export const pressColumn = ({ handleEdit, handleDelete }) => [
+  {
     header: "Title",
     accessorKey: "title",
     cell: ({ getValue }) => (
@@ -276,7 +276,7 @@ export const pressColumn = ({ handleEdit,handleDelete }) => [
           >
             <Edit2 size={20} />
           </button>
-        <button
+          <button
             onClick={() => handleDelete(row.original)}
             className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
           >
@@ -354,20 +354,20 @@ export const bannerColumn = ({ handleEdit, handleDelete }) => [
   },
 ];
 export const lenderColumn = ({ handleEdit, handleDelete }) => [
-    {
-  header: 'SN', // Serial Number
-  id: 'sn',
-  enableSorting: false, // Serial numbers shouldn't be sortable
-  maxSize: 50,
-  cell: ({ row, table }) => {
-    // 1. Get current pagination state from the table instance
-    const { pageIndex, pageSize } = table.getState().pagination;
-    
-    // 2. Calculate the global row index
-    // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
-    return (pageIndex * pageSize) + row.index + 1;
+  {
+    header: 'SN', // Serial Number
+    id: 'sn',
+    enableSorting: false, // Serial numbers shouldn't be sortable
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      // 1. Get current pagination state from the table instance
+      const { pageIndex, pageSize } = table.getState().pagination;
+
+      // 2. Calculate the global row index
+      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
+      return (pageIndex * pageSize) + row.index + 1;
+    },
   },
-},
   {
     header: 'Name',
     accessorKey: 'name',
@@ -469,34 +469,64 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
   },
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
-    {
-  header: 'SN', // Serial Number
-  id: 'sn',
-  enableSorting: false, // Serial numbers shouldn't be sortable
-  maxSize: 50,
-  cell: ({ row, table }) => {
-    // 1. Get current pagination state from the table instance
-    const { pageIndex, pageSize } = table.getState().pagination;
-    
-    // 2. Calculate the global row index
-    // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
-    return (pageIndex * pageSize) + row.index + 1;
-  },
-},
   {
-    header: 'First Name',
-    accessorKey: 'firstName',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    header: 'SN', // Serial Number
+    id: 'sn',
+    enableSorting: false, // Serial numbers shouldn't be sortable
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      // 1. Get current pagination state from the table instance
+      const { pageIndex, pageSize } = table.getState().pagination;
+
+      // 2. Calculate the global row index
+      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
+      return (pageIndex * pageSize) + row.index + 1;
+    },
   },
   {
-    header: 'Last Name',
-    accessorKey: 'lastName',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    header: 'Name',
+    accessorKey: 'name',
+    size: 120,    // fixed width
+    minSize: 120,
+    maxSize: 120,
+    cell: ({ row }) => {
+      const firstName = row.original.firstName || '';
+      const lastName = row.original.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim() || 'N/A';
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={fullName} // Tooltip shows full name on hover
+        >
+          {fullName}
+        </div>
+      );
+    },
   },
+
+
   {
     header: 'Number',
     accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Source',
+    accessorKey: 'utm_source',
+    cell: info => {
+      const source = info.row.original.utm_header?.utm_source || 'N/A'; // optional chaining + fallback
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '150px' }} // adjust width as needed
+          title={source} // tooltip on hover
+        >
+          {source}
+        </div>
+      );
+    }
   },
   {
     header: 'Gender',
@@ -650,20 +680,20 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
   },
 ];
 export const signInColumns = ({ handleEdit, handleDelete }) => [
-    {
-  header: 'SN', // Serial Number
-  id: 'sn',
-  enableSorting: false, // Serial numbers shouldn't be sortable
-  maxSize: 50,
-  cell: ({ row, table }) => {
-    // 1. Get current pagination state from the table instance
-    const { pageIndex, pageSize } = table.getState().pagination;
-    
-    // 2. Calculate the global row index
-    // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
-    return (pageIndex * pageSize) + row.index + 1;
+  {
+    header: 'SN', // Serial Number
+    id: 'sn',
+    enableSorting: false, // Serial numbers shouldn't be sortable
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      // 1. Get current pagination state from the table instance
+      const { pageIndex, pageSize } = table.getState().pagination;
+
+      // 2. Calculate the global row index
+      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
+      return (pageIndex * pageSize) + row.index + 1;
+    },
   },
-},
   {
     header: 'First Name',
     accessorKey: 'firstName',

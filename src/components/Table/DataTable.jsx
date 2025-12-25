@@ -356,7 +356,11 @@ function DataTable({
   activeStatusFilter = 'success',
   onFilterChange,
 
-  dynamicFilters 
+  dynamicFilters,
+
+  activeIncomeFilter,
+  incomeRanges,
+  onFilterByIncome 
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
@@ -518,6 +522,23 @@ function DataTable({
           <span className="text-gray-600 text-sm">
             {totalDataCount} entries
           </span>
+          {/* Income Dropdown */}
+          {incomeRanges && incomeRanges.length > 0 && (
+            <div className="z-20 flex flex-col w-38">
+              <select
+                onChange={(e) => onFilterByIncome(e.target.value)}
+                value={activeIncomeFilter || ''}
+                className="p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+              >
+                {incomeRanges.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
 
           {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
           {dynamicFilters && dynamicFilters.length > 0 && (
