@@ -86,55 +86,55 @@ const Leads = () => {
       setLoading(true);
 
       // Fetch without date filter
-      const response = await getLeads(query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome, query.filter_date);
+      const response = await getLeads();
 
       if (response?.data?.success) {
         let rows = response?.data?.data?.rows || [];
 
         // ⭐ TODAY / YESTERDAY / LAST 7 DAYS
-        // if (query.filter_date) {
-        //   const today = new Date();
-        //   const yesterday = new Date();
-        //   yesterday.setDate(today.getDate() - 1);
+        if (query.filter_date) {
+          const today = new Date();
+          const yesterday = new Date();
+          yesterday.setDate(today.getDate() - 1);
 
-        //   rows = rows.filter(item => {
-        //     const created = new Date(item.createdAt);
+          rows = rows.filter(item => {
+            const created = new Date(item.createdAt);
 
-        //     if (query.filter_date === "today") {
-        //       return created.toDateString() === today.toDateString();
-        //     }
+            if (query.filter_date === "today") {
+              return created.toDateString() === today.toDateString();
+            }
 
-        //     if (query.filter_date === "yesterday") {
-        //       return created.toDateString() === yesterday.toDateString();
-        //     }
+            if (query.filter_date === "yesterday") {
+              return created.toDateString() === yesterday.toDateString();
+            }
 
-        //     if (query.filter_date === "last_7_days") {
-        //       const last7 = new Date();
-        //       last7.setDate(today.getDate() - 7);
-        //       return created >= last7 && created <= today;
-        //     }
+            if (query.filter_date === "last_7_days") {
+              const last7 = new Date();
+              last7.setDate(today.getDate() - 7);
+              return created >= last7 && created <= today;
+            }
 
-        //     return true;
-        //   });
-        // }
+            return true;
+          });
+        }
 
-        // // ⭐ Custom Date Range Filter (frontend only)
-        // if (query.startDate && query.endDate) {
-        //   rows = rows.filter(item => {
-        //     const created = new Date(item.createdAt);
-        //     return created >= new Date(query.startDate) &&
-        //       created <= new Date(query.endDate);
-        //   });
-        // }
+        // ⭐ Custom Date Range Filter (frontend only)
+        if (query.startDate && query.endDate) {
+          rows = rows.filter(item => {
+            const created = new Date(item.createdAt);
+            return created >= new Date(query.startDate) &&
+              created <= new Date(query.endDate);
+          });
+        }
 
-        // if (query.gender) {
-        //   rows = rows.filter(item => item.gender?.toLowerCase() == query.gender.toLowerCase());
-        // }
+        if (query.gender) {
+          rows = rows.filter(item => item.gender?.toLowerCase() == query.gender.toLowerCase());
+        }
 
 
         // Set filtered data
         setData(rows);
-        setTotalDataCount(response?.data?.data?.pagination?.total);
+        setTotalDataCount(rows.length);
 
       } else {
         ToastNotification.error("Error fetching data");
@@ -203,7 +203,7 @@ const Leads = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome,query.filter_date]);
+  }, [query.page_no, query.search, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome]);
 
   console.log(query.search, "query.search")
 

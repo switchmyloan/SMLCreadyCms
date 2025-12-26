@@ -181,42 +181,59 @@ function DataTable({
     setPagination((prev) => ({ ...prev, pageIndex: page - 1 }));
   };
 
-  const handleDateRangeApply = () => {
-    const { startDate, endDate } = dateRangeFilter;
+  // const handleDateRangeApply = () => {
+  //   const { startDate, endDate } = dateRangeFilter;
 
-    if (!startDate || !endDate) {
-      alert("Please select both a start date and an end date.");
-      return;
-    }
+  //   if (!startDate || !endDate) {
+  //     alert("Please select both a start date and an end date.");
+  //     return;
+  //   }
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  //   const start = new Date(startDate);
+  //   const end = new Date(endDate);
 
-    // 1. Basic Validation: Start Date vs End Date
-    if (start > end) {
-      alert("Start date cannot be after end date.");
-      return;
-    }
+  //   // 1. Basic Validation: Start Date vs End Date
+  //   if (start > end) {
+  //     alert("Start date cannot be after end date.");
+  //     return;
+  //   }
 
-    // 🛑 NEW/FIXED VALIDATION: Check for Future Date
-    const today = new Date();
+  //   // 🛑 NEW/FIXED VALIDATION: Check for Future Date
+  //   const today = new Date();
 
-    // Set both today and the selected end date to midnight for a pure date-only comparison
-    today.setHours(0, 0, 0, 0);
-    end.setHours(0, 0, 0, 0);
+  //   // Set both today and the selected end date to midnight for a pure date-only comparison
+  //   today.setHours(0, 0, 0, 0);
+  //   end.setHours(0, 0, 0, 0);
 
-    // Now, if the selected end date is strictly greater than today, it means it's a future day.
-    if (end > today) {
-      alert("End Date cannot be a future date.");
-      return;
-    }
-    // 🛑 END FIXED VALIDATION
+  //   // Now, if the selected end date is strictly greater than today, it means it's a future day.
+  //   if (end > today) {
+  //     alert("End Date cannot be a future date.");
+  //     return;
+  //   }
+  //   // 🛑 END FIXED VALIDATION
 
-    if (onFilterByRange) {
-      onFilterByRange(dateRangeFilter);
-      setShowDateRangeInputs(false);
-    }
-  };
+  //   if (onFilterByRange) {
+  //     onFilterByRange(dateRangeFilter);
+  //     setShowDateRangeInputs(false);
+  //   }
+  // };
+
+   const handleDateRangeApply = () => {
+        const { startDate, endDate } = dateRangeFilter;
+        if (!startDate || !endDate) return alert("Please select both start and end date");
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        if (start > end) return alert("Start date cannot be after end date");
+        if (end > today) return alert("End date cannot be in the future");
+
+        onFilterByRange && onFilterByRange({ startDate, endDate });
+        setShowDateRangeInputs(false);
+    };
 
   // Helper to format the active date range display
   const formatDateDisplay = (date) => date ? new Date(date).toLocaleDateString() : 'N/A';
