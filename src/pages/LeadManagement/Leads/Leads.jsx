@@ -292,7 +292,7 @@
 
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import DataTable from '@components/Table/DataTable';
+import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
@@ -453,7 +453,11 @@ const Leads = () => {
 
   const onSearchHandler = useCallback((term) => {
     setQuery(prev => ({ ...prev, search: term }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
+    // setPagination(p => ({ ...p, pageIndex: 10 }));
+    setPagination({
+    pageIndex: 0, 
+    pageSize: 10 
+  });
   }, []);
 
   const handleGenderFilter = useCallback((value) => {
@@ -505,6 +509,16 @@ const Leads = () => {
   ], [query.gender]);
 
   /* ========================= RENDER ========================= */
+
+  useEffect(() => {
+  const start = pagination.pageIndex * pagination.pageSize;
+  const end = start + pagination.pageSize;
+
+  const slicedData = filteredData.slice(start, end);
+  
+  setData(slicedData);
+  setTotalDataCount(filteredData.length);
+}, [filteredData, pagination]);
 
   return (
     <>

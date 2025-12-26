@@ -815,6 +815,35 @@ export const signInColumns = ({ handleEdit, handleDelete }) => [
     },
   },
   {
+    header: 'Created At',
+    accessorKey: 'createdAt',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      };
+
+      // Create a new formatter for the 'en-IN' locale (English - India)
+      const formatter = new Intl.DateTimeFormat('en-IN', options);
+
+      // Format the date and replace the space with a forward slash
+      const formattedDate = formatter.format(date).replace(/ /g, ' ');
+
+      return (
+        <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
     header: 'Actions',
     accessorKey: 'actions',
     cell: ({ row }) => {

@@ -148,7 +148,7 @@
 
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import DataTable from '@components/Table/DataTable';
+import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
@@ -173,6 +173,8 @@ const SignInUsers = () => {
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
 
+  const [rawData, setRawData] = useState([]);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10
@@ -196,51 +198,95 @@ const SignInUsers = () => {
     try {
       setLoading(true);
 
-      const response = await getInAppLeads(
-        query.page_no,
-        query.limit,
-        query.search,
-        query.gender,
-        query.minIncome,
-        query.maxIncome,
-        query.filter_date
-      );
+      const response = await getInAppLeads();
 
       if (response?.data?.success) {
-        let rows = response?.data?.data?.rows || [];
-
-        // ✅ FRONTEND INCOME FILTER (SAFE)
-        if (
-          query.minIncome !== undefined &&
-          query.maxIncome !== undefined
-        ) {
-          rows = rows.filter(item => {
-            const income = Number(
-              String(
-                item.income ||
-                item.monthlyIncome ||
-                item.salary ||
-                0
-              ).replace(/,/g, '')
-            );
-
-            return income >= query.minIncome && income <= query.maxIncome;
-          });
-        }
-
-        setData(rows);
-        setTotalDataCount(response?.data?.data?.pagination?.total || rows.length);
+        setRawData(response.data.data.rows || []);
       } else {
-        ToastNotification.error('Error fetching data');
+        ToastNotification.error("Failed to fetch leads");
       }
-    } catch (error) {
-      console.error(error);
-      ToastNotification.error('Failed to fetch data');
+    } catch (err) {
+      ToastNotification.error("API Error");
     } finally {
       setLoading(false);
     }
   };
 
+  const filteredData = useMemo(() => {
+    let rows = [...rawData];
+
+    // 🔍 SEARCH
+    if (query.search) {
+      const term = query.search.toLowerCase();
+      rows = rows.filter(item =>
+        item.firstName?.toLowerCase().includes(term) ||
+        item.lastName?.toLowerCase().includes(term) ||
+        item.emailAddress?.toLowerCase().includes(term) ||
+        item.phoneNumber?.includes(term)
+      );
+    }
+
+    // 👤 GENDER
+    if (query.gender) {
+      rows = rows.filter(r => r.gender?.toLowerCase() === query.gender);
+    }
+
+    // 💰 INCOME
+    if (
+      query.minIncome !== undefined &&
+      query.maxIncome !== undefined
+    ) {
+      rows = rows.filter(item => {
+        const income = Number(
+          String(item.income || item.monthlyIncome || 0).replace(/,/g, '')
+        );
+        return income >= query.minIncome && income <= query.maxIncome;
+      });
+    }
+
+    // 📅 TODAY / YESTERDAY
+    if (query.filter_date) {
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      rows = rows.filter(item => {
+        const created = new Date(item.createdAt);
+
+        if (query.filter_date === 'today') {
+          return created.toDateString() === today.toDateString();
+        }
+
+        if (query.filter_date === 'yesterday') {
+          return created.toDateString() === yesterday.toDateString();
+        }
+
+        return true;
+      });
+    }
+
+    // 📆 CUSTOM RANGE
+    if (query.startDate && query.endDate) {
+      rows = rows.filter(item => {
+        const created = new Date(item.createdAt);
+        return (
+          created >= new Date(query.startDate) &&
+          created <= new Date(query.endDate)
+        );
+      });
+    }
+
+    return rows;
+  }, [rawData, query]);
+
+
+  useEffect(() => {
+    const start = pagination.pageIndex * pagination.pageSize;
+    const end = start + pagination.pageSize;
+
+    setData(filteredData.slice(start, end));
+    setTotalDataCount(filteredData.length);
+  }, [filteredData, pagination]);
   // ---------------- EDIT ----------------
   const handleEdit = (row) => {
     navigate(`/lead-detail/${row?.id}`, {
@@ -264,13 +310,23 @@ const SignInUsers = () => {
 
   // ---------------- SEARCH ----------------
   const onSearchHandler = useCallback((term) => {
-    setQuery(prev => ({
-      ...prev,
-      search: term,
-      page_no: 1
-    }));
-    setPagination(prev => ({ ...prev, pageIndex: 0 }));
+    setQuery(prev => ({ ...prev, search: term }));
+    // setPagination(p => ({ ...p, pageIndex: 10 }));
+    setPagination({
+      pageIndex: 0,
+      pageSize: 10
+    });
   }, []);
+
+  useEffect(() => {
+    const start = pagination.pageIndex * pagination.pageSize;
+    const end = start + pagination.pageSize;
+
+    const slicedData = filteredData.slice(start, end);
+
+    setData(slicedData);
+    setTotalDataCount(filteredData.length);
+  }, [filteredData, pagination]);
 
   const debouncedSearch = useMemo(
     () => debounce(onSearchHandler, 300),
@@ -359,16 +415,7 @@ const SignInUsers = () => {
   // ---------------- AUTO FETCH ----------------
   useEffect(() => {
     fetchBlogs();
-  }, [
-    query.page_no,
-    query.search,
-    query.filter_date,
-    query.startDate,
-    query.endDate,
-    query.gender,
-    query.minIncome,
-    query.maxIncome
-  ]);
+  }, []);
 
   // ---------------- UI ----------------
   return (
