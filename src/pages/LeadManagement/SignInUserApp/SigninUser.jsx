@@ -78,7 +78,7 @@
 //    const handleStatusFilter = useCallback(newStatus => {
 //     setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
 //   }, []);
-  
+
 
 //   const onSearchHandler = useCallback(term => {
 //     setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
@@ -109,7 +109,7 @@
 //   useEffect(() => {
 //     fetchBlogs();
 //   }, [query.page_no,  query.status]);
-  
+
 //   return (
 //     <>
 //       <Toaster />
@@ -171,6 +171,7 @@ const SignInUsers = () => {
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -196,11 +197,11 @@ const SignInUsers = () => {
 
       // ❗ DATE FILTER NOT SENT TO API
       const response = await getInAppLeads(
-       query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome
+        query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome
       );
 
       if (response?.data?.success) {
-         let rows = response?.data?.data?.rows || [];
+        let rows = response?.data?.data?.rows || [];
 
         // -------------------------------------------------
         // FRONTEND DATE FILTERS
@@ -350,6 +351,61 @@ const SignInUsers = () => {
     query.endDate
   ]);
 
+  const handleIncomeFilter = (value) => {
+    setActiveIncomeFilter(value);
+
+    // Reset
+    if (!value) {
+      setQuery(prev => ({
+        ...prev,
+        minIncome: undefined,
+        maxIncome: undefined,
+        page_no: 1,
+      }));
+      return;
+    }
+
+    const [min, max] = value.split('-');
+
+    const minIncome = Number(min);
+    const maxIncome = Number(max); // 👈 ALWAYS number
+
+    setQuery(prev => ({
+      ...prev,
+      minIncome,
+      maxIncome,
+      page_no: 1,
+    }));
+  };
+
+  const handleGenderFilter = useCallback((newGender) => {
+    setQuery(prev => ({ ...prev, gender: newGender, page_no: 1 }));
+  }, []);
+
+  const genderOptions = useMemo(() => [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' },
+    { label: 'Other', value: 'other' },
+  ], []);
+
+  const incomeRanges = [
+    { label: 'All', value: '' },
+    { label: 'Less than ₹20,000', value: '0-20000' },
+    { label: '₹20,001 - ₹50,000', value: '20001-50000' },
+    { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
+    { label: 'Above ₹1,00,000', value: '100001-100000000' }, // 👈 FIX
+  ];
+
+  const dynamicFiltersArray = useMemo(() => [
+    {
+      key: 'gender_filter',
+      label: 'Gender',
+      activeValue: query.gender,
+      options: genderOptions,
+      onChange: handleGenderFilter,
+    }
+  ], [query.gender, query.income, genderOptions, handleGenderFilter]);
+
   return (
     <>
       <Toaster />
@@ -381,8 +437,15 @@ const SignInUsers = () => {
           endDate: query.endDate
         }}
 
-        // activeStatusFilter={query.status}
+
         // onFilterChange={handleStatusFilter}
+        activeStatusFilter={query.status}
+
+        dynamicFilters={dynamicFiltersArray}
+
+        onFilterByIncome={handleIncomeFilter}
+        incomeRanges={incomeRanges}
+        activeIncomeFilter={activeIncomeFilter}
       />
     </>
   );

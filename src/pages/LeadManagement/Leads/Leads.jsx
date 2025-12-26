@@ -58,12 +58,12 @@ const Leads = () => {
   // ];
 
   const incomeRanges = [
-  { label: 'All', value: '' },
-  { label: 'Less than ₹20,000', value: '0-20000' },
-  { label: '₹20,001 - ₹50,000', value: '20001-50000' },
-  { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
-  { label: 'Above ₹1,00,000', value: '100001-100000000' }, // 👈 FIX
-];
+    { label: 'All', value: '' },
+    { label: 'Less than ₹20,000', value: '0-20000' },
+    { label: '₹20,001 - ₹50,000', value: '20001-50000' },
+    { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
+    { label: 'Above ₹1,00,000', value: '100001-100000000' }, // 👈 FIX
+  ];
 
 
 
@@ -219,31 +219,31 @@ const Leads = () => {
   ], [query.gender, query.income, genderOptions, handleGenderFilter]);
 
   const handleIncomeFilter = (value) => {
-  setActiveIncomeFilter(value);
+    setActiveIncomeFilter(value);
 
-  // Reset
-  if (!value) {
+    // Reset
+    if (!value) {
+      setQuery(prev => ({
+        ...prev,
+        minIncome: undefined,
+        maxIncome: undefined,
+        page_no: 1,
+      }));
+      return;
+    }
+
+    const [min, max] = value.split('-');
+
+    const minIncome = Number(min);
+    const maxIncome = Number(max); // 👈 ALWAYS number
+
     setQuery(prev => ({
       ...prev,
-      minIncome: undefined,
-      maxIncome: undefined,
+      minIncome,
+      maxIncome,
       page_no: 1,
     }));
-    return;
-  }
-
-  const [min, max] = value.split('-');
-
-  const minIncome = Number(min);
-  const maxIncome = Number(max); // 👈 ALWAYS number
-
-  setQuery(prev => ({
-    ...prev,
-    minIncome,
-    maxIncome,
-    page_no: 1,
-  }));
-};
+  };
 
 
 
