@@ -261,6 +261,7 @@ function DataTable({
   const handleSearch = (value) => {
     setGlobalFilter(value);
   };
+  
 
   return (
     <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm  pt-0 pb-0 ">

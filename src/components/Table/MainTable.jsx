@@ -1,54 +1,38 @@
 import React, { useEffect, useRef, useState } from 'react';
-
-import { Search } from "lucide-react";
+import {
+  Plus, ChevronLeft, ChevronRight,
+  ChevronsLeft, ChevronsRight,
+  RefreshCcw, Download, Calendar
+} from 'lucide-react';
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  RefreshCcw,
-  Download,
-  Calendar,
-} from 'lucide-react';
 
+import { Search } from "lucide-react";
 
-const DebouncedInput = ({ value: initialValue, onChange, onSearch, debounce = 1000, placeholder = "Search...", ...props }) => {
-  // States
+const DebouncedInput = ({
+  value: initialValue,
+  onChange,
+  debounce = 1000,
+  placeholder = "Search...",
+}) => {
   const [value, setValue] = useState(initialValue);
   const inputRef = useRef(null);
-  const mode = "light"
+
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      onChange(value);
+      onChange(value); // ✅ ONLY ONE SOURCE
     }, debounce);
 
     return () => clearTimeout(timeout);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, debounce, onChange]);
-
-  const handleSearch = () => {
-    if (onSearch) {
-      onSearch(value);
-    }
-    // console.log("Current Search Value:", value);
-  };
-
-  useEffect(() => {
-    // console.log(value, "sdad")
-    if (value !== '' && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [value]);
 
   return (
     <div className="relative flex items-center">
@@ -60,37 +44,42 @@ const DebouncedInput = ({ value: initialValue, onChange, onSearch, debounce = 10
         placeholder={placeholder}
         className="w-full rounded-full border border-gray-300 px-5 py-2.5 pr-12 text-sm text-gray-700 placeholder-gray-400 focus:border-[#6232FF] focus:ring-1 focus:ring-[#6232FF] outline-none transition"
       />
-      <button
-        type="button"
-        className="absolute right-3 text-gray-500 hover:text-[#6232FF] transition"
-      >
+      <span className="absolute right-3 text-gray-500">
         <Search size={20} />
-      </button>
+      </span>
     </div>
   );
 };
 
+
+
 function DataTable({
   columns,
   data,
+  onCreate,
+  createLabel = 'Create',
+  onRefresh,
   totalDataCount,
   onPageChange,
   onSearch,
-  loading,
-  title,
-  onRefresh,
+  title = "Page",
+  loading = false,
+  onExport,
   onFilterByDate,
   activeFilter,
   onFilterByRange,
-  activeDateRange,
+  activeDateRange = { startDate: null, endDate: null },
+  activeStatusFilter = 'success',
+  onFilterChange,
   dynamicFilters,
-  incomeRanges,
-  onFilterByIncome,
   activeIncomeFilter,
+  incomeRanges,
+  onFilterByIncome
 }) {
   const [sorting, setSorting] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState('');
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const [globalFilter, setGlobalFilter] = useState('');
+  const [selectedGoTo, setSelectedGoTo] = useState(1);
 
   const table = useReactTable({
     data,
@@ -99,30 +88,46 @@ function DataTable({
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    pageCount: Math.ceil(totalDataCount / pagination.pageSize),
   });
 
-  /* 🔥 Notify parent ONLY for pagination */
+  /* 🔥 Pagination → parent */
   useEffect(() => {
-    onPageChange && onPageChange(pagination);
+    onPageChange(pagination);
   }, [pagination]);
+
+  /* 🔥 Search → parent (ONLY PLACE) */
+  useEffect(() => {
+    onSearch && onSearch(globalFilter);
+  }, [globalFilter]);
+
+  useEffect(() => {
+    setSelectedGoTo(pagination.pageIndex + 1);
+  }, [pagination.pageIndex]);
+
+  const pageOptions = Array.from(
+    { length: Math.ceil(totalDataCount / pagination.pageSize) },
+    (_, i) => ({ value: i + 1, label: `Page ${i + 1}` })
+  );
 
   return (
     <div className="p-3 md:p-4 bg-gray-50 rounded-lg shadow-sm">
+
       {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-lg font-semibold">{title}</h1>
 
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
+
           {incomeRanges && (
             <select
-              value={activeIncomeFilter}
+              value={activeIncomeFilter || ''}
               onChange={(e) => onFilterByIncome(e.target.value)}
               className="p-1.5 border rounded text-sm"
             >
               {incomeRanges.map(opt => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
           )}
@@ -147,12 +152,18 @@ function DataTable({
 
           <DebouncedInput
             value={globalFilter}
-            onChange={(val) => {
-              setGlobalFilter(val);
-              onSearch && onSearch(val);
-            }}
+            onChange={setGlobalFilter}
             placeholder="Search..."
           />
+
+          {onCreate && (
+            <button
+              onClick={onCreate}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg"
+            >
+              {createLabel}
+            </button>
+          )}
         </div>
       </div>
 
@@ -169,6 +180,7 @@ function DataTable({
             </tr>
           ))}
         </thead>
+
         <tbody>
           {loading ? (
             <tr><td colSpan={columns.length}>Loading...</td></tr>
@@ -191,7 +203,7 @@ function DataTable({
       {/* PAGINATION */}
       <div className="flex justify-between items-center mt-2">
         <span className="text-sm">
-          Page {pagination.pageIndex + 1} of {Math.ceil(totalDataCount / pagination.pageSize)}
+          Page {pagination.pageIndex + 1} of {table.getPageCount()}
         </span>
 
         <div className="flex gap-1">
@@ -204,7 +216,7 @@ function DataTable({
           <button onClick={() => setPagination(p => ({ ...p, pageIndex: p.pageIndex + 1 }))}>
             <ChevronRight size={16} />
           </button>
-          <button onClick={() => setPagination(p => ({ ...p, pageIndex: Math.ceil(totalDataCount / p.pageSize) - 1 }))}>
+          <button onClick={() => setPagination(p => ({ ...p, pageIndex: table.getPageCount() - 1 }))}>
             <ChevronsRight size={16} />
           </button>
         </div>
