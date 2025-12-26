@@ -9,7 +9,7 @@ import Api from "../api";
 //     )
 // };
 
-export const getLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome) => {
+export const getLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome,filter_date) => {
     // Base URL
     const baseUrl = `/leads/admin/in-web-leads`;
 
@@ -20,6 +20,7 @@ export const getLeads = async (pageNo, limit, globalFilter, gender, minIncome, m
     if (limit) params.append('perPage', limit);
     if (globalFilter) params.append('search', globalFilter);
     if (gender) params.append('gender', gender);
+    if (filter_date) params.append('type', filter_date);
     if (minIncome !== undefined && minIncome !== null) params.append('minIncome', Number(minIncome));
     if (maxIncome !== undefined && maxIncome !== null) params.append('maxIncome', Number(maxIncome));
 
@@ -30,7 +31,7 @@ export const getLeads = async (pageNo, limit, globalFilter, gender, minIncome, m
     });
 };
 
-export const getInAppLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome) => {
+export const getInAppLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome,filter_date) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
 
@@ -41,6 +42,7 @@ export const getInAppLeads = async (pageNo, limit, globalFilter, gender, minInco
     if (limit) params.append('perPage', limit);
     if (globalFilter) params.append('search', globalFilter);
     if (gender) params.append('gender', gender);
+    if (filter_date) params.append('type', filter_date);
     if (minIncome !== undefined && minIncome !== null) params.append('minIncome', Number(minIncome));
     if (maxIncome !== undefined && maxIncome !== null) params.append('maxIncome', Number(maxIncome));
 

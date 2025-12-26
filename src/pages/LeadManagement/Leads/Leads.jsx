@@ -86,7 +86,7 @@ const Leads = () => {
       setLoading(true);
 
       // Fetch without date filter
-      const response = await getLeads(query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome);
+      const response = await getLeads(query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome, query.filter_date);
 
       if (response?.data?.success) {
         let rows = response?.data?.data?.rows || [];
@@ -203,7 +203,7 @@ const Leads = () => {
 
   useEffect(() => {
     fetchBlogs();
-  }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome]);
+  }, [query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome,query.filter_date]);
 
   console.log(query.search, "query.search")
 

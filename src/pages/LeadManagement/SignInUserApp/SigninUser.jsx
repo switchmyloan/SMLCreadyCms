@@ -197,7 +197,7 @@ const SignInUsers = () => {
 
       // ❗ DATE FILTER NOT SENT TO API
       const response = await getInAppLeads(
-        query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome
+        query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome, query.filter_date
       );
 
       if (response?.data?.success) {
@@ -342,7 +342,7 @@ const SignInUsers = () => {
   useEffect(() => {
     fetchBlogs();
   }, [
- query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome
+ query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome, query.filter_date
   ]);
 
   const handleIncomeFilter = (value) => {
