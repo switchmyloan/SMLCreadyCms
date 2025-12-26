@@ -298,6 +298,8 @@ import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { getLeads } from '../../../api-services/Modules/Leads';
 import { leadsColumn } from '../../../components/TableHeader';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 
 const Leads = () => {
   const navigate = useNavigate();
@@ -455,9 +457,9 @@ const Leads = () => {
     setQuery(prev => ({ ...prev, search: term }));
     // setPagination(p => ({ ...p, pageIndex: 10 }));
     setPagination({
-    pageIndex: 0, 
-    pageSize: 10 
-  });
+      pageIndex: 0,
+      pageSize: 10
+    });
   }, []);
 
   const handleGenderFilter = useCallback((value) => {
@@ -508,17 +510,117 @@ const Leads = () => {
     }
   ], [query.gender]);
 
-  /* ========================= RENDER ========================= */
+const handleExport = async () => {
+  if (!rawData || rawData.length === 0) {
+    ToastNotification.error("No data to export");
+    return;
+  }
 
-  useEffect(() => {
-  const start = pagination.pageIndex * pagination.pageSize;
-  const end = start + pagination.pageSize;
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Leads Lender Offers');
 
-  const slicedData = filteredData.slice(start, end);
-  
-  setData(slicedData);
-  setTotalDataCount(filteredData.length);
-}, [filteredData, pagination]);
+  /* =========================
+     STEP 1: GET ALL UNIQUE LENDERS
+  ========================= */
+
+  const allLenders = Array.from(
+    new Set(
+      rawData.flatMap(item =>
+        item.lender_responses?.map(lr => lr?.lender?.name)
+      )
+    )
+  ).filter(Boolean);
+
+  /* =========================
+     STEP 2: DEFINE COLUMNS
+  ========================= */
+
+  worksheet.columns = [
+    { header: 'First Name', key: 'firstName', width: 15 },
+    { header: 'Last Name', key: 'lastName', width: 15 },
+       { header: 'Email', key: 'email', width: 25 },
+    { header: 'Phone', key: 'phone', width: 15 },
+    { header: 'Income', key: 'income', width: 15 },
+    { header: 'Created At', key: 'createdAt', width: 15 },
+
+    // 🔥 dynamic lender columns
+    ...allLenders.map(lender => ({
+      header: lender,
+      key: lender,
+      width: 15,
+    })),
+
+ 
+  ];
+
+  /* =========================
+     STEP 3: HEADER STYLING
+  ========================= */
+
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+  worksheet.getRow(1).eachCell(cell => {
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFEFEFEF' },
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' },
+    };
+  });
+
+  /* =========================
+     STEP 4: ADD ROWS
+  ========================= */
+
+  rawData.forEach(item => {
+    const lenderStatusMap = {};
+
+    // default = No for all lenders
+    allLenders.forEach(lender => {
+      lenderStatusMap[lender] = 'No';
+    });
+
+    // mark Yes where offer exists
+    item.lender_responses?.forEach(lr => {
+      const lenderName = lr?.lender?.name;
+      if (lenderName && lr.isOffer) {
+        lenderStatusMap[lenderName] = 'Yes';
+      }
+    });
+
+    worksheet.addRow({
+      firstName: item.firstName || 'N/A',
+      lastName: item.lastName || 'N/A',
+       email: item.emailAddress || 'N/A',
+      phone: item.phoneNumber || 'N/A',
+      income: item.income || item.monthlyIncome || 0,
+      createdAt: item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString()
+        : 'N/A',
+      ...lenderStatusMap
+    });
+  });
+
+  /* =========================
+     STEP 5: DOWNLOAD FILE
+  ========================= */
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  });
+
+  saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
+  ToastNotification.success("Excel exported successfully!");
+};
+
+
 
   return (
     <>
@@ -548,6 +650,8 @@ const Leads = () => {
         onFilterByIncome={handleIncomeFilter}
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
+
+        onExport={handleExport}
       />
     </>
   );
