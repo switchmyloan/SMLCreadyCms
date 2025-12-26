@@ -342,13 +342,7 @@ const SignInUsers = () => {
   useEffect(() => {
     fetchBlogs();
   }, [
-    query.page_no,
-    query.limit,
-    query.search,
-    query.status,
-    query.filter_date,
-    query.startDate,
-    query.endDate
+ query.page_no, query.search, query.filter_date, query.startDate, query.endDate, query.gender, query.minIncome, query.maxIncome
   ]);
 
   const handleIncomeFilter = (value) => {
