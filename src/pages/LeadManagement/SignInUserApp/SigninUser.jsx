@@ -196,61 +196,57 @@ const SignInUsers = () => {
 
       // ❗ DATE FILTER NOT SENT TO API
       const response = await getInAppLeads(
-        query.page_no,
-        query.limit,
-        query.search,
-        query.status
+       query.page_no, query.limit, query.search, query.gender, query.minIncome, query.maxIncome
       );
 
       if (response?.data?.success) {
-        let rows = response?.data?.data?.rows || [];
+         let rows = response?.data?.data?.rows || [];
 
         // -------------------------------------------------
         // FRONTEND DATE FILTERS
         // -------------------------------------------------
 
         // QUICK DATE FILTER (today/yesterday/7 days)
-        if (query.filter_date) {
-          const today = new Date();
+        // if (query.filter_date) {
+        //   const today = new Date();
 
-          rows = rows.filter(item => {
-            const d = new Date(item.createdAt);
+        //   rows = rows.filter(item => {
+        //     const d = new Date(item.createdAt);
 
-            if (query.filter_date === "today") {
-              return d.toDateString() === today.toDateString();
-            }
+        //     if (query.filter_date === "today") {
+        //       return d.toDateString() === today.toDateString();
+        //     }
 
-            if (query.filter_date === "yesterday") {
-              const y = new Date();
-              y.setDate(y.getDate() - 1);
-              return d.toDateString() === y.toDateString();
-            }
+        //     if (query.filter_date === "yesterday") {
+        //       const y = new Date();
+        //       y.setDate(y.getDate() - 1);
+        //       return d.toDateString() === y.toDateString();
+        //     }
 
-            if (query.filter_date === "last_7_days") {
-              const last7 = new Date();
-              last7.setDate(last7.getDate() - 7);
-              return d >= last7 && d <= today;
-            }
+        //     if (query.filter_date === "last_7_days") {
+        //       const last7 = new Date();
+        //       last7.setDate(last7.getDate() - 7);
+        //       return d >= last7 && d <= today;
+        //     }
 
-            return true;
-          });
-        }
+        //     return true;
+        //   });
+        // }
 
-        // DATE RANGE FILTER
-        if (query.startDate && query.endDate) {
-          const s = new Date(query.startDate);
-          const e = new Date(query.endDate);
+        // // DATE RANGE FILTER
+        // if (query.startDate && query.endDate) {
+        //   const s = new Date(query.startDate);
+        //   const e = new Date(query.endDate);
 
-          rows = rows.filter(item => {
-            const d = new Date(item.createdAt);
-            return d >= s && d <= e;
-          });
-        }
+        //   rows = rows.filter(item => {
+        //     const d = new Date(item.createdAt);
+        //     return d >= s && d <= e;
+        //   });
+        // }
 
         // SET DATA
-        setTotalDataCount(rows.length);
         setData(rows);
-
+        setTotalDataCount(response?.data?.data?.pagination?.total);
       } else {
         ToastNotification.error("Error fetching data");
       }
