@@ -9,6 +9,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportModal from '../../../components/ExportModal';
+import { leadsColumn } from '../../../components/TableHeader';
 
 
 // ---------------- DEBOUNCE ----------------
@@ -622,7 +623,7 @@ const SignInUsers = () => {
         loading={loading}
       />
       <DataTable
-        columns={signInColumns({ handleEdit })}
+        columns={leadsColumn({ handleEdit })}
         title="Sign In Users"
 
         data={data}
