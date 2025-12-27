@@ -559,23 +559,23 @@ const SignInUsers = () => {
     {
       title: "Loan Amount",
       value: Number(summaryMetrics.totalLoanAmount) || 0,
-      icon: "CheckCircle",
+      icon: "Wallet",
       color: "text-green-600",
       bg: "bg-green-50"
     },
     {
       title: "Total Offers",
       value: Number(summaryMetrics.totalOffers) || 0,
-      icon: "XCircle",
-      color: "text-red-600",
-      bg: "bg-red-50"
+      icon: "BadgePercent",
+      color: "text-green-600",
+      bg: "bg-green-50"
     },
     {
       title: "Users With Offers",
       value: Number(summaryMetrics.usersWithOffers) || 0,
-      icon: "TriangleAlert",
-      color: "text-yellow-600",
-      bg: "bg-yellow-50"
+      icon: "UserCheck",
+      color: "text-purple-600",
+      bg: "bg-purple-50"
     }
   ], [summaryMetrics]);
   return (

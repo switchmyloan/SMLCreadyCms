@@ -78,7 +78,7 @@
 
 // SummaryCards.jsx
 import React from 'react';
-import { Users, CheckCircle, XCircle, TriangleAlert, ShieldOff, Clock, LineChart } from 'lucide-react';
+import { Users, CheckCircle, XCircle, TriangleAlert, ShieldOff, Clock, LineChart, BadgePercent, Wallet,IndianRupee, UserCheck} from 'lucide-react';
 
 // Mapping string names to actual Lucide icon components
 const iconMap = {
@@ -89,6 +89,10 @@ const iconMap = {
   ShieldOff,
   Clock,
   LineChart,
+  Wallet,
+  BadgePercent,
+  IndianRupee,
+  UserCheck
   // Add any other Lucide icons you might use in different modules
 };
 

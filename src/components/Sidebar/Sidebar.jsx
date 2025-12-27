@@ -329,13 +329,16 @@ import {
   BookOpen,
   ClipboardList,
   ShieldCheck,
-  Settings
+  Settings,
+  Phone,
+  Users2,
+  LucideMonitor
 } from "lucide-react";
 
 const ICONS = {
   Home, FileText, Users, HelpCircle, Newspaper, MessageSquare,
   UserPlus, UserMinus, UserCheck, Building2, BookOpen, ClipboardList,
-  ShieldCheck, Settings
+  ShieldCheck, Settings,Phone,Users2,LucideMonitor
 };
 
 function Sidebar({ onClose, collapsed, onToggleCollapse }) {
