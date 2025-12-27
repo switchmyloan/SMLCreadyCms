@@ -156,6 +156,7 @@ import { signInColumns } from '@components/TableHeader';
 import { getInAppLeads } from '../../../api-services/Modules/Leads';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import SummaryCards from '../../../components/SummaryCards';
 
 
 // ---------------- DEBOUNCE ----------------
@@ -183,6 +184,14 @@ const SignInUsers = () => {
     pageSize: 10
   });
 
+
+  const [summaryMetrics, setSummaryMetrics] = useState({
+    totalUsers: 0,
+    totalLoanAmount: 0,
+    totalOffers: 0,
+    usersWithOffers: 0
+  });
+
   const [query, setQuery] = useState({
     page_no: 1,
     limit: 10,
@@ -205,6 +214,13 @@ const SignInUsers = () => {
 
       if (response?.data?.success) {
         setRawData(response.data.data.rows || []);
+
+        setSummaryMetrics({
+          totalUsers: response?.data?.data?.summary?.totalUsers || 10,
+          totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
+          totalOffers: response?.data?.data?.summary?.totalOffers,
+          usersWithOffers: response?.data?.data?.summary?.usersWithOffers,
+        });
       } else {
         ToastNotification.error("Failed to fetch leads");
       }
@@ -426,14 +442,14 @@ const SignInUsers = () => {
       ToastNotification.error("No data to export");
       return;
     }
-  
+
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Leads Lender Offers');
-  
+
     /* =========================
        STEP 1: GET ALL UNIQUE LENDERS
     ========================= */
-  
+
     const allLenders = Array.from(
       new Set(
         rawData.flatMap(item =>
@@ -441,36 +457,36 @@ const SignInUsers = () => {
         )
       )
     ).filter(Boolean);
-  
+
     /* =========================
        STEP 2: DEFINE COLUMNS
     ========================= */
-  
+
     worksheet.columns = [
       { header: 'First Name', key: 'firstName', width: 15 },
       { header: 'Last Name', key: 'lastName', width: 15 },
-         { header: 'Email', key: 'email', width: 25 },
+      { header: 'Email', key: 'email', width: 25 },
       { header: 'Phone', key: 'phone', width: 15 },
       { header: 'Income', key: 'income', width: 15 },
       { header: 'Created At', key: 'createdAt', width: 15 },
-  
+
       // 🔥 dynamic lender columns
       ...allLenders.map(lender => ({
         header: lender,
         key: lender,
         width: 15,
       })),
-  
-   
+
+
     ];
-  
+
     /* =========================
        STEP 3: HEADER STYLING
     ========================= */
-  
+
     worksheet.getRow(1).font = { bold: true };
     worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-  
+
     worksheet.getRow(1).eachCell(cell => {
       cell.fill = {
         type: 'pattern',
@@ -484,19 +500,19 @@ const SignInUsers = () => {
         right: { style: 'thin' },
       };
     });
-  
+
     /* =========================
        STEP 4: ADD ROWS
     ========================= */
-  
+
     rawData.forEach(item => {
       const lenderStatusMap = {};
-  
+
       // default = No for all lenders
       allLenders.forEach(lender => {
         lenderStatusMap[lender] = 'No';
       });
-  
+
       // mark Yes where offer exists
       item.lender_responses?.forEach(lr => {
         const lenderName = lr?.lender?.name;
@@ -504,11 +520,11 @@ const SignInUsers = () => {
           lenderStatusMap[lenderName] = 'Yes';
         }
       });
-  
+
       worksheet.addRow({
         firstName: item.firstName || 'N/A',
         lastName: item.lastName || 'N/A',
-         email: item.emailAddress || 'N/A',
+        email: item.emailAddress || 'N/A',
         phone: item.phoneNumber || 'N/A',
         income: item.income || item.monthlyIncome || 0,
         createdAt: item.createdAt
@@ -517,23 +533,59 @@ const SignInUsers = () => {
         ...lenderStatusMap
       });
     });
-  
+
     /* =========================
        STEP 5: DOWNLOAD FILE
     ========================= */
-  
+
     const buffer = await workbook.xlsx.writeBuffer();
     const blob = new Blob([buffer], {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-  
+
     saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
     ToastNotification.success("Excel exported successfully!");
   };
+
+
+  const dynamicMetrics = useMemo(() => [
+    {
+      title: "Total Users",
+      value: Number(summaryMetrics.totalUsers) || 0,
+      icon: "Users",
+      color: "text-blue-600",
+      bg: "bg-blue-50"
+    },
+    {
+      title: "Loan Amount",
+      value: Number(summaryMetrics.totalLoanAmount) || 0,
+      icon: "CheckCircle",
+      color: "text-green-600",
+      bg: "bg-green-50"
+    },
+    {
+      title: "Total Offers",
+      value: Number(summaryMetrics.totalOffers) || 0,
+      icon: "XCircle",
+      color: "text-red-600",
+      bg: "bg-red-50"
+    },
+    {
+      title: "Users With Offers",
+      value: Number(summaryMetrics.usersWithOffers) || 0,
+      icon: "TriangleAlert",
+      color: "text-yellow-600",
+      bg: "bg-yellow-50"
+    }
+  ], [summaryMetrics]);
   return (
     <>
       <Toaster />
 
+      <SummaryCards
+        metrics={dynamicMetrics}
+        loading={loading}
+      />
       <DataTable
         columns={signInColumns({ handleEdit })}
         title="Sign In Users"

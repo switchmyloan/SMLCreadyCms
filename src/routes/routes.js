@@ -31,6 +31,16 @@ export const routes = [
     roles: ["admin", "super-admin"],
   },
   {
+    path: "/all-leads",
+    label: "All Leads",
+    icon: "ClipboardList", // ✅ leads list
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1,
+    order: 3,
+    roles: ["admin", "super-admin"],
+  },
+  {
     path: "/archive-users",
     label: "Archive users",
     icon: "UserMinus", // ✅ archived users

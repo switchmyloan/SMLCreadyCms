@@ -8,6 +8,13 @@ export const getLeads = async () => {
         }
     )
 };
+export const getAllLeads = async () => {
+    return Api().get(`/leads/admin/all-leads`,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
 
 // export const getLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome,fromDate,toDate) => {
 //     // Base URL
