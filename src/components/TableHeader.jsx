@@ -962,7 +962,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
 
           {/* ADD USERS */}
           <button
-            onClick={() => handleAddUsers(item.id)}
+            onClick={() => handleAddUsers(item)}
             className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
           >
             <FaUserPlus size={18} />

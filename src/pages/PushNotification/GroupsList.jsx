@@ -38,6 +38,7 @@ export default function GroupList() {
   };
 
   const fetchSingleGroup = async (id) => {
+    console.log(id)
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/push-notification/admin/group/${id}`
@@ -86,7 +87,8 @@ export default function GroupList() {
     console.log("Edit group:", group);
     setEditId(group.id);
     setIsModalOpen(true);
-    fetchSingleGroup(group.id);
+    // fetchSingleGroup(group);
+    setGroupName(group?.title)
   };
 
   const updateGroup = async () => {
@@ -128,7 +130,8 @@ export default function GroupList() {
 
 
   const handleAddUsers = (groupId) => {
-    navigate(`/group/create?id=${groupId}`);
+    console.log(groupId)
+    navigate(`/group/create?name=${groupId?.title}&groupId=${groupId?.id}`);
   };
 
   useEffect(() => {

@@ -45,12 +45,19 @@ export default function PushNotificationList() {
     fetchGroups();
   }, []);
 
+   const handleEdit = (group) => {
+    console.log("Edit group:", group);
+    setEditId(group.id);
+    navigate('/push-notification')
+  };
+
   return (
     <div className="p-6">
       <Toaster />
       <DataTable
         columns={pushNotificationColumns({
-          sendNotification
+          sendNotification,
+          handleEdit
         })}
         data={groups}
         loading={loading}
