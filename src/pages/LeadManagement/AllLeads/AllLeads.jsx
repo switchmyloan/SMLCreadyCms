@@ -10,7 +10,77 @@ import { leadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
+import ExportModal from '../../../components/ExportModal';
 
+
+
+const exportToExcel = async (rawData) => {
+  if (!rawData || rawData.length === 0) {
+    ToastNotification.error("No data to export");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Leads Lender Offers");
+
+  const allLenders = Array.from(
+    new Set(
+      rawData.flatMap(item =>
+        item.lender_responses?.map(lr => lr?.lender?.name)
+      )
+    )
+  ).filter(Boolean);
+
+  worksheet.columns = [
+    { header: "First Name", key: "firstName", width: 15 },
+    { header: "Last Name", key: "lastName", width: 15 },
+    { header: "Email", key: "email", width: 25 },
+    { header: "Phone", key: "phone", width: 15 },
+    { header: "Income", key: "income", width: 15 },
+    { header: "Created At", key: "createdAt", width: 15 },
+    ...allLenders.map(lender => ({
+      header: lender,
+      key: lender,
+      width: 15,
+    })),
+  ];
+
+  worksheet.getRow(1).font = { bold: true };
+
+  rawData.forEach(item => {
+    const lenderStatusMap = {};
+
+    allLenders.forEach(lender => {
+      lenderStatusMap[lender] = "No";
+    });
+
+    item.lender_responses?.forEach(lr => {
+      const lenderName = lr?.lender?.name;
+      if (lenderName && lr.isOffer) {
+        lenderStatusMap[lenderName] = "Yes";
+      }
+    });
+
+    worksheet.addRow({
+      firstName: item.firstName || "N/A",
+      lastName: item.lastName || "N/A",
+      email: item.emailAddress || "N/A",
+      phone: item.phoneNumber || "N/A",
+      income: item.income || item.monthlyIncome || 0,
+      createdAt: item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("en-IN")
+        : "N/A",
+      ...lenderStatusMap,
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, "All_Leads_Report.xlsx");
+};
 const AllLeads = () => {
   const navigate = useNavigate();
 
@@ -19,6 +89,8 @@ const AllLeads = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const [summaryMetrics, setSummaryMetrics] = useState({
     totalLeads: 0,
@@ -290,114 +362,154 @@ const AllLeads = () => {
     }
   ], [query.gender, query.minAge, query.maxAge]);
 
-  const handleExport = async () => {
-    if (!rawData || rawData.length === 0) {
-      ToastNotification.error("No data to export");
-      return;
+  // const handleExport = async () => {
+  //   if (!rawData || rawData.length === 0) {
+  //     ToastNotification.error("No data to export");
+  //     return;
+  //   }
+
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet('Leads Lender Offers');
+
+  //   /* =========================
+  //      STEP 1: GET ALL UNIQUE LENDERS
+  //   ========================= */
+
+  //   const allLenders = Array.from(
+  //     new Set(
+  //       rawData.flatMap(item =>
+  //         item.lender_responses?.map(lr => lr?.lender?.name)
+  //       )
+  //     )
+  //   ).filter(Boolean);
+
+  //   /* =========================
+  //      STEP 2: DEFINE COLUMNS
+  //   ========================= */
+
+  //   worksheet.columns = [
+  //     { header: 'First Name', key: 'firstName', width: 15 },
+  //     { header: 'Last Name', key: 'lastName', width: 15 },
+  //     { header: 'Email', key: 'email', width: 25 },
+  //     { header: 'Phone', key: 'phone', width: 15 },
+  //     { header: 'Income', key: 'income', width: 15 },
+  //     { header: 'Created At', key: 'createdAt', width: 15 },
+
+  //     // 🔥 dynamic lender columns
+  //     ...allLenders.map(lender => ({
+  //       header: lender,
+  //       key: lender,
+  //       width: 15,
+  //     })),
+
+
+  //   ];
+
+  //   /* =========================
+  //      STEP 3: HEADER STYLING
+  //   ========================= */
+
+  //   worksheet.getRow(1).font = { bold: true };
+  //   worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+  //   worksheet.getRow(1).eachCell(cell => {
+  //     cell.fill = {
+  //       type: 'pattern',
+  //       pattern: 'solid',
+  //       fgColor: { argb: 'FFEFEFEF' },
+  //     };
+  //     cell.border = {
+  //       top: { style: 'thin' },
+  //       left: { style: 'thin' },
+  //       bottom: { style: 'thin' },
+  //       right: { style: 'thin' },
+  //     };
+  //   });
+
+  //   /* =========================
+  //      STEP 4: ADD ROWS
+  //   ========================= */
+
+  //   rawData.forEach(item => {
+  //     const lenderStatusMap = {};
+
+  //     // default = No for all lenders
+  //     allLenders.forEach(lender => {
+  //       lenderStatusMap[lender] = 'No';
+  //     });
+
+  //     // mark Yes where offer exists
+  //     item.lender_responses?.forEach(lr => {
+  //       const lenderName = lr?.lender?.name;
+  //       if (lenderName && lr.isOffer) {
+  //         lenderStatusMap[lenderName] = 'Yes';
+  //       }
+  //     });
+
+  //     worksheet.addRow({
+  //       firstName: item.firstName || 'N/A',
+  //       lastName: item.lastName || 'N/A',
+  //       email: item.emailAddress || 'N/A',
+  //       phone: item.phoneNumber || 'N/A',
+  //       income: item.income || item.monthlyIncome || 0,
+  //       createdAt: item.createdAt
+  //         ? new Date(item.createdAt).toLocaleDateString()
+  //         : 'N/A',
+  //       ...lenderStatusMap
+  //     });
+  //   });
+
+  //   /* =========================
+  //      STEP 5: DOWNLOAD FILE
+  //   ========================= */
+
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //   });
+
+  //   saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
+  //   ToastNotification.success("Excel exported successfully!");
+  // };
+
+  const filterDataByDate = (data, startDate, endDate) => {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    return data.filter(item => {
+      if (!item.createdAt) return false;
+      const created = new Date(item.createdAt);
+      return created >= start && created <= end;
+    });
+  };
+
+
+  const handleExport = async ({ startDate, endDate, mode }) => {
+    try {
+      setIsExporting(true);
+
+      // 🔥 STEP 1: FILTER FRONTEND DATA
+      const filteredData = filterDataByDate(rawData, startDate, endDate);
+
+      if (!filteredData.length) {
+        ToastNotification.error("No data found for selected date range");
+        return;
+      }
+
+      // 🔥 STEP 2: EXCEL EXPORT (tumhara existing code)
+      await exportToExcel(filteredData);
+
+      ToastNotification.success("Excel exported successfully");
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      ToastNotification.error("Export failed");
+    } finally {
+      setIsExporting(false);
     }
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Leads Lender Offers');
-
-    /* =========================
-       STEP 1: GET ALL UNIQUE LENDERS
-    ========================= */
-
-    const allLenders = Array.from(
-      new Set(
-        rawData.flatMap(item =>
-          item.lender_responses?.map(lr => lr?.lender?.name)
-        )
-      )
-    ).filter(Boolean);
-
-    /* =========================
-       STEP 2: DEFINE COLUMNS
-    ========================= */
-
-    worksheet.columns = [
-      { header: 'First Name', key: 'firstName', width: 15 },
-      { header: 'Last Name', key: 'lastName', width: 15 },
-      { header: 'Email', key: 'email', width: 25 },
-      { header: 'Phone', key: 'phone', width: 15 },
-      { header: 'Income', key: 'income', width: 15 },
-      { header: 'Created At', key: 'createdAt', width: 15 },
-
-      // 🔥 dynamic lender columns
-      ...allLenders.map(lender => ({
-        header: lender,
-        key: lender,
-        width: 15,
-      })),
-
-
-    ];
-
-    /* =========================
-       STEP 3: HEADER STYLING
-    ========================= */
-
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-    worksheet.getRow(1).eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFEFEFEF' },
-      };
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
-      };
-    });
-
-    /* =========================
-       STEP 4: ADD ROWS
-    ========================= */
-
-    rawData.forEach(item => {
-      const lenderStatusMap = {};
-
-      // default = No for all lenders
-      allLenders.forEach(lender => {
-        lenderStatusMap[lender] = 'No';
-      });
-
-      // mark Yes where offer exists
-      item.lender_responses?.forEach(lr => {
-        const lenderName = lr?.lender?.name;
-        if (lenderName && lr.isOffer) {
-          lenderStatusMap[lenderName] = 'Yes';
-        }
-      });
-
-      worksheet.addRow({
-        firstName: item.firstName || 'N/A',
-        lastName: item.lastName || 'N/A',
-        email: item.emailAddress || 'N/A',
-        phone: item.phoneNumber || 'N/A',
-        income: item.income || item.monthlyIncome || 0,
-        createdAt: item.createdAt
-          ? new Date(item.createdAt).toLocaleDateString()
-          : 'N/A',
-        ...lenderStatusMap
-      });
-    });
-
-    /* =========================
-       STEP 5: DOWNLOAD FILE
-    ========================= */
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-
-    saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
-    ToastNotification.success("Excel exported successfully!");
   };
 
   const dynamicMetrics = useMemo(() => [
@@ -431,12 +543,27 @@ const AllLeads = () => {
     }
   ], [summaryMetrics]);
 
+   const handleOpenExportModal = () => {
+    setIsExportModalOpen(true);
+  };
+
+  const handleCloseExportModal = () => {
+    if (!isExporting) {
+      setIsExportModalOpen(false);
+    }
+  };
+
 
 
   return (
     <>
       <Toaster />
-
+      <ExportModal
+        open={isExportModalOpen}
+        onClose={handleCloseExportModal}
+        onSubmit={handleExport}
+        isSubmitting={isExporting}
+      />
       <SummaryCards
         metrics={dynamicMetrics}
         loading={loading}
@@ -467,7 +594,7 @@ const AllLeads = () => {
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
 
-        onExport={handleExport}
+        onExport={handleOpenExportModal}
       />
     </>
   );

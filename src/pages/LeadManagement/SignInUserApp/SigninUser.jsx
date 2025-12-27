@@ -1,152 +1,3 @@
-// import React, { useCallback, useEffect, useMemo, useState } from 'react'
-// import DataTable from '@components/Table/DataTable';
-// import { Toaster } from 'react-hot-toast';
-// import { useNavigate } from 'react-router-dom'
-// import ToastNotification from '@components/Notification/ToastNotification';
-// import { signInColumns } from '@components/TableHeader';
-// import { getInAppLeads } from '../../../api-services/Modules/Leads';
-
-// const debounce = (func, delay) => {
-//   let timeoutId;
-//   return (...args) => {
-//     clearTimeout(timeoutId);
-//     timeoutId = setTimeout(() => func(...args), delay);
-//   };
-// };
-
-// const SignInUsers = () => {
-//   const navigate = useNavigate();
-//   const [data, setData] = useState([]);
-//   const [totalDataCount, setTotalDataCount] = useState(0);
-//   const [loading, setLoading] = useState(false);
-//    const [tablePagination, setTablePagination] = useState({
-//     pageIndex: 0,
-//     pageSize: 10,
-//   });
-//   const [pagination, setPagination] = useState({
-//     pageIndex: 0,
-//     pageSize: 10
-//   })
-//   const [query, setQuery] = useState({
-//     page_no: 1,
-//     limit: 10,
-//     search: '',
-//     filter_date: '',
-//     startDate: null,
-//     endDate: null,
-//     status: 'success'
-//   })
-
-//   const fetchBlogs = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await getInAppLeads(query.page_no, query.limit, '');
-//       if (response?.data?.success) {
-//         setData(response?.data?.data?.rows || []);
-//         setTotalDataCount(response?.data?.data?.pagination?.total || 0);
-//       } else {
-//         ToastNotification.error("Error fetching data");
-//       }
-//     } catch (error) {
-//       console.error('Error fetching:', error);
-
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const handleEdit = (data) => {
-//     navigate(`/lead-detail/${data?.id}`, {
-//       state: { lead: data }
-//     })
-//   }
-
-//   const onPageChange = useCallback((pageInfo) => {
-//     setTablePagination({
-//       pageIndex: pageInfo.pageIndex,
-//       pageSize: pageInfo.pageSize,
-//     });
-//     setQuery((prevQuery) => {
-//       return {
-//         ...prevQuery,
-//         page_no: pageInfo.pageIndex + 1, // 1-based index for query
-//         limit: pageInfo.pageSize, // new limit
-//       };
-//     });
-//   }, []);
-
-//    const handleStatusFilter = useCallback(newStatus => {
-//     setQuery(prev => ({ ...prev, status: newStatus, page_no: 1 }));
-//   }, []);
-
-
-//   const onSearchHandler = useCallback(term => {
-//     setQuery(prev => ({ ...prev, search: term, page_no: 1 }));
-//   }, []);
-
-//   const debouncedSearch = useMemo(() => debounce(onSearchHandler, 300), [onSearchHandler]);
-
-//   const onFilterByDate = useCallback(type => {
-//     setQuery(prev => ({
-//       ...prev,
-//       filter_date: prev.filter_date === type ? '' : type,
-//       startDate: null,
-//       endDate: null,
-//       page_no: 1
-//     }));
-//   }, []);
-
-//   const onFilterByRange = useCallback(range => {
-//     setQuery(prev => ({
-//       ...prev,
-//       startDate: range.startDate,
-//       endDate: range.endDate,
-//       filter_date: '',
-//       page_no: 1
-//     }));
-//   }, []);
-
-//   useEffect(() => {
-//     fetchBlogs();
-//   }, [query.page_no,  query.status]);
-
-//   return (
-//     <>
-//       <Toaster />
-//       <DataTable
-//         columns={signInColumns({
-//           handleEdit
-//         })}
-//         title='Sign In Users'
-//         data={data}
-//         totalDataCount={totalDataCount}
-//         // onCreate={handleCreate}
-//         createLabel="Create"
-//         onPageChange={onPageChange}
-//         setPagination={setPagination}
-//         pagination={pagination}
-//         loading={loading}
-//          onSearch={debouncedSearch}
-//         onRefresh={fetchBlogs}
-//         // onExport={handleExport}
-
-//           // Filters
-//         onFilterByDate={onFilterByDate}
-//         activeFilter={query.filter_date}
-//         onFilterByRange={onFilterByRange}
-//         activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
-
-//         // STATUS FILTER
-//         // onFilterChange={handleStatusFilter}
-//         activeStatusFilter={query.status}
-//       />
-//     </>
-//   )
-// }
-
-// export default SignInUsers;
-
-
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
@@ -157,6 +8,7 @@ import { getInAppLeads } from '../../../api-services/Modules/Leads';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
+import ExportModal from '../../../components/ExportModal';
 
 
 // ---------------- DEBOUNCE ----------------
@@ -168,6 +20,73 @@ const debounce = (func, delay) => {
   };
 };
 
+const exportToExcel = async (rawData) => {
+  if (!rawData || rawData.length === 0) {
+    ToastNotification.error("No data to export");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Leads Lender Offers");
+
+  const allLenders = Array.from(
+    new Set(
+      rawData.flatMap(item =>
+        item.lender_responses?.map(lr => lr?.lender?.name)
+      )
+    )
+  ).filter(Boolean);
+
+  worksheet.columns = [
+    { header: "First Name", key: "firstName", width: 15 },
+    { header: "Last Name", key: "lastName", width: 15 },
+    { header: "Email", key: "email", width: 25 },
+    { header: "Phone", key: "phone", width: 15 },
+    { header: "Income", key: "income", width: 15 },
+    { header: "Created At", key: "createdAt", width: 15 },
+    ...allLenders.map(lender => ({
+      header: lender,
+      key: lender,
+      width: 15,
+    })),
+  ];
+
+  worksheet.getRow(1).font = { bold: true };
+
+  rawData.forEach(item => {
+    const lenderStatusMap = {};
+
+    allLenders.forEach(lender => {
+      lenderStatusMap[lender] = "No";
+    });
+
+    item.lender_responses?.forEach(lr => {
+      const lenderName = lr?.lender?.name;
+      if (lenderName && lr.isOffer) {
+        lenderStatusMap[lenderName] = "Yes";
+      }
+    });
+
+    worksheet.addRow({
+      firstName: item.firstName || "N/A",
+      lastName: item.lastName || "N/A",
+      email: item.emailAddress || "N/A",
+      phone: item.phoneNumber || "N/A",
+      income: item.income || item.monthlyIncome || 0,
+      createdAt: item.createdAt
+        ? new Date(item.createdAt).toLocaleDateString("en-IN")
+        : "N/A",
+      ...lenderStatusMap,
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+
+  saveAs(blob, "App_Leads_Report.xlsx");
+};
 const SignInUsers = () => {
   const navigate = useNavigate();
 
@@ -176,6 +95,8 @@ const SignInUsers = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const [rawData, setRawData] = useState([]);
 
@@ -449,26 +370,26 @@ const SignInUsers = () => {
     { label: '45+', value: '45-200' },
   ];
 
- const handleDobFilter = useCallback((value) => {
-  if (!value) {
+  const handleDobFilter = useCallback((value) => {
+    if (!value) {
+      setQuery(prev => ({
+        ...prev,
+        minAge: undefined,
+        maxAge: undefined,
+        page_no: 1
+      }));
+      return;
+    }
+
+    const [min, max] = value.split('-');
+
     setQuery(prev => ({
       ...prev,
-      minAge: undefined,
-      maxAge: undefined,
+      minAge: Number(min),
+      maxAge: Number(max),
       page_no: 1
     }));
-    return;
-  }
-
-  const [min, max] = value.split('-');
-
-  setQuery(prev => ({
-    ...prev,
-    minAge: Number(min),
-    maxAge: Number(max),
-    page_no: 1
-  }));
-}, []);
+  }, []);
 
   const dynamicFiltersArray = useMemo(() => [
     {
@@ -479,131 +400,182 @@ const SignInUsers = () => {
       onChange: handleGenderFilter
     },
     {
-    key: 'dob',
-    label: 'Age',
-    activeValue: query.minAge
-      ? `${query.minAge}-${query.maxAge}`
-      : '',
-    options: dobRanges,
-    onChange: handleDobFilter
-  }
-  ], [query.gender, genderOptions, handleGenderFilter,query.minAge, query.maxAge]);
+      key: 'dob',
+      label: 'Age',
+      activeValue: query.minAge
+        ? `${query.minAge}-${query.maxAge}`
+        : '',
+      options: dobRanges,
+      onChange: handleDobFilter
+    }
+  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge]);
 
   // ---------------- AUTO FETCH ----------------
   useEffect(() => {
     fetchBlogs();
   }, []);
 
-  // ---------------- UI ----------------
-  const handleExport = async () => {
-    if (!rawData || rawData.length === 0) {
-      ToastNotification.error("No data to export");
-      return;
-    }
-
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Leads Lender Offers');
-
-    /* =========================
-       STEP 1: GET ALL UNIQUE LENDERS
-    ========================= */
-
-    const allLenders = Array.from(
-      new Set(
-        rawData.flatMap(item =>
-          item.lender_responses?.map(lr => lr?.lender?.name)
-        )
-      )
-    ).filter(Boolean);
-
-    /* =========================
-       STEP 2: DEFINE COLUMNS
-    ========================= */
-
-    worksheet.columns = [
-      { header: 'First Name', key: 'firstName', width: 15 },
-      { header: 'Last Name', key: 'lastName', width: 15 },
-      { header: 'Email', key: 'email', width: 25 },
-      { header: 'Phone', key: 'phone', width: 15 },
-      { header: 'Income', key: 'income', width: 15 },
-      { header: 'Created At', key: 'createdAt', width: 15 },
-
-      // 🔥 dynamic lender columns
-      ...allLenders.map(lender => ({
-        header: lender,
-        key: lender,
-        width: 15,
-      })),
-
-
-    ];
-
-    /* =========================
-       STEP 3: HEADER STYLING
-    ========================= */
-
-    worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-    worksheet.getRow(1).eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFEFEFEF' },
-      };
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' },
-      };
-    });
-
-    /* =========================
-       STEP 4: ADD ROWS
-    ========================= */
-
-    rawData.forEach(item => {
-      const lenderStatusMap = {};
-
-      // default = No for all lenders
-      allLenders.forEach(lender => {
-        lenderStatusMap[lender] = 'No';
-      });
-
-      // mark Yes where offer exists
-      item.lender_responses?.forEach(lr => {
-        const lenderName = lr?.lender?.name;
-        if (lenderName && lr.isOffer) {
-          lenderStatusMap[lenderName] = 'Yes';
-        }
-      });
-
-      worksheet.addRow({
-        firstName: item.firstName || 'N/A',
-        lastName: item.lastName || 'N/A',
-        email: item.emailAddress || 'N/A',
-        phone: item.phoneNumber || 'N/A',
-        income: item.income || item.monthlyIncome || 0,
-        createdAt: item.createdAt
-          ? new Date(item.createdAt).toLocaleDateString()
-          : 'N/A',
-        ...lenderStatusMap
-      });
-    });
-
-    /* =========================
-       STEP 5: DOWNLOAD FILE
-    ========================= */
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-
-    saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
-    ToastNotification.success("Excel exported successfully!");
+  const handleOpenExportModal = () => {
+    setIsExportModalOpen(true);
   };
+
+  const handleCloseExportModal = () => {
+    if (!isExporting) {
+      setIsExportModalOpen(false);
+    }
+  };
+
+  // ---------------- UI ----------------
+  // const handleExport = async () => {
+  //   if (!rawData || rawData.length === 0) {
+  //     ToastNotification.error("No data to export");
+  //     return;
+  //   }
+
+  //   const workbook = new ExcelJS.Workbook();
+  //   const worksheet = workbook.addWorksheet('Leads Lender Offers');
+
+  //   /* =========================
+  //      STEP 1: GET ALL UNIQUE LENDERS
+  //   ========================= */
+
+  //   const allLenders = Array.from(
+  //     new Set(
+  //       rawData.flatMap(item =>
+  //         item.lender_responses?.map(lr => lr?.lender?.name)
+  //       )
+  //     )
+  //   ).filter(Boolean);
+
+  //   /* =========================
+  //      STEP 2: DEFINE COLUMNS
+  //   ========================= */
+
+  //   worksheet.columns = [
+  //     { header: 'First Name', key: 'firstName', width: 15 },
+  //     { header: 'Last Name', key: 'lastName', width: 15 },
+  //     { header: 'Email', key: 'email', width: 25 },
+  //     { header: 'Phone', key: 'phone', width: 15 },
+  //     { header: 'Income', key: 'income', width: 15 },
+  //     { header: 'Created At', key: 'createdAt', width: 15 },
+
+  //     // 🔥 dynamic lender columns
+  //     ...allLenders.map(lender => ({
+  //       header: lender,
+  //       key: lender,
+  //       width: 15,
+  //     })),
+
+
+  //   ];
+
+  //   /* =========================
+  //      STEP 3: HEADER STYLING
+  //   ========================= */
+
+  //   worksheet.getRow(1).font = { bold: true };
+  //   worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+
+  //   worksheet.getRow(1).eachCell(cell => {
+  //     cell.fill = {
+  //       type: 'pattern',
+  //       pattern: 'solid',
+  //       fgColor: { argb: 'FFEFEFEF' },
+  //     };
+  //     cell.border = {
+  //       top: { style: 'thin' },
+  //       left: { style: 'thin' },
+  //       bottom: { style: 'thin' },
+  //       right: { style: 'thin' },
+  //     };
+  //   });
+
+  //   /* =========================
+  //      STEP 4: ADD ROWS
+  //   ========================= */
+
+  //   rawData.forEach(item => {
+  //     const lenderStatusMap = {};
+
+  //     // default = No for all lenders
+  //     allLenders.forEach(lender => {
+  //       lenderStatusMap[lender] = 'No';
+  //     });
+
+  //     // mark Yes where offer exists
+  //     item.lender_responses?.forEach(lr => {
+  //       const lenderName = lr?.lender?.name;
+  //       if (lenderName && lr.isOffer) {
+  //         lenderStatusMap[lenderName] = 'Yes';
+  //       }
+  //     });
+
+  //     worksheet.addRow({
+  //       firstName: item.firstName || 'N/A',
+  //       lastName: item.lastName || 'N/A',
+  //       email: item.emailAddress || 'N/A',
+  //       phone: item.phoneNumber || 'N/A',
+  //       income: item.income || item.monthlyIncome || 0,
+  //       createdAt: item.createdAt
+  //         ? new Date(item.createdAt).toLocaleDateString()
+  //         : 'N/A',
+  //       ...lenderStatusMap
+  //     });
+  //   });
+
+  //   /* =========================
+  //      STEP 5: DOWNLOAD FILE
+  //   ========================= */
+
+  //   const buffer = await workbook.xlsx.writeBuffer();
+  //   const blob = new Blob([buffer], {
+  //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  //   });
+
+  //   saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
+  //   ToastNotification.success("Excel exported successfully!");
+  // };
+
+  const filterDataByDate = (data, startDate, endDate) => {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    return data.filter(item => {
+      if (!item.createdAt) return false;
+      const created = new Date(item.createdAt);
+      return created >= start && created <= end;
+    });
+  };
+
+
+  const handleExport = async ({ startDate, endDate, mode }) => {
+    try {
+      setIsExporting(true);
+
+      // 🔥 STEP 1: FILTER FRONTEND DATA
+      const filteredData = filterDataByDate(rawData, startDate, endDate);
+
+      if (!filteredData.length) {
+        ToastNotification.error("No data found for selected date range");
+        return;
+      }
+
+      // 🔥 STEP 2: EXCEL EXPORT (tumhara existing code)
+      await exportToExcel(filteredData);
+
+      ToastNotification.success("Excel exported successfully");
+      setIsExportModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      ToastNotification.error("Export failed");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
 
 
   const dynamicMetrics = useMemo(() => [
@@ -639,7 +611,12 @@ const SignInUsers = () => {
   return (
     <>
       <Toaster />
-
+      <ExportModal
+        open={isExportModalOpen}
+        onClose={handleCloseExportModal}
+        onSubmit={handleExport}
+        isSubmitting={isExporting}
+      />
       <SummaryCards
         metrics={dynamicMetrics}
         loading={loading}
@@ -675,7 +652,7 @@ const SignInUsers = () => {
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
 
-        onExport={handleExport}
+        onExport={handleOpenExportModal}
 
         onFilterByDob={handleDobFilter}
         dobRanges={dobRanges}
