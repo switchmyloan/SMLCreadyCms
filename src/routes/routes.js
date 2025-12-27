@@ -217,4 +217,14 @@ export const routes = [
     order: 1,
     roles: ["admin", "super-admin"],
   },
+  {
+    path: "/utm-generate",
+    label: "UTM Generate",
+    icon: "ShieldCheck", // ✅ roles/permissions
+    showInSidebar: true,
+    group: "UTM",
+    groupOrder: 6,
+    order: 1,
+    roles: ["admin", "super-admin"],
+  },
 ];

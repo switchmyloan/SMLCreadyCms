@@ -30,6 +30,7 @@ import PushNotificationCreate from './pages/PushNotification/PushNotificationCre
 import GroupList from './pages/PushNotification/GroupsList';
 import GroupCreate from './pages/PushNotification/GroupCreate';
 import Contact from './pages/LeadManagement/Contact/Contact';
+import UTMGenerator from './pages/UTM/UtmLinkGenerate';
 
 function App() {
   return (
@@ -66,6 +67,7 @@ function App() {
             <Route path="group" element={<GroupList/>}/>
             <Route path="group/create" element={<GroupCreate/>}/>
             <Route path="contact" element={<Contact />}/>
+            <Route path="utm-generate" element={<UTMGenerator />}/>
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
