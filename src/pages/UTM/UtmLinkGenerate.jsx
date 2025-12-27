@@ -4,7 +4,7 @@ import ToastNotification from '@components/Notification/ToastNotification';
 
 const UTMGenerator = () => {
   const [form, setForm] = useState({
-    baseUrl: '',
+    baseUrl: 'https://www.cready.in/login',
     utmSource: '',
     utmMedium: '',
     utmCampaign: '',
