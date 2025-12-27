@@ -270,7 +270,7 @@ function DataTable({
           </span>
           {/* Income Dropdown */}
           {incomeRanges && incomeRanges.length > 0 && (
-            <div className="z-20 flex flex-col w-38">
+            <div className="z-20 flex flex-col w-20">
               <select
                 onChange={(e) => onFilterByIncome(e.target.value)}
                 value={activeIncomeFilter || ''}
@@ -289,7 +289,7 @@ function DataTable({
           {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
           {dynamicFilters && dynamicFilters.length > 0 && (
             dynamicFilters.map((filter) => (
-              <div key={filter.key} className="z-20 flex flex-col w-38">
+              <div key={filter.key} className="z-20 flex flex-col w-[80px]">
                 <select
                   onChange={(e) => filter.onChange(e.target.value)}
                   value={filter.activeValue}

@@ -20,7 +20,7 @@ const AllLeads = () => {
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
 
-   const [summaryMetrics, setSummaryMetrics] = useState({
+  const [summaryMetrics, setSummaryMetrics] = useState({
     totalLeads: 0,
     totalLoanAmount: 0,
     todayLeads: 0,
@@ -57,6 +57,35 @@ const AllLeads = () => {
     { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
     { label: 'Above ₹1,00,000', value: '100001-100000000' },
   ];
+
+  const dobRanges = [
+    { label: 'All', value: '' },
+    { label: '18 - 25', value: '18-25' },
+    { label: '26 - 35', value: '26-35' },
+    { label: '36 - 45', value: '36-45' },
+    { label: '45+', value: '45-200' },
+  ];
+
+  const handleDobFilter = useCallback((value) => {
+    if (!value) {
+      setQuery(prev => ({
+        ...prev,
+        minAge: undefined,
+        maxAge: undefined,
+        page_no: 1
+      }));
+      return;
+    }
+
+    const [min, max] = value.split('-');
+
+    setQuery(prev => ({
+      ...prev,
+      minAge: Number(min),
+      maxAge: Number(max),
+      page_no: 1
+    }));
+  }, []);
 
   /* ========================= FETCH ========================= */
 
@@ -154,6 +183,24 @@ const AllLeads = () => {
       });
     }
 
+    // 🎂 DOB / AGE FILTER
+    if (
+      query.minAge !== undefined &&
+      query.maxAge !== undefined
+    ) {
+      rows = rows.filter(item => {
+        if (!item.dateOfBirth) return false;
+
+        const dob = new Date(item.dateOfBirth);
+        const ageDifMs = Date.now() - dob.getTime();
+        const ageDate = new Date(ageDifMs);
+        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
+
+        return age >= query.minAge && age <= query.maxAge;
+      });
+    }
+
+
     return rows;
   }, [rawData, query]);
 
@@ -231,8 +278,17 @@ const AllLeads = () => {
       activeValue: query.gender,
       options: genderOptions,
       onChange: handleGenderFilter,
+    },
+    {
+      key: 'dob',
+      label: 'Age',
+      activeValue: query.minAge
+        ? `${query.minAge}-${query.maxAge}`
+        : '',
+      options: dobRanges,
+      onChange: handleDobFilter
     }
-  ], [query.gender]);
+  ], [query.gender, query.minAge, query.maxAge]);
 
   const handleExport = async () => {
     if (!rawData || rawData.length === 0) {
@@ -382,7 +438,7 @@ const AllLeads = () => {
       <Toaster />
 
       <SummaryCards
-         metrics={dynamicMetrics}
+        metrics={dynamicMetrics}
         loading={loading}
       />
 
