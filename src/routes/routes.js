@@ -13,7 +13,7 @@ export const routes = [
   {
     path: "/signin-user",
     label: "Signin user (in app)",
-    icon: "UserCheck", // ✅ login-related
+    icon: "LucideMonitor", // ✅ login-related
     showInSidebar: true,
     group: "Lead Management",
     groupOrder: 1,
@@ -23,7 +23,7 @@ export const routes = [
   {
     path: "/leads",
     label: "Leads",
-    icon: "ClipboardList", // ✅ leads list
+    icon: "Users", // ✅ leads list
     showInSidebar: true,
     group: "Lead Management",
     groupOrder: 1,
@@ -33,7 +33,7 @@ export const routes = [
   {
     path: "/all-leads",
     label: "All Leads",
-    icon: "ClipboardList", // ✅ leads list
+    icon: "Users2", // ✅ leads list
     showInSidebar: true,
     group: "Lead Management",
     groupOrder: 1,
@@ -53,7 +53,7 @@ export const routes = [
   {
     path: "/contact",
     label: "Contact US",
-    icon: "ContactUs", // ✅ archived users
+    icon: "Phone", // ✅ archived users
     showInSidebar: true,
     group: "Lead Management",
     groupOrder: 1,

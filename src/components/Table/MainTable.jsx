@@ -34,7 +34,7 @@ useEffect(() => {
 }, [value, debounce, onChange, onSearch]);
 
   return (
-    <div className="relative flex items-center">
+    <div className="relative flex items-center w-1/6">
       <input
         ref={inputRef}
         type="text"
@@ -264,17 +264,17 @@ function DataTable({
     <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm  pt-0 pb-0 ">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-lg md:text-lg font-semibold text-gray-800">{title}</h1>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 w-full sm:w-auto justify-between">
           <span className="text-gray-600 text-sm">
             {totalDataCount} entries
           </span>
           {/* Income Dropdown */}
           {incomeRanges && incomeRanges.length > 0 && (
-            <div className="z-20 flex flex-col w-38">
+            <div className="z-20 flex flex-col w-20">
               <select
                 onChange={(e) => onFilterByIncome(e.target.value)}
                 value={activeIncomeFilter || ''}
-                className="p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                className="p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
               >
                 {incomeRanges.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -289,11 +289,11 @@ function DataTable({
           {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
           {dynamicFilters && dynamicFilters.length > 0 && (
             dynamicFilters.map((filter) => (
-              <div key={filter.key} className="z-20 flex flex-col w-38">
+              <div key={filter.key} className="z-20 flex flex-col w-[80px]">
                 <select
                   onChange={(e) => filter.onChange(e.target.value)}
                   value={filter.activeValue}
-                  className="p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                  className="p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
                 >
                   <option value="">{filter.label || 'Select Filter'}</option>
 
@@ -414,7 +414,7 @@ function DataTable({
 
           <div className="relative group inline-block">
             <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()} title='Refresh'>
-              <RefreshCcw size={16} />
+              <RefreshCcw size={14} />
             </button>
           </div>
 
@@ -426,7 +426,7 @@ function DataTable({
                 onClick={onExport}
                 title='Export Data'
               >
-                <Download size={16} />
+                <Download size={14} />
               </button>
             </div>
           )}

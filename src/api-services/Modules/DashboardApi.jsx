@@ -1,5 +1,10 @@
 import Api from "../api";
 
-export const getSummary = async () => {
-  return Api().get(`/summary`)
+export const getSummary = async ({ fromDate, toDate } = {}) => {
+  return Api().get(`/summary`, {
+    params: {
+      fromDate,
+      toDate
+    }
+  })
 }
