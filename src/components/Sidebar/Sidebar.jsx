@@ -341,6 +341,7 @@ const ICONS = {
   ShieldCheck, Settings,Phone,Users2,LucideMonitor
 };
 
+
 function Sidebar({ onClose, collapsed, onToggleCollapse }) {
   const { user } = useAuth(); // ✅ get logged-in user
   const location = useLocation();
@@ -415,9 +416,13 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
       {/* Header */}
       <div className="p-[15px] flex justify-between items-center border-b border-gray-200">
         {!collapsed ? (
-          <img src={logo} alt="Logo" className="w-28 h-auto" />
+          <img src={logo} alt="Logo" className="w-28 h-auto cursor-pointer" 
+          onClick={()=> navigate('/')
+
+          }
+          />
         ) : (
-          <img src={shortLogo} alt="Logo" className="w-5 h-auto" />
+          <img src={shortLogo} alt="Logo" className="w-5 h-auto cursor-pointer" onClick={()=> navigate('/')}/>
         )}
         <div className="flex items-center gap-2">
           <button
