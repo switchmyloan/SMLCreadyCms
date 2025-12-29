@@ -1,48 +1,52 @@
-
-import { useForm } from 'react-hook-form'
-import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import ValidatedTextField from '@components/Form/ValidatedTextField'
-import ValidatedSearchableSelectField from '@components/Form/ValidatedSearchableSelectField'
-import ValidatedSearchMultiSelect from '@components/Form/ValidatedSearchMultiSelect'
-import ValidatedLabel from '@components/Form/ValidatedLabel'
-import SubmitBtn from '@components/Form/SubmitBtn'
-import ToastNotification from '@components/Notification/ToastNotification'
-import CreateAuthorTagModal from '@components/Modal/CreateAuthorTagModal'
-import { getTags, AddTag } from '../../api-services/Modules/TagsApi';
-import { AddBlog, getBlogById, UpdateBlog } from '../../api-services/Modules/BlogsApi'
-import { MetaKeywordsInput } from '@components/Form/MetaKeywordsInput'
-import ValidatedTextArea from '@components/Form/ValidatedTextArea';
-import { AddAuthor, getAuthor } from '../../api-services/Modules/AuthorApi'
-import Uploader from '../../components/Form/Uploader';
-import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ValidatedTextField from "@components/Form/ValidatedTextField";
+import ValidatedSearchableSelectField from "@components/Form/ValidatedSearchableSelectField";
+import ValidatedSearchMultiSelect from "@components/Form/ValidatedSearchMultiSelect";
+import ValidatedLabel from "@components/Form/ValidatedLabel";
+import SubmitBtn from "@components/Form/SubmitBtn";
+import ToastNotification from "@components/Notification/ToastNotification";
+import CreateAuthorTagModal from "@components/Modal/CreateAuthorTagModal";
+import { getTags, AddTag } from "../../api-services/Modules/TagsApi";
+import {
+  AddBlog,
+  getBlogById,
+  UpdateBlog,
+} from "../../api-services/Modules/BlogsApi";
+import { MetaKeywordsInput } from "@components/Form/MetaKeywordsInput";
+import ValidatedTextArea from "@components/Form/ValidatedTextArea";
+import { AddAuthor, getAuthor } from "../../api-services/Modules/AuthorApi";
+import Uploader from "../../components/Form/Uploader";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import RichTextEditor from "../../components/Form/RichTextEditor";
 
 // Yup validation schema
 const validationSchema = Yup.object().shape({
   title: Yup.string()
-    .required('Title is required')
-    .min(2, 'Title must be at least 2 characters')
-    .max(100, 'Title cannot exceed 100 characters')
+    .required("Title is required")
+    .min(2, "Title must be at least 2 characters")
+    .max(100, "Title cannot exceed 100 characters")
     .trim(),
   metaTitle: Yup.string()
-    .required('Meta title is required')
-    .min(2, 'Meta title must be at least 2 characters')
-    .max(60, 'Meta title cannot exceed 60 characters')
+    .required("Meta title is required")
+    .min(2, "Meta title must be at least 2 characters")
+    .max(70, "Meta title cannot exceed 70 characters")
     .trim(),
   description: Yup.string()
-    .required('Description is required')
-    .min(10, 'Description must be at least 10 characters')
-    .max(10000, 'Description cannot exceed 10000 characters')
+    .required("Description is required")
+    .min(10, "Description must be at least 10 characters")
+    .max(10000, "Description cannot exceed 10000 characters")
     .trim(),
   content: Yup.string()
-    .required('Content is required')
-    .min(50, 'Content must be at least 50 characters')
-    .max(10000, 'Content cannot exceed 10000 characters')
+    .required("Content is required")
+    .min(50, "Content must be at least 50 characters")
+    .max(10000, "Content cannot exceed 10000 characters")
     .trim(),
   status: Yup.string()
-    .required('Status is required')
-    .oneOf(['draft', 'published', 'archived', 'reviewed'], 'Invalid status'),
+    .required("Status is required")
+    .oneOf(["draft", "published", "archived", "reviewed"], "Invalid status"),
   metadata: Yup.object().shape({
     level: Yup.string()
       .notRequired()
@@ -50,26 +54,23 @@ const validationSchema = Yup.object().shape({
       // .max(50, 'Level cannot exceed 50 characters')
       .trim(),
     category: Yup.string()
-      .required('Category is required')
-      .oneOf(['backend', 'frontend', 'fullstack'], 'Invalid category'),
+      .required("Category is required")
+      .oneOf(["backend", "frontend", "fullstack"], "Invalid category"),
   }),
   // author_xid: Yup.string().required('Author is required').trim(),
   // tags: Yup.array()
   //   .min(1, 'At least one tag is required')
   //   .required('Tags are required'),
-  metaKeywords: Yup.string()
-  .notRequired()
-  .default('')
-  .trim(),
+  metaKeywords: Yup.string().notRequired().default("").trim(),
   metaImage: Yup.mixed()
-    .required('Image is required')
-    .test('is-valid-image', 'Image must be a valid file or URL', (value) => {
-      return typeof value === 'string' || value instanceof File;
+    .required("Image is required")
+    .test("is-valid-image", "Image must be a valid file or URL", (value) => {
+      return typeof value === "string" || value instanceof File;
     }),
 });
 
 // const BlogPreviewCard = ({ formData, author, tags, baseImageUrl }) => {
- 
+
 //   const selectedAuthor = author.find(a => a.value === formData.author_xid)?.label || 'No author selected';
 //   const selectedTags = formData.tags
 //     ?.map(tagId => tags.find(t => t.value === tagId)?.label)
@@ -134,18 +135,18 @@ const validationSchema = Yup.object().shape({
 // };
 
 export default function BlogCreate() {
-  const imageUrl = import.meta.env.VITE_IMAGE_URL
+  const imageUrl = import.meta.env.VITE_IMAGE_URL;
   const navigate = useNavigate();
   const { id } = useParams();
- 
-  const isEdit = id ;
 
-  const [globalFilter, setGlobalFilter] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [tags, setTags] = useState([])
-  const [author, setAuthor] = useState([])
-  const [openModal, setOpenModal] = useState(false)
-  const [modalType, setModalType] = useState("author")
+  const isEdit = id;
+
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState([]);
+  const [author, setAuthor] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalType, setModalType] = useState("author");
   const [keywords, setKeywords] = useState([]);
 
   const {
@@ -153,26 +154,26 @@ export default function BlogCreate() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
-      title: '',
-      slug: '',
-      description: '',
-      content: '',
-      status: 'draft',
+      title: "",
+      slug: "",
+      description: "",
+      content: "",
+      status: "draft",
       // readTime: null,
       isFeatured: false,
-      metaTitle: '',
-      metaDescription: '',
-      metaImage: '',
-      metaKeywords: '',
-      metadata: { category: '', level: '' },
+      metaTitle: "",
+      metaDescription: "",
+      metaImage: "",
+      metaKeywords: "",
+      metadata: { category: "", level: "" },
       // author_xid: null,
-      tags: []
-    }
-  })
+      tags: [],
+    },
+  });
 
   // Watch form data for live preview
   const formData = watch();
@@ -180,53 +181,53 @@ export default function BlogCreate() {
   // Fetch Tags
   const fetchTags = async () => {
     try {
-      const response = await getTags(1, 100, '')
+      const response = await getTags(1, 100, "");
       if (response?.data?.success) {
-        const mapped = response?.data?.rows?.map(item => ({
+        const mapped = response?.data?.rows?.map((item) => ({
           label: item?.Name?.toUpperCase(),
-          value: item?.ID
-        }))
-        setTags(mapped)
+          value: item?.ID,
+        }));
+        setTags(mapped);
       } else {
-        ToastNotification.error("Error fetching tags")
+        ToastNotification.error("Error fetching tags");
       }
     } catch {
-      ToastNotification.error("Failed to fetch tags")
+      ToastNotification.error("Failed to fetch tags");
     }
-  }
+  };
 
   // Fetch Authors
   const fetchAuthors = async () => {
     try {
-      const response = await getAuthor(1, 10, '')
+      const response = await getAuthor(1, 10, "");
       if (response?.data?.success) {
-        const mapped = response?.data?.data?.rows?.map(item => ({
+        const mapped = response?.data?.data?.rows?.map((item) => ({
           label: item?.name?.toUpperCase(),
-          value: item?.id
-        }))
-        setAuthor(mapped)
+          value: item?.id,
+        }));
+        setAuthor(mapped);
       } else {
-        ToastNotification.error("Error fetching authors")
+        ToastNotification.error("Error fetching authors");
       }
     } catch {
-      ToastNotification.error("Failed to fetch authors")
+      ToastNotification.error("Failed to fetch authors");
     }
-  }
+  };
 
   // Fetch Blog if editing
   useEffect(() => {
-    fetchTags()
-    fetchAuthors()
+    fetchTags();
+    fetchAuthors();
 
     if (isEdit && id != undefined) {
-      console.log("ander aya")
+      console.log("ander aya");
       const fetchBlog = async () => {
         try {
-          const res = await getBlogById(id)
-          console.log(res, "edit blog")
+          const res = await getBlogById(id);
+          console.log(res, "edit blog");
           if (res?.data?.success) {
-            const blog = res?.data?.data
-            
+            const blog = res?.data?.data;
+
             let metadata = {};
             try {
               metadata = blog.metadata ? JSON.parse(blog.metadata) : {};
@@ -235,46 +236,54 @@ export default function BlogCreate() {
               metadata = {};
             }
 
-            setValue('title', blog.title)
-            setValue('metaTitle', blog.metaTitle)
-            setValue('description', blog.description)
-            setValue('metaDescription', blog.metaDescription)
-            setValue('slug', blog.slug)
-            setValue('content', blog.content)
-            setValue('status', blog.status)
-            setValue('metadata.level', metadata.level || '');
-            setValue('metadata.category', metadata.category || '');
+            setValue("title", blog.title);
+            setValue("metaTitle", blog.metaTitle);
+            setValue("description", blog.description);
+            setValue("metaDescription", blog.metaDescription);
+            setValue("slug", blog.slug);
+            setValue("content", blog.content);
+            setValue("status", blog.status);
+            setValue("metadata.level", metadata.level || "");
+            setValue("metadata.category", metadata.category || "");
             // setValue('author_xid', blog.author.id || '')
-            setValue('tags', blog.tags?.map(t => t.id) || [])
-            const keywordArray = blog.metaKeywords ? blog.metaKeywords.split(',').filter(keyword => keyword.trim() !== '') : [];
+            setValue("tags", blog.tags?.map((t) => t.id) || []);
+            const keywordArray = blog.metaKeywords
+              ? blog.metaKeywords
+                  .split(",")
+                  .filter((keyword) => keyword.trim() !== "")
+              : [];
             setKeywords(keywordArray);
-            setValue('metaKeywords', keywordArray.join(', '), { shouldValidate: true });
+            setValue("metaKeywords", keywordArray.join(", "), {
+              shouldValidate: true,
+            });
 
-           if (blog.metaImage) {
-            const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
-            console.log(fullImageUrl, "fullImageUrl")
-            setValue('metaImage', fullImageUrl); // Set as string URL
+            if (blog.metaImage) {
+              const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
+              console.log(fullImageUrl, "fullImageUrl");
+              setValue("metaImage", fullImageUrl); // Set as string URL
+            } else {
+              setValue("metaImage", ""); // Clear image field if no image
+            }
           } else {
-            setValue('metaImage', ''); // Clear image field if no image
-          }
-          } else {
-            ToastNotification.error("Failed to load blog")
+            ToastNotification.error("Failed to load blog");
           }
         } catch {
-          ToastNotification.error("Failed to load blog")
+          ToastNotification.error("Failed to load blog");
         }
-      }
-      fetchBlog()
+      };
+      fetchBlog();
     }
-  }, [id, setValue])
+  }, [id, setValue]);
 
   // Modal submissions
   const handleTagSubmit = async (data) => {
     try {
-      const response = await AddTag([{
-        name: data.name,
-        description: data.description,
-      }]);
+      const response = await AddTag([
+        {
+          name: data.name,
+          description: data.description,
+        },
+      ]);
       if (response) {
         ToastNotification.success("Tag added successfully!");
         fetchTags();
@@ -285,7 +294,7 @@ export default function BlogCreate() {
     } catch {
       ToastNotification.error("Something went wrong!");
     }
-  }
+  };
 
   const handleAuthorSubmit = async (data) => {
     try {
@@ -295,7 +304,7 @@ export default function BlogCreate() {
         description: data.description,
         designation: data.designation,
         socialLink: data.socialLink,
-        metaDescription: data.metaDescription
+        metaDescription: data.metaDescription,
       });
       if (response) {
         ToastNotification.success("Author added successfully!");
@@ -307,7 +316,7 @@ export default function BlogCreate() {
     } catch {
       ToastNotification.error("Something went wrong!");
     }
-  }
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -316,8 +325,8 @@ export default function BlogCreate() {
       // Tags aur keywords ka formatting
       const payload = {
         ...data,
-        tags: data.tags?.map(tagId => ({ id: tagId })),
-        metaKeywords: keywords.join(',')
+        tags: data.tags?.map((tagId) => ({ id: tagId })),
+        metaKeywords: keywords.join(","),
       };
 
       // ---- FORM DATA BANANA ----
@@ -350,16 +359,20 @@ export default function BlogCreate() {
       // ---- API CALL ----
       let res;
       if (isEdit) {
-        res = await UpdateBlog(id, formData);  // sirf id aur formData bhejna
+        res = await UpdateBlog(id, formData); // sirf id aur formData bhejna
       } else {
         res = await AddBlog(formData);
       }
 
       if (res?.data?.success) {
-        ToastNotification.success(isEdit ? "Blog updated successfully" : "Blog created successfully");
-        navigate('/blogs');
+        ToastNotification.success(
+          isEdit ? "Blog updated successfully" : "Blog created successfully"
+        );
+        navigate("/blogs");
       } else {
-        ToastNotification.error(isEdit ? "Failed to update blog" : "Failed to create blog");
+        ToastNotification.error(
+          isEdit ? "Failed to update blog" : "Failed to create blog"
+        );
       }
     } catch (err) {
       console.error(err);
@@ -369,16 +382,21 @@ export default function BlogCreate() {
     }
   };
 
-  useEffect(() =>{
+  useEffect(() => {
     fetchAuthors();
     fetchTags();
-  },[])
+  }, []);
 
   return (
     <div className="">
-      <h2 className="text-2xl font-bold mb-6">{id ? "Edit Blog" : "Create Blog"}</h2>
+      <h2 className="text-2xl font-bold mb-6">
+        {id ? "Edit Blog" : "Create Blog"}
+      </h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 bg-white shadow p-6 rounded-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -403,7 +421,7 @@ export default function BlogCreate() {
               errors={errors}
               placeholder="Enter meta title"
             />
-          
+
             <ValidatedTextArea
               name="description"
               control={control}
@@ -413,15 +431,13 @@ export default function BlogCreate() {
               placeholder="Enter blog description"
               rows={4}
             />
-            <ValidatedTextArea
+            <RichTextEditor
               name="content"
               control={control}
               label="Content"
               errors={errors}
-              className="col-span-2"
-              placeholder="Enter blog content"
-              rows={4}
             />
+
             <ValidatedTextArea
               name="metaDescription"
               control={control}
@@ -436,11 +452,11 @@ export default function BlogCreate() {
               <ValidatedSearchableSelectField
                 name="status"
                 control={control}
-                 options={[
-                  { label: 'Draft', value: 'draft' },
-                  { label: 'Published', value: 'published' },
-                  { label: 'Archived', value: 'archived' },
-                  { label: 'Reviewed', value: 'reviewed' },
+                options={[
+                  { label: "Draft", value: "draft" },
+                  { label: "Published", value: "published" },
+                  { label: "Archived", value: "archived" },
+                  { label: "Reviewed", value: "reviewed" },
                 ]}
                 errors={errors}
                 setGlobalFilter={setGlobalFilter}
@@ -461,10 +477,10 @@ export default function BlogCreate() {
               <ValidatedSearchableSelectField
                 name="metadata.category"
                 control={control}
-                 options={[
-                  { label: 'Backend', value: 'backend' },
-                  { label: 'Frontend', value: 'frontend' },
-                  { label: 'Full Stack', value: 'fullstack' },
+                options={[
+                  { label: "Backend", value: "backend" },
+                  { label: "Frontend", value: "frontend" },
+                  { label: "Full Stack", value: "fullstack" },
                 ]}
                 errors={errors}
                 setGlobalFilter={setGlobalFilter}
@@ -483,7 +499,7 @@ export default function BlogCreate() {
             />
             <div>
               <ValidatedLabel label="Upload Image" />
-              <Uploader 
+              <Uploader
                 name="metaImage"
                 control={control}
                 label="Upload Image"
@@ -509,12 +525,20 @@ export default function BlogCreate() {
               setGlobalFilter={setGlobalFilter}
               globalFilter={globalFilter}
             />
-          </div> */} 
+          </div> */}
           <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
-              <button type="button" onClick={() => { setModalType("tag"); setOpenModal(true) }}
-                className="px-3 py-1 text-sm border rounded">Create</button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalType("tag");
+                  setOpenModal(true);
+                }}
+                className="px-3 py-1 text-sm border rounded"
+              >
+                Create
+              </button>
             </div>
             <ValidatedSearchMultiSelect
               name="tags"
@@ -540,5 +564,5 @@ export default function BlogCreate() {
         onSubmit={modalType === "tag" ? handleTagSubmit : handleAuthorSubmit}
       />
     </div>
-  )
+  );
 }
