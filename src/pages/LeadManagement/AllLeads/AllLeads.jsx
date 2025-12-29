@@ -112,6 +112,7 @@ const AllLeads = () => {
     gender: '',
     minIncome: undefined,
     maxIncome: undefined,
+        jobType: '',
   });
 
   /* ========================= OPTIONS ========================= */
@@ -137,6 +138,21 @@ const AllLeads = () => {
     { label: '36 - 45', value: '36-45' },
     { label: '45+', value: '45-200' },
   ];
+
+   const jobTypeOptions = useMemo(() => [
+      { label: 'Salaried', value: 'salaried' },
+      { label: 'Self Employed', value: 'self-employed' },
+      { label: 'Business', value: 'business' },
+      { label: 'Freelancer', value: 'freelancer' }
+    ], []);
+
+      const handleJobTypeFilter = useCallback((jobType) => {
+        setQuery(prev => ({
+          ...prev,
+          jobType,
+          page_no: 1
+        }));
+      }, []);
 
   const handleDobFilter = useCallback((value) => {
     if (!value) {
@@ -272,6 +288,12 @@ const AllLeads = () => {
       });
     }
 
+      if (query.jobType) {
+      rows = rows.filter(item =>
+        item.jobType?.toLowerCase() === query.jobType
+      );
+    }
+
 
     return rows;
   }, [rawData, query]);
@@ -351,6 +373,13 @@ const AllLeads = () => {
       options: genderOptions,
       onChange: handleGenderFilter,
     },
+      {
+      key: 'jobType',                  // ✅ NEW
+      label: 'Job Type',
+      activeValue: query.jobType,
+      options: jobTypeOptions,
+      onChange: handleJobTypeFilter
+    },
     {
       key: 'dob',
       label: 'Age',
@@ -360,7 +389,7 @@ const AllLeads = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, query.minAge, query.maxAge]);
+  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
 
   // const handleExport = async () => {
   //   if (!rawData || rawData.length === 0) {

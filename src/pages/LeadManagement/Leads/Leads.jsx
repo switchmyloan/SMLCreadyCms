@@ -402,6 +402,7 @@ const Leads = () => {
     gender: '',
     minIncome: undefined,
     maxIncome: undefined,
+    jobType: '',
   });
 
   /* ========================= OPTIONS ========================= */
@@ -419,6 +420,13 @@ const Leads = () => {
     { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
     { label: 'Above ₹1,00,000', value: '100001-100000000' },
   ];
+
+  const jobTypeOptions = useMemo(() => [
+    { label: 'Salaried', value: 'salaried' },
+    { label: 'Self Employed', value: 'self-employed' },
+    { label: 'Business', value: 'business' },
+    { label: 'Freelancer', value: 'freelancer' }
+  ], []);
 
 
   const dobRanges = [
@@ -440,12 +448,22 @@ const Leads = () => {
       return;
     }
 
+
     const [min, max] = value.split('-');
 
     setQuery(prev => ({
       ...prev,
       minAge: Number(min),
       maxAge: Number(max),
+      page_no: 1
+    }));
+  }, []);
+
+
+  const handleJobTypeFilter = useCallback((jobType) => {
+    setQuery(prev => ({
+      ...prev,
+      jobType,
       page_no: 1
     }));
   }, []);
@@ -562,6 +580,11 @@ const Leads = () => {
         return age >= query.minAge && age <= query.maxAge;
       });
     }
+    if (query.jobType) {
+      rows = rows.filter(item =>
+        item.jobType?.toLowerCase() === query.jobType
+      );
+    }
 
     return rows;
   }, [rawData, query]);
@@ -642,6 +665,13 @@ const Leads = () => {
       onChange: handleGenderFilter,
     },
     {
+      key: 'jobType',                  // ✅ NEW
+      label: 'Job Type',
+      activeValue: query.jobType,
+      options: jobTypeOptions,
+      onChange: handleJobTypeFilter
+    },
+    {
       key: 'dob',
       label: 'Age',
       activeValue: query.minAge
@@ -650,7 +680,7 @@ const Leads = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, query.minAge, query.maxAge]);
+  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
 
   // const handleExport = async () => {
   //   if (!rawData || rawData.length === 0) {
@@ -762,7 +792,7 @@ const Leads = () => {
   //   ToastNotification.success("Excel exported successfully!");
   // };
 
- const filterDataByDate = (data, startDate, endDate) => {
+  const filterDataByDate = (data, startDate, endDate) => {
     const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
 

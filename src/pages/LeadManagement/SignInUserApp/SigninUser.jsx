@@ -127,6 +127,7 @@ const SignInUsers = () => {
     maxIncome: undefined,
     minAge: undefined,
     maxAge: undefined,
+    jobType: '',
   });
 
   // ---------------- FETCH DATA ----------------
@@ -234,6 +235,13 @@ const SignInUsers = () => {
 
         return age >= query.minAge && age <= query.maxAge;
       });
+    }
+
+    // 💼 JOB TYPE FILTER
+    if (query.jobType) {
+      rows = rows.filter(item =>
+        item.jobType?.toLowerCase() === query.jobType
+      );
     }
 
 
@@ -371,6 +379,13 @@ const SignInUsers = () => {
     { label: '45+', value: '45-200' },
   ];
 
+  const jobTypeOptions = useMemo(() => [
+    { label: 'Salaried', value: 'salaried' },
+    { label: 'Self Employed', value: 'self-employed' },
+    { label: 'Business', value: 'business' },
+    { label: 'Freelancer', value: 'freelancer' }
+  ], []);
+
   const handleDobFilter = useCallback((value) => {
     if (!value) {
       setQuery(prev => ({
@@ -392,6 +407,14 @@ const SignInUsers = () => {
     }));
   }, []);
 
+  const handleJobTypeFilter = useCallback((jobType) => {
+    setQuery(prev => ({
+      ...prev,
+      jobType,
+      page_no: 1
+    }));
+  }, []);
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -399,6 +422,13 @@ const SignInUsers = () => {
       activeValue: query.gender,
       options: genderOptions,
       onChange: handleGenderFilter
+    },
+    {
+      key: 'jobType',                  // ✅ NEW
+      label: 'Job Type',
+      activeValue: query.jobType,
+      options: jobTypeOptions,
+      onChange: handleJobTypeFilter
     },
     {
       key: 'dob',
@@ -409,7 +439,7 @@ const SignInUsers = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge]);
+  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge, query.jobType,handleJobTypeFilter]);
 
   // ---------------- AUTO FETCH ----------------
   useEffect(() => {
@@ -425,117 +455,6 @@ const SignInUsers = () => {
       setIsExportModalOpen(false);
     }
   };
-
-  // ---------------- UI ----------------
-  // const handleExport = async () => {
-  //   if (!rawData || rawData.length === 0) {
-  //     ToastNotification.error("No data to export");
-  //     return;
-  //   }
-
-  //   const workbook = new ExcelJS.Workbook();
-  //   const worksheet = workbook.addWorksheet('Leads Lender Offers');
-
-  //   /* =========================
-  //      STEP 1: GET ALL UNIQUE LENDERS
-  //   ========================= */
-
-  //   const allLenders = Array.from(
-  //     new Set(
-  //       rawData.flatMap(item =>
-  //         item.lender_responses?.map(lr => lr?.lender?.name)
-  //       )
-  //     )
-  //   ).filter(Boolean);
-
-  //   /* =========================
-  //      STEP 2: DEFINE COLUMNS
-  //   ========================= */
-
-  //   worksheet.columns = [
-  //     { header: 'First Name', key: 'firstName', width: 15 },
-  //     { header: 'Last Name', key: 'lastName', width: 15 },
-  //     { header: 'Email', key: 'email', width: 25 },
-  //     { header: 'Phone', key: 'phone', width: 15 },
-  //     { header: 'Income', key: 'income', width: 15 },
-  //     { header: 'Created At', key: 'createdAt', width: 15 },
-
-  //     // 🔥 dynamic lender columns
-  //     ...allLenders.map(lender => ({
-  //       header: lender,
-  //       key: lender,
-  //       width: 15,
-  //     })),
-
-
-  //   ];
-
-  //   /* =========================
-  //      STEP 3: HEADER STYLING
-  //   ========================= */
-
-  //   worksheet.getRow(1).font = { bold: true };
-  //   worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-  //   worksheet.getRow(1).eachCell(cell => {
-  //     cell.fill = {
-  //       type: 'pattern',
-  //       pattern: 'solid',
-  //       fgColor: { argb: 'FFEFEFEF' },
-  //     };
-  //     cell.border = {
-  //       top: { style: 'thin' },
-  //       left: { style: 'thin' },
-  //       bottom: { style: 'thin' },
-  //       right: { style: 'thin' },
-  //     };
-  //   });
-
-  //   /* =========================
-  //      STEP 4: ADD ROWS
-  //   ========================= */
-
-  //   rawData.forEach(item => {
-  //     const lenderStatusMap = {};
-
-  //     // default = No for all lenders
-  //     allLenders.forEach(lender => {
-  //       lenderStatusMap[lender] = 'No';
-  //     });
-
-  //     // mark Yes where offer exists
-  //     item.lender_responses?.forEach(lr => {
-  //       const lenderName = lr?.lender?.name;
-  //       if (lenderName && lr.isOffer) {
-  //         lenderStatusMap[lenderName] = 'Yes';
-  //       }
-  //     });
-
-  //     worksheet.addRow({
-  //       firstName: item.firstName || 'N/A',
-  //       lastName: item.lastName || 'N/A',
-  //       email: item.emailAddress || 'N/A',
-  //       phone: item.phoneNumber || 'N/A',
-  //       income: item.income || item.monthlyIncome || 0,
-  //       createdAt: item.createdAt
-  //         ? new Date(item.createdAt).toLocaleDateString()
-  //         : 'N/A',
-  //       ...lenderStatusMap
-  //     });
-  //   });
-
-  //   /* =========================
-  //      STEP 5: DOWNLOAD FILE
-  //   ========================= */
-
-  //   const buffer = await workbook.xlsx.writeBuffer();
-  //   const blob = new Blob([buffer], {
-  //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //   });
-
-  //   saveAs(blob, 'Leads_Lender_Offer_Report.xlsx');
-  //   ToastNotification.success("Excel exported successfully!");
-  // };
 
   const filterDataByDate = (data, startDate, endDate) => {
     const start = new Date(startDate);
