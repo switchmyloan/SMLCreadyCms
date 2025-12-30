@@ -157,6 +157,36 @@ export default function RichTextEditor({ name, control, label, errors }) {
               </ToolbarButton>
 
               <ToolbarButton
+                onClick={() => editor.chain().focus().toggleBulletList().run()}
+                active={editor.isActive("bulletList")}
+              >
+                • List
+              </ToolbarButton>
+
+              <ToolbarButton
+                onClick={() => editor.chain().focus().toggleOrderedList().run()}
+                active={editor.isActive("orderedList")}
+              >
+                1. List
+              </ToolbarButton>
+
+              <ToolbarButton
+                onClick={() =>
+                  editor.chain().focus().sinkListItem("listItem").run()
+                }
+              >
+                ➡ Indent
+              </ToolbarButton>
+
+              <ToolbarButton
+                onClick={() =>
+                  editor.chain().focus().liftListItem("listItem").run()
+                }
+              >
+                ⬅ Outdent
+              </ToolbarButton>
+
+              <ToolbarButton
                 onClick={() => {
                   if (editor.state.selection.empty) {
                     alert("Please select a word to add a link");
@@ -193,8 +223,12 @@ export default function RichTextEditor({ name, control, label, errors }) {
                 editor={editor}
                 className="focus:outline-none max-w-none
              [&_a]:text-[#6C47FF]
-             
-             [&_a:hover]:text-[#4b2ecc]"
+             [&_a:hover]:text-[#4b2ecc]
+    [&_ul]:list-disc
+    [&_ul]:pl-6
+    [&_ol]:list-decimal
+    [&_ol]:pl-6
+    [&_li]:mb-1"
               />
             </div>
 

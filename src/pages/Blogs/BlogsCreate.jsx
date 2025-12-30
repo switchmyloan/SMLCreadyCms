@@ -42,7 +42,7 @@ const validationSchema = Yup.object().shape({
   content: Yup.string()
     .required("Content is required")
     .min(50, "Content must be at least 50 characters")
-    .max(10000, "Content cannot exceed 10000 characters")
+    .max(30000, "Content cannot exceed 30000 characters")
     .trim(),
   status: Yup.string()
     .required("Status is required")
