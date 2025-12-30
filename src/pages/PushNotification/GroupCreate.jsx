@@ -5,8 +5,6 @@ import SelectableDataTable from "../../components/Table/SelectableDataTable";
 import { addGroupUsers, getInAppLeads } from "../../api-services/Modules/Leads";
 
 
-
-
 const normalizeGender = (gender) => {
   if (!gender) return '';
   const g = gender.toString().trim().toLowerCase();
@@ -16,6 +14,38 @@ const normalizeGender = (gender) => {
 
   return 'other';
 };
+
+const normalizeDOB = (dob) => {
+  if (!dob) return '';
+
+  const date = new Date(dob);
+  if (isNaN(date.getTime())) return '';
+
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+
+  return `${dd}-${mm}-${yyyy}`; // 1998-04-21
+};
+
+
+const calculateAge = (dob) => {
+  if (!dob) return null;
+
+  const birthDate = new Date(dob);
+  if (isNaN(birthDate.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+
+  return age;
+};
+
 
 
 export default function GroupCreate() {
@@ -31,6 +61,21 @@ export default function GroupCreate() {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
+  // dropdown open state
+  const [ageDropdownOpen, setAgeDropdownOpen] = useState(false);
+
+  // temp values (dropdown ke andar)
+  const [tempAgeRange, setTempAgeRange] = useState({
+    minAge: '',
+    maxAge: '',
+  });
+
+  // Date dropdown ke andar age dropdown
+  const [ageInsideDateOpen, setAgeInsideDateOpen] = useState(false);
+
+
+
 
   const { register, handleSubmit, reset, setValue }
     = useForm({
@@ -65,8 +110,8 @@ export default function GroupCreate() {
     { accessorKey: 'firstName', header: 'Name' },
     { accessorKey: 'emailAddress', header: 'Email' },
     { accessorKey: 'gender', header: 'Gender' },
-    { accessorKey: 'age', header: 'Age' },
-    { accessorKey: 'income', header: 'Income' },
+    { accessorKey: 'dateOfBirth', header: 'Date Of Birth' },
+    { accessorKey: 'monthlyIncome', header: 'Income' },
     { accessorKey: 'createdAt', header: 'Created At' },
   ];
 
@@ -110,16 +155,6 @@ export default function GroupCreate() {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/group/${groupId}`);
       const json = await res.json();
-      // if (json?.success) {
-      //   const members = json?.data?.members || [];
-      //   const memberIds = members.map(m => m.id);
-      //   setSelectedUsers(memberIds);
-      //   const selectionObj = {};
-      //   memberIds.forEach(id => selectionObj[id] = true);
-      //   setRowSelection(selectionObj);
-      //   setGroupName(json?.data?.groupName);
-      //   setValue("title", json?.data?.groupName);
-      // }
       if (json?.success) {
         const memberIds = (json?.data?.members || []).map(m => m.id);
 
@@ -146,15 +181,21 @@ export default function GroupCreate() {
       setLoading(true);
       const response = await getInAppLeads(pagination.pageIndex + 1, pagination.pageSize, '');
       if (response?.data?.success) {
-        // setData(response?.data?.data?.rows || []);
-        // setTotalDataCount(response?.data?.data?.rows.length || 0);
+
         const rows = response?.data?.data?.rows || [];
 
-        const formattedRows = rows.map((u) => ({
-          ...u,
-          id: u.id || u.principal_xid,
-           gender: normalizeGender(u.gender), 
-        }));
+        const formattedRows = rows.map((u) => {
+          const normalizedDOB = normalizeDOB(u.dateOfBirth);
+
+          return {
+            ...u,
+            id: u.id || u.principal_xid,
+            gender: normalizeGender(u.gender).toUpperCase(),
+            dateOfBirth: normalizedDOB || 'N/A',   // ✅ normalized DOB
+            age: calculateAge(normalizedDOB), // ✅ derived age
+          };
+        });
+
 
         setData(formattedRows);
         setTotalDataCount(formattedRows.length);
@@ -196,33 +237,106 @@ export default function GroupCreate() {
   const FiltersUI = (
     <div className="flex flex-wrap gap-2 items-center relative">
 
-      {/* Gender */}
-      <select
-        value={filters.gender}
-        onChange={e => setFilters({ ...filters, gender: e.target.value })}
-        className="border p-2 rounded text-sm"
-      >
-        <option value="">All Gender</option>
-        <option value="male">Male</option>
-        <option value="female">Female</option>
-        <option value="other">Other</option>
-      </select>
+      {/* Date + Age Range Dropdown */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setDateDropdownOpen(!dateDropdownOpen)}
+          className="border p-2 rounded text-sm bg-white hover:bg-gray-100"
+        >
+          {(filters.fromDate && filters.toDate) || (filters.minAge && filters.maxAge)
+            ? `${filters.fromDate || '—'} → ${filters.toDate || '—'} | Age ${filters.minAge || '—'}-${filters.maxAge || '—'}`
+            : "Select Date & Age"}
+        </button>
+
+        {dateDropdownOpen && (
+          <div className="absolute top-full left-0 z-50 bg-white border p-3 shadow-lg rounded mt-1 w-72">
+            <div className="flex flex-col gap-3">
+
+              {/* Date Range */}
+              <div>
+                <label className="text-xs font-semibold text-gray-600 mb-1 block">
+                  Date Range
+                </label>
+                <input
+                  type="date"
+                  value={tempDateRange.startDate}
+                  onChange={(e) =>
+                    setTempDateRange({ ...tempDateRange, startDate: e.target.value })
+                  }
+                  className="border p-2 rounded text-sm w-full mb-2"
+                />
+                <input
+                  type="date"
+                  value={tempDateRange.endDate}
+                  onChange={(e) =>
+                    setTempDateRange({ ...tempDateRange, endDate: e.target.value })
+                  }
+                  className="border p-2 rounded text-sm w-full"
+                />
+              </div>
+
+              {/* Age dropdown inside Date dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAgeInsideDateOpen(!ageInsideDateOpen)}
+                  className="w-full border p-2 rounded text-sm bg-gray-50 hover:bg-gray-100"
+                >
+                  {tempAgeRange.minAge && tempAgeRange.maxAge
+                    ? `Age: ${tempAgeRange.minAge} - ${tempAgeRange.maxAge}`
+                    : "Select Age Range"}
+                </button>
+
+                {ageInsideDateOpen && (
+                  <div className="absolute left-0 top-full z-50 bg-white border p-3 rounded shadow w-full mt-1">
+                    <input
+                      type="number"
+                      placeholder="Min Age"
+                      value={tempAgeRange.minAge}
+                      onChange={(e) =>
+                        setTempAgeRange({ ...tempAgeRange, minAge: e.target.value })
+                      }
+                      className="border p-2 rounded text-sm w-full mb-2"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max Age"
+                      value={tempAgeRange.maxAge}
+                      onChange={(e) =>
+                        setTempAgeRange({ ...tempAgeRange, maxAge: e.target.value })
+                      }
+                      className="border p-2 rounded text-sm w-full mb-2"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Apply Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setFilters({
+                    ...filters,
+                    fromDate: tempDateRange.startDate,
+                    toDate: tempDateRange.endDate,
+                    minAge: tempAgeRange.minAge,
+                    maxAge: tempAgeRange.maxAge,
+                  });
+                  setDateDropdownOpen(false);
+                  setAgeInsideDateOpen(false);
+                }}
+                className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Age */}
-      <input
-        type="number"
-        placeholder="Min Age"
-        value={filters.minAge}
-        onChange={e => setFilters({ ...filters, minAge: e.target.value })}
-        className="border p-2 rounded w-24 text-sm"
-      />
-      <input
-        type="number"
-        placeholder="Max Age"
-        value={filters.maxAge}
-        onChange={e => setFilters({ ...filters, maxAge: e.target.value })}
-        className="border p-2 rounded w-24 text-sm"
-      />
+     
 
       {/* Income Range Dropdown */}
       <div className="relative">
@@ -258,48 +372,6 @@ export default function GroupCreate() {
                 onClick={() => {
                   setFilters({ ...filters, minIncome: tempIncomeRange.minIncome, maxIncome: tempIncomeRange.maxIncome });
                   setIncomeDropdownOpen(false);
-                }}
-                className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Date Range Dropdown */}
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => setDateDropdownOpen(!dateDropdownOpen)}
-          className="border p-2 rounded text-sm bg-white hover:bg-gray-100"
-        >
-          {filters.fromDate && filters.toDate
-            ? `${filters.fromDate} - ${filters.toDate}`
-            : "Select Date Range"}
-        </button>
-
-        {dateDropdownOpen && (
-          <div className="absolute top-full left-0 z-50 bg-white border p-3 shadow-lg rounded mt-1 w-64">
-            <div className="flex flex-col gap-2">
-              <input
-                type="date"
-                value={tempDateRange.startDate}
-                onChange={e => setTempDateRange({ ...tempDateRange, startDate: e.target.value })}
-                className="border p-2 rounded text-sm"
-              />
-              <input
-                type="date"
-                value={tempDateRange.endDate}
-                onChange={e => setTempDateRange({ ...tempDateRange, endDate: e.target.value })}
-                className="border p-2 rounded text-sm"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  setFilters({ ...filters, fromDate: tempDateRange.startDate, toDate: tempDateRange.endDate });
-                  setDateDropdownOpen(false);
                 }}
                 className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
               >
@@ -359,6 +431,8 @@ export default function GroupCreate() {
               {...register("title", { required: true })}
               className="w-full border px-3 py-2 rounded-md focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter group title"
+              readOnly
+              disabled
             />
           </div>
         </form>
