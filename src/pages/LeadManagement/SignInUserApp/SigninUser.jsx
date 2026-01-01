@@ -45,6 +45,9 @@ const exportToExcel = async (rawData) => {
     { header: "Phone", key: "phone", width: 15 },
     { header: "Income", key: "income", width: 15 },
     { header: "Created At", key: "createdAt", width: 15 },
+     { header: "ipAddress", key: "ipAddress", width: 15 },
+    { header: "creditConsentText", key: "creditConsentText", width: 15 },
+    { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
@@ -74,6 +77,9 @@ const exportToExcel = async (rawData) => {
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
       income: item.income || item.monthlyIncome || 0,
+      ipAddress: item.ipAddress,
+      creditConsentText: itemm.creditConsentText,
+      communicationConsentText: itemm.communicationConsentText,
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
@@ -439,7 +445,7 @@ const SignInUsers = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge, query.jobType,handleJobTypeFilter]);
+  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
 
   // ---------------- AUTO FETCH ----------------
   useEffect(() => {

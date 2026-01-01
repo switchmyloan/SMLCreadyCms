@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import DataTable from "../../components/Table/DataTable";
-import SelectableDataTable from "../../components/Table/SelectableDataTable";
 import ValidatedTextField from "../../components/Form/ValidatedTextField";
 import ValidatedTextArea from "../../components/Form/ValidatedTextArea";
-import ValidatedMultiSelect from "../../components/Form/ValidatedSearchMultiSelect";
 import Uploader from "../../components/Form/Uploader";
 import { createTemplate } from "../../api-services/Modules/Leads";
-import ValidatedSearchMultiSelect from "../../components/Form/ValidatedSearchMultiSelect";
 import ValidatedSingleSelect from "../../components/Form/ValidatedSingleSelect";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "../../components/Notification/ToastNotification";
 
@@ -20,8 +16,10 @@ export default function PushNotificationCreate() {
   const [rowSelection, setRowSelection] = useState({});
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [options, setOptions] = useState([]);
-  const [globalFilter, setGlobalFilter] = useState('')
-  const navigate = useNavigate()
+
+  const navigate = useNavigate();
+    const { id } = useParams();
+  
 
 
   const {
@@ -29,6 +27,7 @@ export default function PushNotificationCreate() {
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors }
   } = useForm({
     template_image: null,
@@ -56,6 +55,24 @@ export default function PushNotificationCreate() {
 
     setOptions(formatted); // assuming setOptions is defined in your component
     return formatted;
+  };
+  const fetchTemplate = async () => {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/templates/${id}`);
+
+    if (!res.ok) {
+      console.error("Failed to fetch groups:", res.statusText);
+      return [];
+    }
+
+    const json = await res.json();
+
+    const list = json?.data || [];
+
+    console.log(list?.title, "list?.title")
+    setValue('title', list?.title)
+    setValue('group_xid', list?.group_xid)
+    setValue('message', list?.message)
+    setValue('template_image', import.meta.env.VITE_API_URL + '/' + list?.template_image)
   };
 
   
@@ -87,7 +104,10 @@ export default function PushNotificationCreate() {
   };
 
   useEffect(() => {
-    fetchGroups()
+    fetchGroups();
+    if(id){
+      fetchTemplate()
+    }
   }, [])
 
   return (

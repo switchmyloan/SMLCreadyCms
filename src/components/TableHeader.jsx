@@ -975,7 +975,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
 ];
 
 
-export const pushNotificationColumns = ({ sendNotification }) => [
+export const pushNotificationColumns = ({ sendNotification,handleEdit }) => [
   {
     header: "Title",
     accessorKey: "title",
@@ -1006,10 +1006,7 @@ export const pushNotificationColumns = ({ sendNotification }) => [
 
           {/* EDIT */}
           <button
-            onClick={(row) => {
-              console.log(item, "items")
-              // handleEdit(item)
-            }}
+            onClick={(row) => handleEdit(item) }
             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
           >
             <Edit2 size={18} />

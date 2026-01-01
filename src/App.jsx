@@ -66,6 +66,7 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="push-notification" element={<PushNotificationList/>} />
             <Route path="push-notification/create" element={<PushNotificationCreate/>} />
+            <Route path="push-notification/:id" element={<PushNotificationCreate/>} />
             <Route path="group" element={<GroupList/>}/>
             <Route path="group/create" element={<GroupCreate/>}/>
             <Route path="contact" element={<Contact />}/>

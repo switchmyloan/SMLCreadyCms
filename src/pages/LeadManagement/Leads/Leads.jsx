@@ -328,6 +328,9 @@ const exportToExcel = async (rawData) => {
     { header: "Phone", key: "phone", width: 15 },
     { header: "Income", key: "income", width: 15 },
     { header: "Created At", key: "createdAt", width: 15 },
+     { header: "ipAddress", key: "ipAddress", width: 15 },
+    { header: "creditConsentText", key: "creditConsentText", width: 15 },
+    { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
@@ -357,6 +360,9 @@ const exportToExcel = async (rawData) => {
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
       income: item.income || item.monthlyIncome || 0,
+       ipAddress: item.ipAddress,
+      creditConsentText: item.creditConsentText,
+      communicationConsentText: item.communicationConsentText,
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",

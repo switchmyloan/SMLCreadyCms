@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/Table/DataTable";
 import { pushNotificationColumns } from "../../components/TableHeader";
-import {sendPushNotification} from "../../api-services/Modules/Leads"
+import { sendPushNotification } from "../../api-services/Modules/Leads"
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "../../components/Notification/ToastNotification";
 
@@ -30,10 +30,10 @@ export default function PushNotificationList() {
   async function sendNotification(templateId) {
     console.log(templateId, "templateId")
 
-    const response = await sendPushNotification({templateId : templateId});
- 
+    const response = await sendPushNotification({ templateId: templateId });
+
     if (response?.data?.success) {
-         console.log(response?.data?.success)
+      console.log(response?.data?.success)
       ToastNotification.success(`Notification Send Successfully!`);
     } else {
       ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
@@ -45,10 +45,10 @@ export default function PushNotificationList() {
     fetchGroups();
   }, []);
 
-   const handleEdit = (group) => {
+  const handleEdit = (group) => {
     console.log("Edit group:", group);
-    setEditId(group.id);
-    navigate('/push-notification')
+    // setEditId(group.id);
+    navigate(`/push-notification/${group.id}`)
   };
 
   return (

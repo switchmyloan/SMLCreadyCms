@@ -18,7 +18,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 1,
-    roles: ["admin"]
+    roles: ["admin", "super-admin"]
   },
   {
     path: "/leads",
