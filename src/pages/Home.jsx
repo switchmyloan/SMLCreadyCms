@@ -82,27 +82,6 @@ const HomePage = () => {
     };
 
 
-    // const fetchDashboardData = async () => {
-    //     setIsLoading(true);
-    //     setError(null);
-    //     try {
-    //         // ✅ API Call to your Interactor/Controller endpoint
-    //         const response = await getSummary();
-
-    //         // Assuming the API response structure is { data: { summary: DashboardSummary }, ... }
-    //         const summaryData = response.data.data.summary; 
-
-    //         setData(summaryData); 
-
-    //     } catch (err) {
-    //         console.error("Failed to fetch dashboard data:", err);
-    //         setError("Could not load dashboard data. Please try again.");
-    //         setData(null);
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
     const fetchDashboardData = async () => {
         setIsLoading(true);
         setError(null);
@@ -188,39 +167,11 @@ const HomePage = () => {
         lenderWiseLeads
     } = data;
 
-    // Normalize and aggregate genderDistribution
-    const normalizedGenderDistribution = (genderDistribution || []).reduce(
-        (acc, curr) => {
-            const name =
-                curr.name?.toLowerCase() === 'male'
-                    ? 'Male'
-                    : curr.name?.toLowerCase() === 'female'
-                        ? 'Female'
-                        : 'Unspecified';
-            const existing = acc.find(item => item.name === name);
-            if (existing) {
-                existing.value += curr.value;
-            } else {
-                acc.push({ name, value: curr.value });
-            }
-            return acc;
-        },
-        []
-    );
-
-
-    // Assuming PrincipalDonutChart is a reusable component for distribution
-    const DistributionChart = PrincipalDonutChart;
-
     return (
         <div className=" bg-gray-50 min-h-screen">
-
-
             <h2 className="text-lg font-bold text-gray-700 mb-4">
                 Dashboard Filters
             </h2>
-
-            {/* Radio buttons */}
             <div className="flex flex-wrap gap-6 mb-4">
 
                 {['today', 'yesterday', 'range'].map(mode => (

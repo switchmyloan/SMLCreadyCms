@@ -13,7 +13,7 @@ const LenderWiseDashboard = ({lenderWiseLeads}) => {
           <thead className="bg-blue-600 text-white">
             <tr>
               <th className="py-3 px-4 text-left">Lender</th>
-              <th className="py-3 px-4 text-right">Total Leads</th>
+              {/* <th className="py-3 px-4 text-right">Total Leads</th> */}
               <th className="py-3 px-4 text-right">Success</th>
               <th className="py-3 px-4 text-right">Rejected</th>
               <th className="py-3 px-4 text-right">Success Rate</th>
@@ -23,7 +23,7 @@ const LenderWiseDashboard = ({lenderWiseLeads}) => {
             {lenderWiseLeads.map((lender) => (
               <tr key={lender.lenderId} className="border-b hover:bg-gray-50">
                 <td className="py-2 px-4 font-medium">{lender.lenderName}</td>
-                <td className="py-2 px-4 text-right">{lender.totalLeads}</td>
+                {/* <td className="py-2 px-4 text-right">{lender.totalLeads}</td> */}
                 <td className="py-2 px-4 text-right text-green-600">{lender.success}</td>
                 <td className="py-2 px-4 text-right text-red-600">{lender.rejected}</td>
                 <td className="py-2 px-4 text-right">{lender.successRate}</td>

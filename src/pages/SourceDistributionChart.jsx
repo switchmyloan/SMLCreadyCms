@@ -8,7 +8,7 @@ const mapSourceXID = (xid) => {
   return "Unknown";
 };
 // Color palette
-const COLORS = ["#3B82F6", "#10B981", "#FBBF24"]; // Blue, Green, Yellow
+const COLORS = ["#10B981","#3B82F6", , "#FBBF24"]; // Blue, Green, Yellow
 
 const SourceDistributionChart = ({ principalSourceDistribution = []}) => {
       const formattedData = principalSourceDistribution.map((item) => {
