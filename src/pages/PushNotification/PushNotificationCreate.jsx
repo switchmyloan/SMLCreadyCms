@@ -12,9 +12,6 @@ import ToastNotification from "../../components/Notification/ToastNotification";
 export default function PushNotificationCreate() {
 
   const [selectedItems, setSelectedItems] = useState([]);
-  const [tableData, setTableData] = useState([]);
-  const [rowSelection, setRowSelection] = useState({});
-  const [selectedUsers, setSelectedUsers] = useState([]);
   const [options, setOptions] = useState([]);
 
   const navigate = useNavigate();
@@ -30,7 +27,7 @@ export default function PushNotificationCreate() {
     setValue,
     formState: { errors }
   } = useForm({
-    template_image: null,
+    imageUrl: null,
     group_xid: null,
     title: '',
     message: ''
@@ -72,7 +69,7 @@ export default function PushNotificationCreate() {
     setValue('title', list?.title)
     setValue('group_xid', list?.group_xid)
     setValue('message', list?.message)
-    setValue('template_image', import.meta.env.VITE_API_URL + '/' + list?.template_image)
+    setValue('imageUrl', import.meta.env.VITE_API_URL + '/' + list?.imageUrl)
   };
 
   
@@ -94,13 +91,6 @@ export default function PushNotificationCreate() {
     } else {
       ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
     }
-
-    setTableData((prev) => [payload, ...prev]);
-
-    reset();
-    setSelectedItems([]);
-    setRowSelection({});
-    setSelectedUsers([]);
   };
 
   useEffect(() => {
@@ -181,7 +171,7 @@ export default function PushNotificationCreate() {
 
           <div>
             <Uploader
-              name="template_image"
+              name="imageUrl"
               control={control}
               label="Upload Profile Image"
               errors={errors}
