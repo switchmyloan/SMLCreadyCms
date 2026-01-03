@@ -2,10 +2,14 @@ import React from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 
+// const mapSourceXID = (xid) => {
+//   if (xid === 1) return "Mobile App";
+//   if (xid === 2) return "Web";
+//   return "Unknown";
+// };
+
 const mapSourceXID = (xid) => {
-  if (xid === 1) return "Mobile App";
-  if (xid === 2) return "Web";
-  return "Unknown";
+  return xid ? "Web" : "App";
 };
 // Color palette
 const COLORS = ["#10B981","#3B82F6", , "#FBBF24"]; // Blue, Green, Yellow
