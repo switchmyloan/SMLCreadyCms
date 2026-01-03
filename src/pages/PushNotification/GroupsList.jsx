@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTable from "../../components/Table/DataTable";
 import { groupListFullColumns } from "../../components/TableHeader";
@@ -11,6 +11,21 @@ export default function GroupList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const [query, setQuery] = useState({
+    search: '',
+    filter_date: '',
+    startDate: null,
+    endDate: null,
+    gender: '',
+    minIncome: undefined,
+    maxIncome: undefined,
+    jobType: '',
+  });
 
 
   const fetchGroups = async () => {
@@ -134,9 +149,23 @@ export default function GroupList() {
     navigate(`/group/create?name=${groupId?.title}&groupId=${groupId?.id}`);
   };
 
+
+  const onSearchHandler = useCallback((term) => {
+    setQuery(prev => ({ ...prev, search: term }));
+    // setPagination(p => ({ ...p, pageIndex: 10 }));
+    setPagination({
+      pageIndex: 0,
+      pageSize: 10
+    });
+  }, []);
+
+  const onPageChange = useCallback((pageInfo) => {
+    setPagination(pageInfo);
+  }, []);
+
   useEffect(() => {
     fetchGroups();
-  }, []);
+  }, [query]);
 
 
 
@@ -153,8 +182,9 @@ export default function GroupList() {
         totalDataCount={groups.length}
         onCreate={() => setIsModalOpen(true)}
         createLabel="Create Group"
-        onPageChange={() => { }}
-             onRefresh={fetchGroups}
+        onPageChange={onPageChange}
+        onRefresh={fetchGroups}
+        onSearch={onSearchHandler}
       />
 
       {/* ---------------------- MODAL ---------------------- */}
