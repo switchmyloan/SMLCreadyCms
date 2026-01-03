@@ -33,6 +33,8 @@ import Contact from './pages/LeadManagement/Contact/Contact';
 import UTMGenerator from './pages/UTM/UtmLinkGenerate';
 import AllLeadDetail from './pages/LeadManagement/AllLeads/AllLeadDetail';
 import AllLeads from './pages/LeadManagement/AllLeads/AllLeads';
+import PartnersLeads from './pages/LeadManagement/PartnersLead/PartnersLead';
+import PartnerDetail from './pages/LeadManagement/PartnersLead/PartnerDetail';
 
 function App() {
   return (
@@ -72,6 +74,8 @@ function App() {
             <Route path="contact" element={<Contact />}/>
             <Route path="utm-generate" element={<UTMGenerator />}/>
             <Route path="all-leads" element={<AllLeads />}/>
+            <Route path="partner-leads" element={<PartnersLeads />}/>
+            <Route path="partner-detail/:id" element={<PartnerDetail />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

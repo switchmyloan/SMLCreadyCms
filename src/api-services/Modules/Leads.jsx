@@ -8,6 +8,13 @@ export const getLeads = async () => {
         }
     )
 };
+export const getPartnerLeads = async () => {
+    return Api().get(`/leads/admin/partner-leads`,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
 export const getAllLeads = async () => {
     return Api().get(`/leads/admin/all-leads`,
         {

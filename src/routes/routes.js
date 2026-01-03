@@ -31,6 +31,16 @@ export const routes = [
     roles: ["admin", "super-admin"],
   },
   {
+    path: "/partner-leads",
+    label: "Partners Leads",
+    icon: "Users", // ✅ leads list
+    showInSidebar: true,
+    group: "Lead Management",
+    groupOrder: 1,
+    order: 2,
+    roles: ["admin", "super-admin"],
+  },
+  {
     path: "/all-leads",
     label: "All Leads",
     icon: "Users2", // ✅ leads list
