@@ -12,7 +12,7 @@ export const routes = [
   // --- Lead Management ---
   {
     path: "/signin-user",
-    label: "Signin user (in app)",
+    label: "App Leads",
     icon: "LucideMonitor", // ✅ login-related
     showInSidebar: true,
     group: "Lead Management",
@@ -22,7 +22,7 @@ export const routes = [
   },
   {
     path: "/leads",
-    label: "Leads",
+    label: "Web Leads",
     icon: "Users", // ✅ leads list
     showInSidebar: true,
     group: "Lead Management",
@@ -32,7 +32,7 @@ export const routes = [
   },
   {
     path: "/partner-leads",
-    label: "Partners Leads",
+    label: "UTM Leads",
     icon: "Users", // ✅ leads list
     showInSidebar: true,
     group: "Lead Management",
