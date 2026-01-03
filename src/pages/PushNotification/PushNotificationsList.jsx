@@ -15,13 +15,16 @@ export default function PushNotificationList() {
   // Fetch group list from backend
 
   async function fetchGroups() {
+    setLoading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/templates`);
       const response = await res.json();
       if (response?.success) {
         setGroups(response?.data);
+        setLoading(false);
       }
     } catch (error) {
+      setLoading(false);
       console.error("Error fetching groups:", error);
     }
     setLoading(false);
@@ -66,6 +69,7 @@ export default function PushNotificationList() {
         onCreate={() => navigate("/push-notification/create")} // ✅ Create button callback
         createLabel="Create Template"
         onPageChange={() => { }}
+             onRefresh={fetchGroups}
       />
     </div>
   );

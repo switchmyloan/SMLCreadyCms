@@ -154,6 +154,7 @@ export default function GroupList() {
         onCreate={() => setIsModalOpen(true)}
         createLabel="Create Group"
         onPageChange={() => { }}
+             onRefresh={fetchGroups}
       />
 
       {/* ---------------------- MODAL ---------------------- */}

@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import ValidatedTextField from "../../components/Form/ValidatedTextField";
 import ValidatedTextArea from "../../components/Form/ValidatedTextArea";
 import Uploader from "../../components/Form/Uploader";
-import { createTemplate } from "../../api-services/Modules/Leads";
+import { createTemplate, updateTemplate } from "../../api-services/Modules/Leads";
 import ValidatedSingleSelect from "../../components/Form/ValidatedSingleSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
@@ -77,21 +77,50 @@ export default function PushNotificationCreate() {
     setSelectedItems(selectedItems.filter((i) => i !== item));
   };
 
+  // const onSubmit = async (data) => {
+  //   if (!data.title) {
+  //     alert("Title is required.");
+  //     return;
+  //   }
+
+
+  //   const response = await id ? updateTemplate(id, data) : createTemplate(data);
+  //   console.log(response)
+  //   if (response?.success) {
+  //     navigate('/push-notification');
+  //   } else {
+  //     ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
+  //   }
+  // };
+
   const onSubmit = async (data) => {
-    if (!data.title) {
-      alert("Title is required.");
+  if (!data?.title?.trim()) {
+    ToastNotification.error("Title is required.");
+    return;
+  }
+
+  try {
+    const apiCall = id ? updateTemplate : createTemplate;
+    const response = await apiCall(id ? id : data, id ? data : undefined);
+
+    if (response?.success) {
+      ToastNotification.success('Notification Template Create Successfully!')
+      navigate('/push-notification');
+      return;
+    }
+    if (response?.data?.success) {
+        ToastNotification.success(response?.data?.message)
+      navigate('/push-notification');
       return;
     }
 
+    ToastNotification.error(response?.message || "Failed to save template");
+  } catch (error) {
+    console.error("Template submit error:", error);
+    ToastNotification.error("Something went wrong. Please try again.");
+  }
+};
 
-    const response = await createTemplate(data);
-    console.log(response)
-    if (response?.success) {
-      navigate('/push-notification');
-    } else {
-      ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
-    }
-  };
 
   useEffect(() => {
     fetchGroups();
@@ -107,14 +136,14 @@ export default function PushNotificationCreate() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
 
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-blue-800">Send Push Notification 📢</h2>
+            <h2 className="text-2xl font-bold text-blue-800">{id ? 'Update' : 'Send'} Push Notification 📢</h2>
 
             <button
               type="submit"
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
             // disabled={!selectedItems.length && !selectedUsers.length}
             >
-              Send
+             {id ? 'Update' : 'Send'}
             </button>
           </div>
           <hr />

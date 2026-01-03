@@ -1,4 +1,4 @@
-import { Edit2, Image, Trash2, Eye } from 'lucide-react';
+import { Edit2, Image, Trash2, Eye, Trash } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 import { FaUserPlus } from "react-icons/fa";
 
@@ -929,11 +929,11 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
     accessorKey: "title",
     cell: ({ getValue }) => getValue() || "N/A",
   },
-  {
-    header: "Users",
-    accessorKey: "audienceCount",
-    cell: ({ getValue }) => getValue() || "0",
-  },
+  // {
+  //   header: "Users",
+  //   accessorKey: "audienceCount",
+  //   cell: ({ getValue }) => getValue() || "0",
+  // },
   {
     header: "Created On",
     accessorKey: "createdAt",
@@ -955,6 +955,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
               console.log(item, "items")
               handleEdit(item)
             }}
+            title='Edit Group'
             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
           >
             <Edit2 size={18} />
@@ -964,6 +965,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
           <button
             onClick={() => handleAddUsers(item)}
             className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+            title='Add Users'
           >
             <FaUserPlus size={18} />
           </button>
@@ -975,7 +977,7 @@ export const groupListFullColumns = ({ handleEdit, handleAddUsers }) => [
 ];
 
 
-export const pushNotificationColumns = ({ sendNotification,handleEdit }) => [
+export const pushNotificationColumns = ({ sendNotification, handleEdit }) => [
   {
     header: "Title",
     accessorKey: "title",
@@ -1004,20 +1006,29 @@ export const pushNotificationColumns = ({ sendNotification,handleEdit }) => [
       return (
         <div className="flex space-x-3 items-center">
 
+          {/* ADD USERS */}
+          <button
+            title="Send Notification"
+            onClick={() => sendNotification(item.id)}
+            className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+          >
+            <FaUserPlus size={18} />
+          </button>
           {/* EDIT */}
           <button
-            onClick={(row) => handleEdit(item) }
+            title="Edit"
+            onClick={(row) => handleEdit(item)}
             className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
           >
             <Edit2 size={18} />
           </button>
 
-          {/* ADD USERS */}
           <button
-            onClick={() => sendNotification(item.id)}
-            className="p-2 rounded-lg hover:bg-green-100 text-green-600 transition"
+            title="Delete"
+            onClick={(row) => handleEdit(item)}
+            className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
           >
-            <FaUserPlus size={18} />
+            <Trash size={18} />
           </button>
 
         </div>

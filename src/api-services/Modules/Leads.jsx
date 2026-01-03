@@ -93,6 +93,17 @@ export const createTemplate = async (payload) => {
         }
     )
 };
+export const updateTemplate = async (id , payload) => {
+    console.log(payload, "ppppp")
+    return Api().put(`/push-notification/admin/templates/${id}`, payload,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            skipAdminAppend: true,
+        }
+    )
+};
 export const sendPushNotification = async (payload) => {
     return Api().post(`/push-notification/admin/send`, payload,
         {
