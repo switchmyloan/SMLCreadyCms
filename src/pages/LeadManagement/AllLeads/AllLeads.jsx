@@ -70,9 +70,9 @@ const exportToExcel = async (rawData) => {
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
       income: item.income || item.monthlyIncome || 0,
-       ipAddress: item.ipAddress,
-      creditConsentText: item.creditConsentText,
-      communicationConsentText: item.communicationConsentText,
+      //  ipAddress: item.ipAddress,
+      // creditConsentText: item.creditConsentText,
+      // communicationConsentText: item.communicationConsentText,
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
