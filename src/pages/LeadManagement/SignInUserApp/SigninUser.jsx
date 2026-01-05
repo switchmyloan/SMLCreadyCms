@@ -3,7 +3,6 @@ import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { signInColumns } from '@components/TableHeader';
 import { getInAppLeads } from '../../../api-services/Modules/Leads';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -113,12 +112,12 @@ const SignInUsers = () => {
   });
 
 
-  const [summaryMetrics, setSummaryMetrics] = useState({
-    totalUsers: 0,
-    totalLoanAmount: 0,
-    totalOffers: 0,
-    usersWithOffers: 0
-  });
+  // const [summaryMetrics, setSummaryMetrics] = useState({
+  //   totalUsers: 0,
+  //   totalLoanAmount: 0,
+  //   totalOffers: 0,
+  //   usersWithOffers: 0
+  // });
 
   const [query, setQuery] = useState({
     page_no: 1,
@@ -146,12 +145,12 @@ const SignInUsers = () => {
       if (response?.data?.success) {
         setRawData(response.data.data.rows || []);
 
-        setSummaryMetrics({
-          totalUsers: response?.data?.data?.summary?.totalUsers || 10,
-          totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
-          totalOffers: response?.data?.data?.summary?.totalOffers,
-          usersWithOffers: response?.data?.data?.summary?.usersWithOffers,
-        });
+        // setSummaryMetrics({
+        //   totalUsers: response?.data?.data?.summary?.totalUsers || 10,
+        //   totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
+        //   totalOffers: response?.data?.data?.summary?.totalOffers,
+        //   usersWithOffers: response?.data?.data?.summary?.usersWithOffers,
+        // });
       } else {
         ToastNotification.error("Failed to fetch leads");
       }
@@ -161,6 +160,8 @@ const SignInUsers = () => {
       setLoading(false);
     }
   };
+
+
 
   const filteredData = useMemo(() => {
     let rows = [...rawData];
@@ -502,6 +503,33 @@ const SignInUsers = () => {
     }
   };
 
+  const summaryMetrics = useMemo(() => {
+    const totalUsers = filteredData.length;
+
+    const totalLoanAmount = filteredData.reduce(
+      (sum, item) =>
+        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
+      0
+    );
+
+    // 🔥 Total offers (jitne lender responses me isOffer = true)
+    const totalOffers = filteredData.reduce((count, item) => {
+      const offers = item.lender_responses?.filter(lr => lr.isOffer)?.length || 0;
+      return count + offers;
+    }, 0);
+
+    // 🔥 Users with at least one offer
+    const usersWithOffers = filteredData.filter(item =>
+      item.lender_responses?.some(lr => lr.isOffer)
+    ).length;
+
+    return {
+      totalUsers,
+      totalLoanAmount,
+      totalOffers,
+      usersWithOffers
+    };
+  }, [filteredData]);
 
 
   const dynamicMetrics = useMemo(() => [

@@ -388,12 +388,12 @@ const Leads = () => {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const [summaryMetrics, setSummaryMetrics] = useState({
-    totalLeads: 0,
-    totalLoanAmount: 0,
-    todayLeads: 0,
-    dedupe: 0
-  });
+  // const [summaryMetrics, setSummaryMetrics] = useState({
+  //   totalLeads: 0,
+  //   totalLoanAmount: 0,
+  //   todayLeads: 0,
+  //   dedupe: 0
+  // });
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -484,12 +484,12 @@ const Leads = () => {
       if (response?.data?.success) {
         setRawData(response.data.data.rows || []);
 
-        setSummaryMetrics({
-          totalLeads: response?.data?.data?.summary?.totalLeads || 10,
-          totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
-          todayLeads: response?.data?.data?.summary?.todayLeads,
-          dedupe: response?.data?.data?.summary?.dedupe,
-        });
+        // setSummaryMetrics({
+        //   totalLeads: response?.data?.data?.summary?.totalLeads || 10,
+        //   totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
+        //   todayLeads: response?.data?.data?.summary?.todayLeads,
+        //   dedupe: response?.data?.data?.summary?.dedupe,
+        // });
       } else {
         ToastNotification.error("Failed to fetch leads");
       }
@@ -505,6 +505,31 @@ const Leads = () => {
   }, []);
 
   /* ========================= FILTERING ========================= */
+  const summaryMetrics = useMemo(() => {
+    const totalLeads = filteredData.length;
+
+    const totalLoanAmount = filteredData.reduce(
+      (sum, item) =>
+        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
+      0
+    );
+
+    const today = new Date().toDateString();
+    const todayLeads = filteredData.filter(
+      item => new Date(item.createdAt).toDateString() === today
+    ).length;
+
+    const dedupe = filteredData.filter(
+      item => item.isDuplicate === true
+    ).length;
+
+    return {
+      totalLeads,
+      totalLoanAmount,
+      todayLeads,
+      dedupe
+    };
+  }, [filteredData]);
 
   const filteredData = useMemo(() => {
     let rows = [...rawData];
