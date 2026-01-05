@@ -97,9 +97,9 @@ export const updateTemplate = async (id , payload) => {
     console.log(payload, "ppppp")
     return Api().put(`/push-notification/admin/templates/${id}`, payload,
         {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+            // headers: {
+            //     'Content-Type': 'multipart/form-data',
+            // },
             skipAdminAppend: true,
         }
     )
