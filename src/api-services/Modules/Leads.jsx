@@ -86,9 +86,9 @@ export const addGroupUsers = async (payload) => {
 export const createTemplate = async (payload) => {
     return Api().post(`/push-notification/admin/templates`, payload,
         {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
+            // headers: {
+            //     'Content-Type': 'multipart/form-data',
+            // },
             skipAdminAppend: true,
         }
     )

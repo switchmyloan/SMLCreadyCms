@@ -15,8 +15,8 @@ export default function PushNotificationCreate() {
   const [options, setOptions] = useState([]);
 
   const navigate = useNavigate();
-    const { id } = useParams();
-  
+  const { id } = useParams();
+
 
 
   const {
@@ -32,6 +32,29 @@ export default function PushNotificationCreate() {
     title: '',
     message: ''
   });
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const res = await fetch(
+      // "https://admin.cready.in/api/public/admin",
+      `${import.meta.env.VITE_API_URL}/public/admin`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const json = await res.json();
+
+    if (!json?.success) {
+      throw new Error("Image upload failed");
+    }
+
+    return json.data.path; // 👈 IMPORTANT
+  };
+
 
   const fetchGroups = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/group`);
@@ -72,59 +95,48 @@ export default function PushNotificationCreate() {
     setValue('imageUrl', import.meta.env.VITE_API_URL + '/' + list?.imageUrl)
   };
 
-  
+
   const removeItem = (item) => {
     setSelectedItems(selectedItems.filter((i) => i !== item));
   };
 
-  // const onSubmit = async (data) => {
-  //   if (!data.title) {
-  //     alert("Title is required.");
-  //     return;
-  //   }
-
-
-  //   const response = await id ? updateTemplate(id, data) : createTemplate(data);
-  //   console.log(response)
-  //   if (response?.success) {
-  //     navigate('/push-notification');
-  //   } else {
-  //     ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
-  //   }
-  // };
-
   const onSubmit = async (data) => {
-  if (!data?.title?.trim()) {
-    ToastNotification.error("Title is required.");
-    return;
-  }
+    try {
+      let imagePath = data.imageUrl;
+debugger
+      // 🟡 Agar image File hai tabhi upload karo
+      if (data.imageUrl instanceof File) {
+         imagePath = await uploadImage(data.imageUrl);
+        
+      }
 
-  try {
-    const apiCall = id ? updateTemplate : createTemplate;
-    const response = await apiCall(id ? id : data, id ? data : undefined);
+      const payload = {
+        title: data.title,
+        message: data.message,
+        group_xid: data.group_xid,
+        imageUrl: import.meta.env.VITE_IMAGE_URL+imagePath, // 👈 sirf path jayega
+      };
 
-    if (response?.success) {
-      ToastNotification.success('Notification Template Create Successfully!')
-      navigate('/push-notification');
-      return;
+      const response = id
+        ? await updateTemplate(id, payload)
+        : await createTemplate(payload);
+
+      if (response?.success || response?.data?.success) {
+        ToastNotification.success("Template saved successfully!");
+        navigate("/push-notification");
+        return;
+      }
+
+      ToastNotification.error("Failed to save template");
+    } catch (err) {
+      console.error(err);
+      ToastNotification.error("Something went wrong");
     }
-    if (response?.data?.success) {
-        ToastNotification.success(response?.data?.message)
-      navigate('/push-notification');
-      return;
-    }
-
-    ToastNotification.error(response?.message || "Failed to save template");
-  } catch (error) {
-    console.error("Template submit error:", error);
-    ToastNotification.error("Something went wrong. Please try again.");
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchGroups();
-    if(id){
+    if (id) {
       fetchTemplate()
     }
   }, [])
@@ -143,7 +155,7 @@ export default function PushNotificationCreate() {
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-400"
             // disabled={!selectedItems.length && !selectedUsers.length}
             >
-             {id ? 'Update' : 'Send'}
+              {id ? 'Update' : 'Send'}
             </button>
           </div>
           <hr />
