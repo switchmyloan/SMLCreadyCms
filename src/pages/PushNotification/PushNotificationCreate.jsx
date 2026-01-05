@@ -103,7 +103,7 @@ export default function PushNotificationCreate() {
   const onSubmit = async (data) => {
     try {
       let imagePath = data.imageUrl;
-debugger
+
       // 🟡 Agar image File hai tabhi upload karo
       if (data.imageUrl instanceof File) {
          imagePath = await uploadImage(data.imageUrl);
