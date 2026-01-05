@@ -153,8 +153,15 @@ function LoginPage() {
       id: 2,
       name: "Super Admin",
       email: "super@cready.in",
-      password: "Super@123",
+      password: "Super@321",
       role: "super-admin",
+    },
+    {
+      id: 3,
+      name: "Marketing",
+      email: "marketing@cready.in",
+      password: "Marketing@123",
+      role: "marketing",
     }
   ];
 
