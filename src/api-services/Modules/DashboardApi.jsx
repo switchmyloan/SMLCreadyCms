@@ -7,4 +7,14 @@ export const getSummary = async ({ fromDate, toDate } = {}) => {
       toDate
     }
   })
-}
+};
+
+export const getKycStageStatistics = async (fromDate, toDate) => {
+   return Api().get(`/summary/admin/mf-kyc-statstics`, {
+    params: {
+      fromDate,
+      toDate,
+    },
+    skipAdminAppend : true
+  })
+};
