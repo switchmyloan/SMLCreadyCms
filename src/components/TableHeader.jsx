@@ -679,6 +679,207 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     },
   },
 ];
+export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
+  {
+    header: 'SN', // Serial Number
+    id: 'sn',
+    enableSorting: false, // Serial numbers shouldn't be sortable
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      // 1. Get current pagination state from the table instance
+      const { pageIndex, pageSize } = table.getState().pagination;
+
+      // 2. Calculate the global row index
+      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
+      return (pageIndex * pageSize) + row.index + 1;
+    },
+  },
+  {
+    header: 'Name',
+    accessorKey: 'name',
+    size: 120,    // fixed width
+    minSize: 120,
+    maxSize: 120,
+    cell: ({ row }) => {
+      const firstName = row.original.first_name || '';
+      const lastName = row.original.last_name || '';
+      const fullName = `${firstName} ${lastName}`.trim() || 'N/A';
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={fullName} // Tooltip shows full name on hover
+        >
+          {fullName}
+        </div>
+      );
+    },
+  },
+
+
+  {
+    header: 'Loan ID',
+    accessorKey: 'loan_id',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+
+  {
+    header: 'Number',
+    accessorKey: 'phone_number',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Email',
+    accessorKey: 'email',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Loan Process Step',
+    accessorKey: 'loan_process_step',
+    cell: ({ getValue }) => {
+      const jobType = getValue();
+
+      // Function to convert to Title Case
+      const toTitleCase = (str) => {
+        if (!str) return 'N/A';
+        return str
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      };
+
+      const formattedJobType = toTitleCase(jobType);
+
+      // Define a mapping of job types to badge styles
+      const badgeStyles = {
+        'Loan_process_completed': 'bg-green-100 text-green-800',
+        'Other': 'bg-gray-100 text-gray-800',
+      };
+
+      // Get the style for the formatted job type, defaulting to 'Other'
+      const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+          {formattedJobType}
+        </span>
+      );
+    },
+  },
+ 
+  {
+    header: 'DOB',
+    accessorKey: 'date_of_birth',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    },
+  },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];
+export const MFAllLoansColumn = ({ handleEdit, handleDelete }) => [
+  {
+    header: 'SN', // Serial Number
+    id: 'sn',
+    enableSorting: false, // Serial numbers shouldn't be sortable
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      // 1. Get current pagination state from the table instance
+      const { pageIndex, pageSize } = table.getState().pagination;
+
+      // 2. Calculate the global row index
+      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
+      return (pageIndex * pageSize) + row.index + 1;
+    },
+  },
+  {
+    header: 'User ID',
+    accessorKey: 'user_id',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+
+  {
+    header: 'Disbursement',
+    accessorKey: 'disbursement_amount',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Loan Type',
+    accessorKey: 'loan_type',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'Tenure',
+    accessorKey: 'loan_tenure',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+  {
+    header: 'frequency',
+    accessorKey: 'loan_frequency',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
+
+ 
+  {
+    header: 'Start Date',
+    accessorKey: 'start_date',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    },
+  },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];
 export const signInColumns = ({ handleEdit, handleDelete }) => [
   {
     header: 'SN', // Serial Number

@@ -35,6 +35,9 @@ import AllLeads from './pages/LeadManagement/AllLeads/AllLeads';
 import PartnersLeads from './pages/LeadManagement/PartnersLead/PartnersLead';
 import PartnerDetail from './pages/LeadManagement/PartnersLead/PartnerDetail';
 import GetKycStageStatistics from './pages/AppStatstics/KycStageDashboard';
+import MFAllUsers from './pages/MutalFund/MFAllUsers';
+import MFAllLoans from './pages/MutalFund/MFAllLoans';
+import MFLoansSummary from './pages/MutalFund/MFLoansSummary';
 
 function App() {
   return (
@@ -77,6 +80,9 @@ function App() {
             <Route path="partner-leads" element={<PartnersLeads />}/>
             <Route path="partner-detail/:id" element={<PartnerDetail />} />
             <Route path="kyc-statistics" element={<GetKycStageStatistics />} />
+            <Route path="fetch-all-mf-users" element={<MFAllUsers />} />
+            <Route path="fetch-all-mf-loans" element={<MFAllLoans />} />
+            <Route path="fetch-mf-loans-summary" element={<MFLoansSummary />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
