@@ -38,6 +38,8 @@ import GetKycStageStatistics from './pages/AppStatstics/KycStageDashboard';
 import MFAllUsers from './pages/MutalFund/MFAllUsers';
 import MFAllLoans from './pages/MutalFund/MFAllLoans';
 import MFLoansSummary from './pages/MutalFund/MFLoansSummary';
+import LoanDetail from './pages/MutalFund/LoanDetail';
+import AllUserDetail from './pages/MutalFund/AllUserDetail';
 
 function App() {
   return (
@@ -83,6 +85,8 @@ function App() {
             <Route path="fetch-all-mf-users" element={<MFAllUsers />} />
             <Route path="fetch-all-mf-loans" element={<MFAllLoans />} />
             <Route path="fetch-mf-loans-summary" element={<MFLoansSummary />} />
+            <Route path="fetch-mf-loans/:id" element={<LoanDetail />} />
+            <Route path="fetch-all-mf-users/:id" element={<AllUserDetail />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

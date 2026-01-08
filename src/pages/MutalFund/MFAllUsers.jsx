@@ -668,7 +668,7 @@ const MFAllUsers = () => {
 
   /* ========================= HANDLERS ========================= */
 
-  const handleEdit = (row) => navigate(`/user-detail/${row.id}`, { state: { user: row } });
+  const handleEdit = (row) => navigate(`/fetch-all-mf-users/${row.user_id}`, { state: { user: row } });
 
   const onSearchHandler = useCallback((term) => {
     setQuery(prev => ({ ...prev, search: term }));
