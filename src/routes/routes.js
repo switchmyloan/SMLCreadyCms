@@ -6,7 +6,7 @@ export const routes = [
     icon: "Home",
     showInSidebar: false,
     order: 0,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
 
   // --- Lead Management ---
@@ -18,7 +18,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 1,
-    roles: ["admin", "super-admin"]
+    roles: ["admin", "super-admin","marketing"]
   },
   {
     path: "/leads",
@@ -28,7 +28,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 2,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/partner-leads",
@@ -38,7 +38,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 2,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/all-leads",
@@ -48,7 +48,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 3,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/archive-users",
@@ -68,7 +68,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 4,
-    roles: ["admin", "super-admin"],
+    roles: ["admin","super-admin","marketing"],
   },
 
   // --- Lender Management ---
@@ -102,7 +102,7 @@ export const routes = [
     order: 1,
     group: "Blogs",
     groupOrder: 3,
-    roles: ["super-admin"],
+    roles: ["super-admin","marketing"],
   },
   {
     path: "/blog/create",
@@ -112,7 +112,7 @@ export const routes = [
     order: 2,
     group: "Blogs",
     groupOrder: 3,
-    roles: ["super-admin"],
+    roles: ["super-admin","marketing"],
   },
 
   // --- FAQ ---
@@ -124,7 +124,7 @@ export const routes = [
     order: 1,
     group: "FAQ",
     groupOrder: 4,
-    roles: ["super-admin"],
+    roles: ["super-admin","marketing"],
   },
 
   // --- CMS Management ---
@@ -136,7 +136,7 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 1,
-    roles: ["super-admin"],
+    roles: ["super-admin","marketing"],
   },
   {
     path: "/testimonials",
@@ -174,7 +174,7 @@ export const routes = [
     group: "CMS Management",
     groupOrder: 5,
     order: 5,
-    roles: ["super-admin"],
+    roles: ["super-admin","marketing"],
   },
   {
     path: "/terms-conditions",
@@ -225,7 +225,7 @@ export const routes = [
     group: "Push Notification",
     groupOrder: 6,
     order: 2,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/group",
@@ -235,7 +235,7 @@ export const routes = [
     group: "Push Notification",
     groupOrder: 6,
     order: 1,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/utm-generate",
@@ -245,7 +245,7 @@ export const routes = [
     group: "UTM",
     groupOrder: 6,
     order: 1,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","marketing"],
   },
   {
     path: "/fetch-all-mf-users",
