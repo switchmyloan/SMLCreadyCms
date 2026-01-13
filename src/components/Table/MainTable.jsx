@@ -34,7 +34,7 @@ useEffect(() => {
 }, [value, debounce, onChange, onSearch]);
 
   return (
-    <div className="relative flex items-center w-1/6">
+    <div className="relative flex items-center">
       <input
         ref={inputRef}
         type="text"

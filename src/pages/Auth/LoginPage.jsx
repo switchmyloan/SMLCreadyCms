@@ -183,7 +183,7 @@ function LoginPage() {
     if (foundUser) {
       const token = "dummy_token_" + foundUser.role;
       login(token, foundUser);
-      navigate("/");
+      navigate("/signin-user");
     } else {
       setError("Invalid email or password");
     }
