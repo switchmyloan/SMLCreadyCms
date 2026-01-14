@@ -179,7 +179,9 @@ const AppMetricsDisplay = () => {
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4 text-center">Installs</th>
                 <th className="px-6 py-4 text-center">Updates</th>
-                <th className="px-6 py-4 text-right">Status</th>
+                <th className="px-6 py-4 text-center">Uninstalls After Install</th>
+                <th className="px-6 py-4 text-center">Uninstalls After Update</th>
+                {/* <th className="px-6 py-4 text-right">Status</th> */}
               </tr>
             </thead>
             <tbody className="text-sm divide-y divide-gray-100">
@@ -193,17 +195,23 @@ const AppMetricsDisplay = () => {
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-center font-semibold text-blue-600">
-                    {item.newInstalls}
-                  </td>
                   <td className="px-6 py-4 text-center font-semibold text-green-600">
-                    {item.updates}
+                    {item?.newInstalls}
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${item.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                      {item.isActive ? 'Active' : 'Inactive'}
+                  <td className="px-6 py-4 text-center font-semibold text-purple-600">
+                    {item?.updates}
+                  </td>
+                  <td className="px-6 py-4 text-center font-semibold text-blue-600">
+                    {item?.uninstallsAfterInstall}
+                  </td>
+                  <td className="px-6 py-4 text-center font-semibold text-blue-600">
+                    {item?.uninstallsAfterUpdate}
+                  </td>
+                  {/* <td className="px-6 py-4 text-right">
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${item?.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                      {item?.isActive ? 'Active' : 'Inactive'}
                     </span>
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>

@@ -70,6 +70,26 @@ export const routes = [
     order: 4,
     roles: ["admin","super-admin","marketing"],
   },
+  {
+    path: "/upload-app-metrics",
+    label: "Upload File",
+    icon: "Upload",
+    showInSidebar: true,
+    group: "App Statistics",
+    groupOrder: 1,
+    order: 2,
+    roles: ["admin","super-admin","marketing"],
+  },
+  {
+    path: "/app-metrics",
+    label: "App Metrics",
+    icon: "Camera",
+    showInSidebar: true,
+    group: "App Statistics",
+    groupOrder: 1,
+    order: 1,
+    roles: ["admin","super-admin","marketing"],
+  },
 
   // --- Lender Management ---
   {
