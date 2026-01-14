@@ -40,6 +40,8 @@ import MFAllLoans from './pages/MutalFund/MFAllLoans';
 import MFLoansSummary from './pages/MutalFund/MFLoansSummary';
 import LoanDetail from './pages/MutalFund/LoanDetail';
 import AllUserDetail from './pages/MutalFund/AllUserDetail';
+import UploadAppMatrix from './pages/AppMatrix/UploadAppMetrics'
+import AppMetricsDisplay from './pages/AppMatrix/AppMetrics';
 
 function App() {
   return (
@@ -87,6 +89,8 @@ function App() {
             <Route path="fetch-mf-loans-summary" element={<MFLoansSummary />} />
             <Route path="fetch-mf-loans/:id" element={<LoanDetail />} />
             <Route path="fetch-all-mf-users/:id" element={<AllUserDetail />} />
+            <Route path="upload-app-metrics" element={<UploadAppMatrix />} />
+            <Route path="app-metrics" element={<AppMetricsDisplay />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
