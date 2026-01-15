@@ -8,6 +8,10 @@ export const getBlogs = async (pageNo, limit, globalFilter) => {
   )
 }
 export const getBlogById = async id => Api().get(`/blog/${id}`)
+export const deleteBlogById = async (deleteBlog) => {
+  console.log(deleteBlog, "deleteBlog")
+  return Api().delete(`/blog/${deleteBlog}`)
+}
 export const AddBlog = async (formData) => {
   return Api().post('/blog', formData, {
     headers: {
