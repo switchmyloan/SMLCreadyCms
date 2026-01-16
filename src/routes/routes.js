@@ -216,27 +216,7 @@ export const routes = [
   //   order: 7,
   // },
 
-  // --- Admin Management ---
-  {
-    path: "/users",
-    label: "Users",
-    icon: "Users",
-    showInSidebar: true,
-    group: "Admin Management",
-    groupOrder: 7,
-    order: 2,
-    roles: ["super-admin"],
-  },
-  {
-    path: "/roles",
-    label: "Roles",
-    icon: "ShieldCheck", // ✅ roles/permissions
-    showInSidebar: true,
-    group: "Admin Management",
-    groupOrder: 7,
-    order: 1,
-    roles: ["super-admin"],
-  },
+ 
   {
     path: "/push-notification",
     label: "Push Notification",

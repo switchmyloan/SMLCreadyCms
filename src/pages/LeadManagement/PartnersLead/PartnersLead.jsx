@@ -214,7 +214,7 @@ const Leads = () => {
   /* ========================= FILTERING ========================= */
   
 
-  const filteredData = useMemo(() => {
+    const filteredData = useMemo(() => {
     let rows = [...rawData];
 
     // 🔍 SEARCH
