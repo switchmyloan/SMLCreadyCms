@@ -504,34 +504,7 @@ const Leads = () => {
     fetchLeads();
   }, []);
 
-  /* ========================= FILTERING ========================= */
-  const summaryMetrics = useMemo(() => {
-    const totalLeads = filteredData.length;
-
-    const totalLoanAmount = filteredData.reduce(
-      (sum, item) =>
-        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
-      0
-    );
-
-    const today = new Date().toDateString();
-    const todayLeads = filteredData.filter(
-      item => new Date(item.createdAt).toDateString() === today
-    ).length;
-
-    const dedupe = filteredData.filter(
-      item => item.isDuplicate === true
-    ).length;
-
-    return {
-      totalLeads,
-      totalLoanAmount,
-      todayLeads,
-      dedupe
-    };
-  }, [filteredData]);
-
-  const filteredData = useMemo(() => {
+    const filteredData = useMemo(() => {
     let rows = [...rawData];
 
     // 🔍 SEARCH
@@ -619,6 +592,35 @@ const Leads = () => {
 
     return rows;
   }, [rawData, query]);
+
+  /* ========================= FILTERING ========================= */
+  const summaryMetrics = useMemo(() => {
+    const totalLeads = filteredData.length;
+
+    const totalLoanAmount = filteredData.reduce(
+      (sum, item) =>
+        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
+      0
+    );
+
+    const today = new Date().toDateString();
+    const todayLeads = filteredData.filter(
+      item => new Date(item.createdAt).toDateString() === today
+    ).length;
+
+    const dedupe = filteredData.filter(
+      item => item.isDuplicate === true
+    ).length;
+
+    return {
+      totalLeads,
+      totalLoanAmount,
+      todayLeads,
+      dedupe
+    };
+  }, [filteredData]);
+
+
 
   /* ========================= PAGINATION ========================= */
 
