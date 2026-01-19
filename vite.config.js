@@ -22,7 +22,7 @@ export default defineConfig({
     global: {},
   },
   build: {
-    chunkSizeWarningLimit: 1000, // 1MB
+    chunkSizeWarningLimit: 3000, // 1MB
   },
   server: {
     port: 3005,
