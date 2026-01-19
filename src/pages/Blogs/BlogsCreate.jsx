@@ -47,16 +47,16 @@ const validationSchema = Yup.object().shape({
   status: Yup.string()
     .required("Status is required")
     .oneOf(["draft", "published", "archived", "reviewed"], "Invalid status"),
-  metadata: Yup.object().shape({
-    level: Yup.string()
-      .notRequired()
-      // .min(2, 'Level must be at least 2 characters')
-      // .max(50, 'Level cannot exceed 50 characters')
-      .trim(),
-    category: Yup.string()
-      .required("Category is required")
-      .oneOf(["backend", "frontend", "fullstack"], "Invalid category"),
-  }),
+  // metadata: Yup.object().shape({
+  //   level: Yup.string()
+  //     .notRequired()
+  //     // .min(2, 'Level must be at least 2 characters')
+  //     // .max(50, 'Level cannot exceed 50 characters')
+  //     .trim(),
+  //   category: Yup.string()
+  //     .required("Category is required")
+  //     .oneOf(["backend", "frontend", "fullstack"], "Invalid category"),
+  // }),
   // author_xid: Yup.string().required('Author is required').trim(),
   // tags: Yup.array()
   //   .min(1, 'At least one tag is required')
@@ -249,8 +249,8 @@ export default function BlogCreate() {
             setValue("tags", blog.tags?.map((t) => t.id) || []);
             const keywordArray = blog.metaKeywords
               ? blog.metaKeywords
-                  .split(",")
-                  .filter((keyword) => keyword.trim() !== "")
+                .split(",")
+                .filter((keyword) => keyword.trim() !== "")
               : [];
             setKeywords(keywordArray);
             setValue("metaKeywords", keywordArray.join(", "), {
@@ -389,14 +389,20 @@ export default function BlogCreate() {
 
   return (
     <div className="">
-      <h2 className="text-2xl font-bold mb-6">
-        {id ? "Edit Blog" : "Create Blog"}
-      </h2>
+
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+        className="grid grid-cols-1 gap-6"
       >
+        <div className="flex justify-between text-center">
+          <h2 className="text-2xl font-bold pb-0 mb-0">
+            {id ? "Edit Blog" : "Create Blog"}
+          </h2>
+          <div>
+          <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
+          </div>
+        </div>
         {/* LEFT COLUMN */}
         <div className="lg:col-span-2 bg-white shadow p-6 rounded-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -464,15 +470,15 @@ export default function BlogCreate() {
                 placeholder="Select status"
               />
             </div>
-            <ValidatedTextField
+            {/* <ValidatedTextField
               name="metadata.level"
               control={control}
               label="Level"
               errors={errors}
               placeholder="Enter level (e.g., Beginner, Intermediate)"
               helperText="Level is required"
-            />
-            <div>
+            /> */}
+            {/* <div>
               <ValidatedLabel label="Select Category" />
               <ValidatedSearchableSelectField
                 name="metadata.category"
@@ -487,7 +493,7 @@ export default function BlogCreate() {
                 globalFilter={globalFilter}
                 placeholder="Select category"
               />
-            </div>
+            </div> */}
             <MetaKeywordsInput
               name="metaKeywords"
               control={control}
@@ -526,7 +532,7 @@ export default function BlogCreate() {
               globalFilter={globalFilter}
             />
           </div> */}
-          <div className="bg-white shadow p-4 rounded-xl">
+          {/* <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
               <button
@@ -549,11 +555,9 @@ export default function BlogCreate() {
               setGlobalFilter={setGlobalFilter}
               globalFilter={globalFilter}
             />
-          </div>
+          </div> */}
           {/* <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/> */}
-          <div className="flex justify-end">
-            <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
-          </div>
+
         </div>
       </form>
 
