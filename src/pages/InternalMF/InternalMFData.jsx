@@ -282,7 +282,7 @@ const MFAllUsers = () => {
       /> */}
 
       {/* --- Section 1: Custom User Cards --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Registered"
           value={userStats.total}
@@ -307,7 +307,7 @@ const MFAllUsers = () => {
           icon={ShieldCheck}
           colorClass={{ bg: 'bg-purple-50', text: 'text-purple-600' }}
         />
-      </div>
+      </div> */}
 
       {/* --- Section 2: Table --- */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
