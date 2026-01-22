@@ -288,7 +288,7 @@ export const routes = [
     roles: ["admin", "super-admin","reporting-manager"],
   },
   {
-    path: "/internal-MF-Detail",
+    path: "/internal-mf",
     label: "Internal MF Detail",
     icon: "ShieldCheck", 
     showInSidebar: true,
