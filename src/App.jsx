@@ -98,7 +98,7 @@ function App() {
             <Route path="mis-zype-upload" element={<RawMisZypeUpload />} />
             <Route path="mis-zype-data" element={<RawMisZypeData />} />
             <Route path="internal-mf" element={<InternalMFData />} />
-            <Route path="InternalMFDetail/:id" element={<InternalMFDetail />} />
+            <Route path="internal-MF-Detail/:id" element={<InternalMFDetail />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
