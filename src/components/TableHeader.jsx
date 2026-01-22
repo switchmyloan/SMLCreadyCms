@@ -470,23 +470,19 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
   {
-    header: 'SN', // Serial Number
+    header: 'SN', 
     id: 'sn',
-    enableSorting: false, // Serial numbers shouldn't be sortable
+    enableSorting: false, 
     maxSize: 50,
     cell: ({ row, table }) => {
-      // 1. Get current pagination state from the table instance
       const { pageIndex, pageSize } = table.getState().pagination;
-
-      // 2. Calculate the global row index
-      // Formula: (Current Page Index * Page Size) + Row Index on current page + 1
       return (pageIndex * pageSize) + row.index + 1;
     },
   },
   {
     header: 'Name',
     accessorKey: 'name',
-    size: 120,    // fixed width
+    size: 120,  
     minSize: 120,
     maxSize: 120,
     cell: ({ row }) => {
@@ -516,12 +512,12 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     header: 'Source',
     accessorKey: 'utm_source',
     cell: info => {
-      const source = info.row.original.utm_header?.utm_source || 'N/A'; // optional chaining + fallback
+      const source = info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
       return (
         <div
           className="truncate"
-          style={{ maxWidth: '150px' }} // adjust width as needed
-          title={source} // tooltip on hover
+          style={{ maxWidth: '150px' }} 
+          title={source} 
         >
           {source}
         </div>
