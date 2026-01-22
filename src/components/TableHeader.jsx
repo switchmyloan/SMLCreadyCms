@@ -509,8 +509,8 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'Source',
-    accessorKey: 'utm_source',
+    header: 'PlatForm',
+    accessorKey: 'DeviceAndBioMetric',
     cell: info => {
       const source = info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
       return (
