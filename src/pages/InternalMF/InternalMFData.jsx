@@ -208,7 +208,7 @@ const MFAllUsers = () => {
 
   /* ========================= HANDLERS ========================= */
 
-  const handleEdit = (row) => navigate(`/InternalMFDetail/${row.id}`, { state: { user: row } });
+  const handleEdit = (row) => navigate(`/internal-MF-Detail/${row.id}`, { state: { user: row } });
 
   const onSearchHandler = useCallback((term) => {
     setQuery(prev => ({ ...prev, search: term }));
