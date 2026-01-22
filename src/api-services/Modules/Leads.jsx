@@ -8,6 +8,13 @@ export const getLeads = async () => {
         }
     )
 };
+export const getRawMisZypeData = async (pageNo, limit) => {
+    return Api().get(`/public/admin/get-raw-mis-zype-data?pageNo, limit=${pageNo}&limit=${limit}`,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
 export const getPartnerLeads = async () => {
     return Api().get(`/leads/admin/partner-leads`,
         {

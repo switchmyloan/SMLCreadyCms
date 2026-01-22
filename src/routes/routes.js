@@ -6,7 +6,7 @@ export const routes = [
     icon: "Home",
     showInSidebar: false,
     order: 0,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["admin", "super-admin","marketing","reporting-manager"],
   },
 
   // --- Lead Management ---
@@ -18,7 +18,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 1,
-    roles: ["admin", "super-admin","marketing"]
+    roles: ["admin", "super-admin","marketing","reporting-manager"]
   },
   {
     path: "/leads",
@@ -28,7 +28,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 2,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["admin", "super-admin","marketing","reporting-manager"],
   },
   {
     path: "/partner-leads",
@@ -38,7 +38,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 2,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["admin", "super-admin","marketing","reporting-manager"],
   },
   {
     path: "/all-leads",
@@ -48,7 +48,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 3,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["admin", "super-admin","marketing","reporting-manager"],
   },
   {
     path: "/archive-users",
@@ -68,7 +68,7 @@ export const routes = [
     group: "Lead Management",
     groupOrder: 1,
     order: 4,
-    roles: ["admin","super-admin","marketing"],
+    roles: ["admin","super-admin","marketing","reporting-manager"],
   },
   {
     path: "/upload-app-metrics",
@@ -88,7 +88,7 @@ export const routes = [
     group: "App Statistics",
     groupOrder: 1,
     order: 1,
-    roles: ["admin","super-admin","marketing"],
+    roles: ["admin","super-admin","marketing","reporting-manager"],
   },
 
   // --- Lender Management ---
@@ -98,9 +98,9 @@ export const routes = [
     icon: "UserPlus", // ✅ add new lender
     showInSidebar: true,
     group: "Lender Management",
-    groupOrder: 2,
+    groupOrder: 5,
     order: 2,
-    roles: ["super-admin"],
+    roles: ["admin","super-admin"],
   },
   {
     path: "/list-of-lenders",
@@ -108,9 +108,9 @@ export const routes = [
     icon: "Building2", // ✅ lenders
     showInSidebar: true,
     group: "Lender Management",
-    groupOrder: 2,
+    groupOrder: 5,
     order: 1,
-    roles: ["super-admin"],
+    roles: ["admin","super-admin","reporting-manager"],
   },
 
   // --- Blogs ---
@@ -121,8 +121,8 @@ export const routes = [
     showInSidebar: true,
     order: 1,
     group: "Blogs",
-    groupOrder: 3,
-    roles: ["super-admin","marketing"],
+    groupOrder: 6,
+    roles: ["admin","super-admin","marketing"],
   },
   {
     path: "/blog/create",
@@ -131,8 +131,8 @@ export const routes = [
     showInSidebar: true,
     order: 2,
     group: "Blogs",
-    groupOrder: 3,
-    roles: ["super-admin","marketing"],
+    groupOrder: 6,
+    roles: ["admin","super-admin","marketing"],
   },
 
   // --- FAQ ---
@@ -143,8 +143,8 @@ export const routes = [
     showInSidebar: true,
     order: 1,
     group: "FAQ",
-    groupOrder: 4,
-    roles: ["super-admin","marketing"],
+    groupOrder: 7,
+    roles: ["admin","super-admin","marketing"],
   },
 
   // --- CMS Management ---
@@ -154,9 +154,9 @@ export const routes = [
     icon: "Newspaper",
     showInSidebar: true,
     group: "CMS Management",
-    groupOrder: 5,
+    groupOrder: 10,
     order: 1,
-    roles: ["super-admin","marketing"],
+    roles: ["admin","super-admin","marketing"],
   },
   {
     path: "/testimonials",
@@ -164,9 +164,9 @@ export const routes = [
     icon: "MessageSquare",
     showInSidebar: true,
     group: "CMS Management",
-    groupOrder: 5,
+    groupOrder: 10,
     order: 2,
-    roles: ["super-admin"],
+    roles: ["admin","super-admin"],
   },
   // {
   //   path: "/social-icons",
@@ -192,7 +192,7 @@ export const routes = [
     icon: "FileText", // ✅ banners/files
     showInSidebar: true,
     group: "CMS Management",
-    groupOrder: 5,
+    groupOrder: 10,
     order: 5,
     roles: ["super-admin","marketing"],
   },
@@ -202,7 +202,7 @@ export const routes = [
     icon: "ShieldCheck", // ✅ policies/security
     showInSidebar: true,
     group: "CMS Management",
-    groupOrder: 5,
+    groupOrder: 10,
     order: 6,
     roles: ["super-admin"],
   },
@@ -220,12 +220,12 @@ export const routes = [
   {
     path: "/push-notification",
     label: "Push Notification",
-    icon: "ShieldCheck", // ✅ roles/permissions
+    icon: "ShieldCheck", 
     showInSidebar: true,
     group: "Push Notification",
     groupOrder: 6,
     order: 2,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["super-admin","marketing"],
   },
   {
     path: "/group",
@@ -235,7 +235,7 @@ export const routes = [
     group: "Push Notification",
     groupOrder: 6,
     order: 1,
-    roles: ["admin", "super-admin","marketing"],
+    roles: ["super-admin","marketing"],
   },
   {
     path: "/utm-generate",
@@ -248,14 +248,24 @@ export const routes = [
     roles: ["admin", "super-admin","marketing"],
   },
   {
+    path: "/mis-zype-data",
+    label: "MIS Data",
+    icon: "ShieldCheck",
+    showInSidebar: true,
+    group: "MIS Raw",
+    groupOrder: 7,
+    order: 1,
+    roles: ["admin", "super-admin","marketing","reporting-manager"],
+  },
+  {
     path: "/fetch-all-mf-users",
     label: "Fetch All Users",
     icon: "ShieldCheck", 
     showInSidebar: true,
     group: "Mutual Funds",
-    groupOrder: 7,
+    groupOrder: 4,
     order: 2,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","reporting-manager"],
   },
   {
     path: "/fetch-all-mf-loans",
@@ -263,9 +273,9 @@ export const routes = [
     icon: "ShieldCheck", 
     showInSidebar: true,
     group: "Mutual Funds",
-    groupOrder: 7,
+    groupOrder: 4,
     order: 3,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","reporting-manager"],
   },
   {
     path: "/fetch-mf-loans-summary",
@@ -273,8 +283,18 @@ export const routes = [
     icon: "ShieldCheck", 
     showInSidebar: true,
     group: "Mutual Funds",
-    groupOrder: 7,
+    groupOrder: 4,
     order: 1,
-    roles: ["admin", "super-admin"],
+    roles: ["admin", "super-admin","reporting-manager"],
+  },
+  {
+    path: "/internal-MF-Detail",
+    label: "Internal MF Detail",
+    icon: "ShieldCheck", 
+    showInSidebar: true,
+    group: "Internal Mutual Funds",
+    groupOrder: 3,
+    order: 1,
+    roles: ["admin", "super-admin","reporting-manager"],
   },
 ];

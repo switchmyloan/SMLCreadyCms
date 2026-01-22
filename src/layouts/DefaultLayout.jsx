@@ -3,6 +3,7 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "../components/Navbar/Navbar";
 import Breadcrumb from "../components/BreadCrumb/BreadCrumb";
 import { Outlet } from "react-router-dom";
+import { UploadProvider } from "../context/UploadContext";
 
 function DefaultLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -17,6 +18,7 @@ function DefaultLayout({ children }) {
 
   return (
     <div className="flex min-h-screen">
+        <UploadProvider>
       {/* Sidebar: Hidden on mobile, visible on larger screens */}
       {/* <div
         className={`fixed inset-y-0 left-0 w-64 transform bg-gray-800 text-white z-50 transition-transform duration-300 ease-in-out ${
@@ -51,13 +53,14 @@ function DefaultLayout({ children }) {
           isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
         }`}
       >
-        {/* Navbar */}
         {/* <div className="fixed top-0 left-0 right-0 z-30 md:left-64 md:w-[calc(100%-16rem)]"> */}
         <div className="fixed top-0 left-0 right-0 z-30 md:left-auto md:w-full md:pl-0">
+        
           <Navbar 
           onToggleSidebar={toggleSidebar} 
           onToggleCollapse={toggleSidebarCollapse}
           />
+        
         </div>
 
          {/* Fixed Breadcrumb */}
@@ -76,6 +79,7 @@ function DefaultLayout({ children }) {
           <Outlet /> 
         </main>
       </div>
+        </UploadProvider>
     </div>
   );
 }

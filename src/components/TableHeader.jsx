@@ -799,6 +799,145 @@ export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
     },
   },
 ];
+export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
+  {
+    header: 'SN', 
+    id: 'sn',
+    enableSorting: false, 
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      const { pageIndex, pageSize } = table.getState().pagination;
+      return (pageIndex * pageSize) + row.index + 1;
+    },
+  },
+  {
+    header: 'Name',
+    accessorKey: 'name',
+    size: 120, 
+    minSize: 120,
+    maxSize: 120,
+    cell: ({ row }) => {
+      const firstName = row.original.user.name || '';
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '100px' }}
+          title={firstName} // Tooltip shows full name on hover
+        >
+          {firstName}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'User ID',
+    accessorKey: 'user_id',
+    size: 120, 
+    minSize: 120,
+    maxSize: 120,
+    cell: ({ row }) => {
+      const firstName = row.original.loanCreation[0]?.user_id || 'N/A';
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '90px' }}
+          title={firstName} // Tooltip shows full name on hover
+        >
+          {firstName}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'Loan ID',
+    accessorKey: 'loanCreation',
+    cell: ({ row }) => {
+      const loan_id = row.original?.loanCreation[0]?.loan_id || 'N/A';
+     
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '90px' }}
+          title={loan_id} // Tooltip shows full name on hover
+        >
+          {loan_id}
+        </div>
+      );
+    },
+  },
+
+
+  {
+    header: 'Number',
+    accessorKey: 'phoneNumber',
+    cell: ({ row }) => {
+      const loan_id = row.original?.user?.phoneNumber || 'N/A';
+     
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={loan_id} // Tooltip shows full name on hover
+        >
+          {loan_id}
+        </div>
+      );
+    },
+  },
+  
+  {
+    header: 'Email',
+    accessorKey: 'emailAddress',
+    cell: ({ row }) => {
+      const loan_id = row.original?.user?.emailAddress || 'N/A';
+     
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={loan_id} // Tooltip shows full name on hover
+        >
+          {loan_id}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'Disburshment',
+    accessorKey: 'disburshmentAmount',
+    cell: ({ row }) => {
+      const loan_id = row.original?.loanCreation[0]?.disburshmentAmount || 'N/A';
+     
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={loan_id} // Tooltip shows full name on hover
+        >
+          {loan_id}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];
 export const MFAllLoansColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'SN', // Serial Number

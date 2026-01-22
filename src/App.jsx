@@ -42,6 +42,10 @@ import LoanDetail from './pages/MutalFund/LoanDetail';
 import AllUserDetail from './pages/MutalFund/AllUserDetail';
 import UploadAppMatrix from './pages/AppMatrix/UploadAppMetrics'
 import AppMetricsDisplay from './pages/AppMatrix/AppMetrics';
+import RawMisZypeUpload from './pages/MIS/RawMisZypeUpload';
+import RawMisZypeData from './pages/MIS/RawMisZypeData';
+import InternalMFData from './pages/InternalMF/InternalMFData'
+import InternalMFDetail from './pages/InternalMF/InternalMFDetail';
 
 function App() {
   return (
@@ -91,6 +95,10 @@ function App() {
             <Route path="fetch-all-mf-users/:id" element={<AllUserDetail />} />
             <Route path="upload-app-metrics" element={<UploadAppMatrix />} />
             <Route path="app-metrics" element={<AppMetricsDisplay />} />
+            <Route path="mis-zype-upload" element={<RawMisZypeUpload />} />
+            <Route path="mis-zype-data" element={<RawMisZypeData />} />
+            <Route path="internal-mf" element={<InternalMFData />} />
+            <Route path="InternalMFDetail/:id" element={<InternalMFDetail />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

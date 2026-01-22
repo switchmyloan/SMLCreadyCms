@@ -7,6 +7,13 @@ export const getAllMFUsers = async () => {
         }
     )
 };
+export const getAllInternalMFUsers = async () => {
+    return Api().get(`/50fin/admin/get-internal-fifty-fin-data/`,
+        {
+            skipAdminAppend: true,
+        }
+    )
+};
 export const getAllMFLoans = async () => {
     return Api().get(`/50fin/admin/fetch-all-loans`,
         {
