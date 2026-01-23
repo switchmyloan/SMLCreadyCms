@@ -107,8 +107,8 @@ const exportToExcel = async (rawData) => {
 
 const MFAllUsers = () => {
   const navigate = useNavigate();
-  const [selectedStatus, setSelectedStatus] = useState;
-  const [selectedLTV, setSelectedLTV] = useState;
+  // const [selectedStatus, setSelectedStatus] = useState;
+  const [selectedLTV, setSelectedLTV] = useState();
 
   const [rawData, setRawData] = useState([]);
   const [data, setData] = useState([]);
@@ -203,11 +203,7 @@ const MFAllUsers = () => {
       });
     }
 
-    if (selectedStatus) {
-      rows = rows.filter(item =>
-        item.loanCreation?.[0]?.status_xid?.toString() === selectedStatus
-      );
-    }
+  
 
     // 3. LTV Ratio Filter (New Logic)
     if (selectedLTV) {
@@ -221,7 +217,7 @@ const MFAllUsers = () => {
 
 
     return rows;
-  }, [rawData, query, selectedStatus, selectedLTV]);
+  }, [rawData, query, selectedLTV]);
 
   /* ========================= PAGINATION ========================= */
 
