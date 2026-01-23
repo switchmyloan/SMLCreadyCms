@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import DataTable from '@components/Table/MainTable';
+import DataTable from '@components/Table/FrontendTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { Users, UserPlus, Briefcase, Calendar, ShieldCheck } from 'lucide-react';
-
-import { getAllInternalMFUsers, getAllMFUsers } from '../../api-services/Modules/MutalFundApi';
-import { MFAllInternalUsersColumn, MFAllUsersColumn } from '../../components/TableHeader';
+import ExportMf from '../../pages/MutalFund/ExportMf'
+import { getAllInternalMFUsers } from '../../api-services/Modules/MutalFundApi';
+import { MFAllInternalUsersColumn } from '../../components/TableHeader';
 
 // --- Custom Stat Card Component ---
 const StatCard = ({ title, value, icon: Icon, colorClass }) => (
@@ -23,6 +23,17 @@ const StatCard = ({ title, value, icon: Icon, colorClass }) => (
   </div>
 );
 
+const LOAN_STATUS_OPTIONS = [
+  { label: "Pending", value: "1" },
+  { label: "Approved", value: "2" },
+  { label: "Rejected", value: "3" },
+];
+
+const LTV_OPTIONS = [
+  { label: "50% LTV", value: "0.500000" },
+  { label: "75% LTV", value: "0.750000" },
+];
+
 const exportToExcel = async (rawData) => {
   if (!rawData || rawData.length === 0) {
     ToastNotification.error("No data to export");
@@ -30,67 +41,74 @@ const exportToExcel = async (rawData) => {
   }
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Leads Lender Offers");
+  const worksheet = workbook.addWorksheet("MF User Report");
 
-  const allLenders = Array.from(
-    new Set(
-      rawData.flatMap(item =>
-        item.lender_responses?.map(lr => lr?.lender?.name)
-      )
-    )
-  ).filter(Boolean);
-
+  // 1. Columns Define karein (Aapke naye JSON ke according)
   worksheet.columns = [
-    { header: "First Name", key: "firstName", width: 15 },
-    { header: "Last Name", key: "lastName", width: 15 },
-    { header: "Email", key: "email", width: 25 },
+    { header: "User ID", key: "userId", width: 10 },
+    { header: "Name", key: "name", width: 25 },
     { header: "Phone", key: "phone", width: 15 },
-    { header: "Income", key: "income", width: 15 },
-    { header: "Created At", key: "createdAt", width: 15 },
-    //  { header: "ipAddress", key: "ipAddress", width: 15 },
-    // { header: "creditConsentText", key: "creditConsentText", width: 15 },
-    // { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
-    ...allLenders.map(lender => ({
-      header: lender,
-      key: lender,
-      width: 15,
-    })),
+    { header: "Email", key: "email", width: 30 },
+    { header: "Registration Date", key: "createdAt", width: 15 },
+    { header: "Loan Status", key: "loanStatus", width: 15 },
+    { header: "Disbursed Amount", key: "loanAmount", width: 15 },
+    { header: "Tenure (Months)", key: "tenure", width: 15 },
+    { header: "ROI (%)", key: "roi", width: 10 },
+    { header: "Total Portfolios", key: "portfolioCount", width: 15 },
+    { header: "Total Portfolio Value", key: "totalValue", width: 20 },
+    { header: "Active Status", key: "active", width: 10 },
   ];
 
+  // Header styling
   worksheet.getRow(1).font = { bold: true };
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'F2F2F2' }
+  };
 
+  // 2. Data Rows add karein
   rawData.forEach(item => {
-    const lenderStatusMap = {};
-    allLenders.forEach(lender => { lenderStatusMap[lender] = "No"; });
+    // Portfolio Calculation
+    const totalValue = item.portfolios?.reduce((acc, p) => {
+      return acc + (parseFloat(p.price || 0) * parseFloat(p.quantity || 0));
+    }, 0);
 
-    item.lender_responses?.forEach(lr => {
-      if (lr?.lender?.name && lr.isOffer) lenderStatusMap[lr.lender.name] = "Yes";
-    });
+    const loanInfo = item.loanCreation?.[0] || {};
 
-    // worksheet.addRow wala part change karein
+    // Status Mapping (status_xid logic)
+    const statusMap = { "1": "Pending", "2": "Success", "3": "Rejected" };
+    const displayStatus = statusMap[loanInfo.status_xid?.toString()] || "N/A";
+
     worksheet.addRow({
-      firstName: item.first_name || item.firstName || "N/A",
-      lastName: item.last_name || item.lastName || "N/A",
-      email: item.email || item.emailAddress || "N/A",
-      phone: item.phone_number || item.phoneNumber || "N/A",
-      income: item.income || 0,
-      createdAt: (item.createdAt || item.date_of_birth)
-        ? new Date(item.createdAt || item.date_of_birth).toLocaleDateString("en-IN")
-        : "N/A",
-      ...lenderStatusMap,
+      userId: item.user_id || "N/A",
+      name: item.user?.name || "N/A",
+      phone: item.user?.phoneNumber || "N/A",
+      email: item.user?.emailAddress || "N/A",
+      createdAt: item.createdAt ? new Date(item.createdAt).toLocaleDateString("en-IN") : "N/A",
+      loanStatus: displayStatus,
+      loanAmount: loanInfo.disburshmentAmount || 0,
+      tenure: loanInfo.tenure || "N/A",
+      roi: loanInfo.rateOfInterest || 0,
+      portfolioCount: item.portfolios?.length || 0,
+      totalValue: totalValue.toFixed(2), // 2 decimal points tak value
+      active: item.isActive ? "Yes" : "No",
     });
   });
-
+  // 3. File Save karein
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, "Leads_Report.xlsx");
+  const fileName = `MF_Users_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+  saveAs(blob, fileName);
 };
 
 const MFAllUsers = () => {
   const navigate = useNavigate();
+  const [selectedStatus, setSelectedStatus] = useState;
+  const [selectedLTV, setSelectedLTV] = useState;
 
   const [rawData, setRawData] = useState([]);
   const [data, setData] = useState([]);
@@ -173,29 +191,37 @@ const MFAllUsers = () => {
     if (query.search) {
       const term = query.search.toLowerCase();
       rows = rows.filter(item => {
-        const fName = (item.firstName || item.first_name || "").toLowerCase();
-        const lName = (item.lastName || item.last_name || "").toLowerCase();
-        const email = (item.emailAddress || item.email || "").toLowerCase();
-        const phone = (item.phoneNumber || item.phone_number || "");
+        // Check all possible field names used in your columns
+        console.log(item, 'iii')
+        const name = (item.user?.name || item.user?.name || "").toLowerCase();
+        const email = (item?.user?.emailAddress || item?.user?.email || "").toLowerCase();
+        const phone = (item?.user?.phoneNumber || item.phone_number || "").toString();
 
-        return fName.includes(term) ||
-          lName.includes(term) ||
+        return name.includes(term) ||
           email.includes(term) ||
           phone.includes(term);
       });
     }
 
-    if (query.startDate && query.endDate) {
-      const start = new Date(query.startDate).setHours(0, 0, 0, 0);
-      const end = new Date(query.endDate).setHours(23, 59, 59, 999);
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt).getTime();
-        return created >= start && created <= end;
-      });
+    if (selectedStatus) {
+      rows = rows.filter(item =>
+        item.loanCreation?.[0]?.status_xid?.toString() === selectedStatus
+      );
     }
 
+    // 3. LTV Ratio Filter (New Logic)
+    if (selectedLTV) {
+      rows = rows.filter(item =>
+        // check if 'any' portfolio in the array matches the selected LTV
+        item.portfolios?.some(portfolio =>
+          portfolio.loan_to_value_ratio === selectedLTV
+        )
+      );
+    }
+
+
     return rows;
-  }, [rawData, query]);
+  }, [rawData, query, selectedStatus, selectedLTV]);
 
   /* ========================= PAGINATION ========================= */
 
@@ -212,6 +238,7 @@ const MFAllUsers = () => {
 
   const onSearchHandler = useCallback((term) => {
     setQuery(prev => ({ ...prev, search: term }));
+    // Critical: Reset to page 0 when search changes
     setPagination({ pageIndex: 0, pageSize: 10 });
   }, []);
 
@@ -242,28 +269,28 @@ const MFAllUsers = () => {
     });
   };
 
- const handleExport = async ({ startDate, endDate }) => {
-  try {
-    setIsExporting(true);
-    
-    // Agar dates select nahi hain, toh rawData (saara data) bhej do
-    const dataToExport = (startDate && endDate) 
-      ? filterDataByDate(rawData, startDate, endDate) 
-      : rawData;
+  const handleExport = async ({ startDate, endDate }) => {
+    try {
+      setIsExporting(true);
 
-    if (dataToExport.length === 0) {
-      ToastNotification.error("No data found");
-      return;
+      // Agar dates select nahi hain, toh rawData (saara data) bhej do
+      const dataToExport = (startDate && endDate)
+        ? filterDataByDate(rawData, startDate, endDate)
+        : rawData;
+
+      if (dataToExport.length === 0) {
+        ToastNotification.error("No data found");
+        return;
+      }
+
+      await exportToExcel(dataToExport);
+      ToastNotification.success("Export successful");
+    } catch (err) {
+      ToastNotification.error("Export failed");
+    } finally {
+      setIsExporting(false);
     }
-
-    await exportToExcel(dataToExport);
-    ToastNotification.success("Export successful");
-  } catch (err) {
-    ToastNotification.error("Export failed");
-  } finally {
-    setIsExporting(false);
-  }
-};
+  };
   const handleCloseExportModal = () => {
     if (!isExporting) {
       setIsExportModalOpen(false);
@@ -274,12 +301,12 @@ const MFAllUsers = () => {
   return (
     <div className="bg-[#f8fafc] min-h-screen">
       <Toaster />
-      {/* <ExportMf
+      <ExportMf
         open={isExportModalOpen}
         onClose={handleCloseExportModal}
         onSubmit={handleExport} // Apne export function ko yaha link karein
         isSubmitting={isExporting}
-      /> */}
+      />
 
       {/* --- Section 1: Custom User Cards --- */}
       {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -315,6 +342,19 @@ const MFAllUsers = () => {
           title="Internal Mutual Fund User Base"
           columns={MFAllInternalUsersColumn({ handleEdit })}
           data={data}
+          dynamicFilters={[
+
+            {
+              label: "LTV Ratio",
+              key: "ltv_filter",
+              options: LTV_OPTIONS,
+              activeValue: selectedLTV,
+              onChange: (val) => {
+                setSelectedLTV(val);
+                setPagination(p => ({ ...p, pageIndex: 0 }));
+              },
+            }
+          ]}
           totalDataCount={totalDataCount}
           loading={loading}
           pagination={pagination}
