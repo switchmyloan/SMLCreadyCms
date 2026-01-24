@@ -22,6 +22,47 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import RichTextEditor from "../../components/Form/RichTextEditor";
 
+
+const LiveBlogPreview = ({ formData }) => {
+  const BASE_URL = import.meta.env.VITE_IMAGE_URL;
+
+  // Image URL logic: file preview or existing URL
+  const getPreviewImage = () => {
+    if (formData.metaImage instanceof File) {
+      return URL.createObjectURL(formData.metaImage);
+    }
+    if (typeof formData.metaImage === "string" && formData.metaImage.startsWith("http")) {
+      return formData.metaImage;
+    }
+    return "https://via.placeholder.com/400x200?text=Blog+Image";
+  };
+
+  return (
+    <div className="sticky top-10">
+      <h3 className="text-lg font-bold mb-4 text-gray-700">Live Preview</h3>
+      <div className="w-full max-w-[350px] bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 flex flex-col mx-auto">
+        <div className="w-full h-[200px]">
+          <img
+            src={getPreviewImage()}
+            className="w-full h-full object-cover"
+            alt="Preview"
+          />
+        </div>
+        <div className="p-5 flex flex-col gap-3">
+          <h3 className="text-xl font-bold text-[#002B49] leading-tight line-clamp-2">
+            {formData.title || "Your Blog Title Will Appear Here"}
+          </h3>
+          <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
+            {formData.description || "Every year around this time, there is a familiar buzz in the air. News debates, office conversations..."}
+          </p>
+          <div className="mt-2 text-gray-400 text-sm font-medium">
+            {new Date().toLocaleDateString("en-US")}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 // Yup validation schema
 const validationSchema = Yup.object().shape({
   title: Yup.string()
@@ -400,7 +441,7 @@ export default function BlogCreate() {
             {id ? "Edit Blog" : "Create Blog"}
           </h2>
           <div>
-          <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
+            <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
           </div>
         </div>
         {/* LEFT COLUMN */}
@@ -557,7 +598,9 @@ export default function BlogCreate() {
             />
           </div> */}
           {/* <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/> */}
-
+          <div className="lg:col-span-1">
+            <LiveBlogPreview formData={formData} />
+          </div>
         </div>
       </form>
 
