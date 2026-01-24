@@ -16,7 +16,7 @@ import {
 } from "../../api-services/Modules/BlogsApi";
 import { MetaKeywordsInput } from "@components/Form/MetaKeywordsInput";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
-import { AddAuthor, getAuthor } from "../../api-services/Modules/AuthorApi";
+import { AddAuthor, AddBlogCategory, getAuthor, getBlogCategory } from "../../api-services/Modules/AuthorApi";
 import Uploader from "../../components/Form/Uploader";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -189,6 +189,8 @@ export default function BlogCreate() {
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("author");
   const [keywords, setKeywords] = useState([]);
+  const [categoryData, setCategoryData] = useState([])
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const {
     control,
@@ -213,6 +215,7 @@ export default function BlogCreate() {
       metadata: { category: "", level: "" },
       // author_xid: null,
       tags: [],
+      blog_category_xid:null
     },
   });
 
@@ -254,6 +257,23 @@ export default function BlogCreate() {
       ToastNotification.error("Failed to fetch authors");
     }
   };
+  const fetchBlogCategory = async () => {
+    try {
+      const response = await getBlogCategory(1, 10, "");
+      console.log(response?.data?.data, "ddd")
+      if (response?.data?.success) {
+        const mapped = response?.data?.data?.rows?.map((item) => ({
+          label: item?.name?.toUpperCase(),
+          value: item?.id,
+        }));
+        setCategoryData(mapped);
+      } else {
+        ToastNotification.error("Error fetching authors");
+      }
+    } catch {
+      ToastNotification.error("Failed to fetch authors");
+    }
+  };
 
   // Fetch Blog if editing
   useEffect(() => {
@@ -286,6 +306,7 @@ export default function BlogCreate() {
             setValue("status", blog.status);
             setValue("metadata.level", metadata.level || "");
             setValue("metadata.category", metadata.category || "");
+            setValue("blog_category_xid", blog.categoryId || "");
             // setValue('author_xid', blog.author.id || '')
             setValue("tags", blog.tags?.map((t) => t.id) || []);
             const keywordArray = blog.metaKeywords
@@ -426,92 +447,116 @@ export default function BlogCreate() {
   useEffect(() => {
     fetchAuthors();
     fetchTags();
+    fetchBlogCategory()
   }, []);
 
   return (
-    <div className="">
+    <>
+      <div className="">
 
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 gap-6"
-      >
-        <div className="flex justify-between text-center">
-          <h2 className="text-2xl font-bold pb-0 mb-0">
-            {id ? "Edit Blog" : "Create Blog"}
-          </h2>
-          <div>
-            <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
-          </div>
-        </div>
-        {/* LEFT COLUMN */}
-        <div className="lg:col-span-2 bg-white shadow p-6 rounded-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ValidatedTextField
-              name="title"
-              control={control}
-              label="Title"
-              errors={errors}
-              placeholder="Enter blog title"
-            />
-            <ValidatedTextField
-              name="slug"
-              control={control}
-              label="Slug"
-              errors={errors}
-              placeholder="Enter slug"
-            />
-            <ValidatedTextField
-              name="metaTitle"
-              control={control}
-              label="Meta Title"
-              errors={errors}
-              placeholder="Enter meta title"
-            />
-
-            <ValidatedTextArea
-              name="description"
-              control={control}
-              label="Description"
-              errors={errors}
-              className="col-span-2"
-              placeholder="Enter blog description"
-              rows={4}
-            />
-            <RichTextEditor
-              name="content"
-              control={control}
-              label="Content"
-              errors={errors}
-            />
-
-            <ValidatedTextArea
-              name="metaDescription"
-              control={control}
-              label="Meta Description"
-              errors={errors}
-              className="col-span-2"
-              placeholder="Enter  content"
-              rows={4}
-            />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-1 gap-6"
+        >
+          <div className="flex justify-between text-center">
+            <h2 className="text-2xl font-bold pb-0 mb-0">
+              {id ? "Edit Blog" : "Create Blog"}
+            </h2>
             <div>
-              <ValidatedLabel label="Select Status" />
-              <ValidatedSearchableSelectField
-                name="status"
-                control={control}
-                options={[
-                  { label: "Draft", value: "draft" },
-                  { label: "Published", value: "published" },
-                  { label: "Archived", value: "archived" },
-                  { label: "Reviewed", value: "reviewed" },
-                ]}
-                errors={errors}
-                setGlobalFilter={setGlobalFilter}
-                globalFilter={globalFilter}
-                placeholder="Select status"
-              />
+              <SubmitBtn loading={loading} label={id ? "Update" : "Submit"} />
             </div>
-            {/* <ValidatedTextField
+          </div>
+          {/* LEFT COLUMN */}
+          <div className="lg:col-span-2 bg-white shadow p-6 rounded-xl">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ValidatedTextField
+                name="title"
+                control={control}
+                label="Title"
+                errors={errors}
+                placeholder="Enter blog title"
+              />
+              <ValidatedTextField
+                name="slug"
+                control={control}
+                label="Slug"
+                errors={errors}
+                placeholder="Enter slug"
+              />
+              <ValidatedTextField
+                name="metaTitle"
+                control={control}
+                label="Meta Title"
+                errors={errors}
+                placeholder="Enter meta title"
+              />
+
+              <ValidatedTextArea
+                name="description"
+                control={control}
+                label="Description"
+                errors={errors}
+                className="col-span-2"
+                placeholder="Enter blog description"
+                rows={4}
+              />
+              <div>
+                <div className="flex items-center justify-between">
+                  <ValidatedLabel label="Select category" />
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline btn-primary"
+                    onClick={() => setIsCategoryModalOpen(true)}
+                  >
+                    + Create
+                  </button>
+                </div>
+                <ValidatedSearchableSelectField
+                  name="blog_category_xid"
+                  control={control}
+                  options={categoryData}
+                  errors={errors}
+                  setGlobalFilter={setGlobalFilter}
+                  globalFilter={globalFilter}
+                  placeholder="Select category"
+                  // label="Select Blog Category"
+                />
+              </div>
+              <RichTextEditor
+                name="content"
+                control={control}
+                label="Content"
+                errors={errors}
+              />
+
+              <ValidatedTextArea
+                name="metaDescription"
+                control={control}
+                label="Meta Description"
+                errors={errors}
+                className="col-span-2"
+                placeholder="Enter  content"
+                rows={4}
+              />
+              <div>
+                <ValidatedLabel label="Select Status" />
+                <ValidatedSearchableSelectField
+                  name="status"
+                  control={control}
+                  options={[
+                    { label: "Draft", value: "draft" },
+                    { label: "Published", value: "published" },
+                    { label: "Archived", value: "archived" },
+                    { label: "Reviewed", value: "reviewed" },
+                  ]}
+                  errors={errors}
+                  setGlobalFilter={setGlobalFilter}
+                  globalFilter={globalFilter}
+                  placeholder="Select status"
+                />
+              </div>
+              {/* <ValidatedTextField
               name="metadata.level"
               control={control}
               label="Level"
@@ -519,7 +564,7 @@ export default function BlogCreate() {
               placeholder="Enter level (e.g., Beginner, Intermediate)"
               helperText="Level is required"
             /> */}
-            {/* <div>
+              {/* <div>
               <ValidatedLabel label="Select Category" />
               <ValidatedSearchableSelectField
                 name="metadata.category"
@@ -535,30 +580,30 @@ export default function BlogCreate() {
                 placeholder="Select category"
               />
             </div> */}
-            <MetaKeywordsInput
-              name="metaKeywords"
-              control={control}
-              label="Meta Keywords"
-              errors={errors}
-              keywords={keywords}
-              setKeywords={setKeywords}
-              setValue={setValue}
-            />
-            <div>
-              <ValidatedLabel label="Upload Image" />
-              <Uploader
-                name="metaImage"
+              <MetaKeywordsInput
+                name="metaKeywords"
                 control={control}
-                label="Upload Image"
+                label="Meta Keywords"
                 errors={errors}
+                keywords={keywords}
+                setKeywords={setKeywords}
+                setValue={setValue}
               />
+              <div>
+                <ValidatedLabel label="Upload Image" />
+                <Uploader
+                  name="metaImage"
+                  control={control}
+                  label="Upload Image"
+                  errors={errors}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* RIGHT COLUMN */}
-        <div className="space-y-6 lg:sticky lg:top-10 self-start">
-          {/* <div className="bg-white shadow p-4 rounded-xl">
+          {/* RIGHT COLUMN */}
+          <div className="space-y-6 lg:sticky lg:top-10 self-start">
+            {/* <div className="bg-white shadow p-4 rounded-xl">
             {/* <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Author</h3>
               <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
@@ -573,7 +618,7 @@ export default function BlogCreate() {
               globalFilter={globalFilter}
             />
           </div> */}
-          {/* <div className="bg-white shadow p-4 rounded-xl">
+            {/* <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
               <button
@@ -597,19 +642,96 @@ export default function BlogCreate() {
               globalFilter={globalFilter}
             />
           </div> */}
-          {/* <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/> */}
-          <div className="lg:col-span-1">
-            <LiveBlogPreview formData={formData} />
+            {/* <BlogPreviewCard formData={formData} author={author} tags={tags}  baseImageUrl={imageUrl}/> */}
+            <div className="lg:col-span-1">
+              <LiveBlogPreview formData={formData} />
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      <CreateAuthorTagModal
-        open={openModal}
-        handleClose={() => setOpenModal(false)}
-        type={modalType}
-        onSubmit={modalType === "tag" ? handleTagSubmit : handleAuthorSubmit}
-      />
-    </div>
+        <CreateAuthorTagModal
+          open={openModal}
+          handleClose={() => setOpenModal(false)}
+          type={modalType}
+          onSubmit={modalType === "tag" ? handleTagSubmit : handleAuthorSubmit}
+        />
+      </div>
+
+
+
+
+      {
+        isCategoryModalOpen && (
+          <dialog open className="modal">
+            <div className="modal-box">
+              <h3 className="font-bold text-lg">Create Blog Category</h3>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target);
+                  const name = formData.get('name');
+                  const description = formData.get('description');
+
+                  const categoryData = {
+                    name: name,
+                    description: description,
+                  };
+                  console.log(categoryData, 'formadadadadada');
+
+                  try {
+                    const response = await AddBlogCategory(categoryData); // API call
+                    if (response?.data?.success) {
+                      ToastNotification.success('Category created successfully!');
+                      fetchBlogCategory(); // refresh dropdown
+                      setIsCategoryModalOpen(false);
+                    } else {
+                      ToastNotification.error('Failed to create category.');
+                    }
+                  } catch (error) {
+                    console.log('err', error);
+                    ToastNotification.error('Something went wrong!');
+                  }
+                }}
+                className="space-y-4 mt-4"
+              >
+                <div>
+                  <ValidatedLabel label="Category Name" />
+                  <input
+                    name="name"
+                    type="text"
+                    placeholder="Category name"
+                    className="input input-bordered w-full"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <ValidatedLabel label="Category Description" />
+                  <textarea
+                    name="description"
+                    placeholder="Category Description"
+                    className="textarea textarea-bordered w-full"
+                    rows={5}
+                  />
+                </div>
+
+                <div className="modal-action">
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => setIsCategoryModalOpen(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Create
+                  </button>
+                </div>
+              </form>
+            </div>
+          </dialog>
+        )
+      }
+    </>
   );
 }
