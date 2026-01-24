@@ -290,11 +290,21 @@ export const routes = [
   {
     path: "/internal-mf",
     label: "Internal MF Detail",
-    icon: "ShieldCheck", 
+    icon: "ShieldCheck",
     showInSidebar: true,
     group: "Internal Mutual Funds",
     groupOrder: 3,
     order: 1,
     roles: ["admin", "super-admin","reporting-manager"],
+  },
+  {
+    path: "/analytics-dashboard",
+    label: "Analytics Dashboard",
+    icon: "LineChart",
+    showInSidebar: true,
+    group: "Analytics",
+    groupOrder: 2,
+    order: 1,
+    roles: ["admin", "super-admin", "reporting-manager"],
   },
 ];

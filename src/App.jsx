@@ -46,6 +46,7 @@ import RawMisZypeUpload from './pages/MIS/RawMisZypeUpload';
 import RawMisZypeData from './pages/MIS/RawMisZypeData';
 import InternalMFData from './pages/InternalMF/InternalMFData'
 import InternalMFDetail from './pages/InternalMF/InternalMFDetail';
+import AnalyticsDashboard from './pages/AnalyticsDashboard/AnalyticsDashboard';
 
 function App() {
   return (
@@ -99,6 +100,7 @@ function App() {
             <Route path="mis-zype-data" element={<RawMisZypeData />} />
             <Route path="internal-mf" element={<InternalMFData />} />
             <Route path="internal-MF-Detail/:id" element={<InternalMFDetail />} />
+            <Route path="analytics-dashboard" element={<AnalyticsDashboard />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>

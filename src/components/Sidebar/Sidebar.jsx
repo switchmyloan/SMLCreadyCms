@@ -334,14 +334,15 @@ import {
   Users2,
   LucideMonitor,
   Camera,
-  File,Upload
+  File,Upload,
+  LineChart
 } from "lucide-react";
 
 const ICONS = {
   Home, FileText, Users, HelpCircle, Newspaper, MessageSquare,
   UserPlus, UserMinus, UserCheck, Building2, BookOpen, ClipboardList,
   ShieldCheck, Settings,Phone,Users2,LucideMonitor, Camera,
-  File,Upload
+  File,Upload,LineChart
 };
 
 
