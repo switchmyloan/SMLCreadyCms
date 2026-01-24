@@ -3,28 +3,20 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer,
   AreaChart, Area, CartesianGrid,
-  LineChart, Line,
 } from 'recharts';
 import {
   Users, TrendingUp, IndianRupee, UserCheck, ShieldCheck,
   Activity, ArrowUpRight, ArrowDownRight, RefreshCw,
-  Filter, Calendar,
+  Calendar, Mail, Phone, CreditCard, Briefcase,
+  PieChart as PieChartIcon, BarChart3, Target,
 } from 'lucide-react';
-import { getSummary, getLenderWiseLeads, getKycStageStatistics } from '../../api-services/Modules/DashboardApi';
-import { getLeads, getAllLeads } from '../../api-services/Modules/Leads';
-import { getAllMFUsers, getAllMFLoans } from '../../api-services/Modules/MutalFundApi';
+import { getComprehensiveAnalytics } from '../../api-services/Modules/DashboardApi';
 
 // --- Color Palette ---
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
-const GRADIENT_COLORS = {
-  primary: ['#6366f1', '#8b5cf6'],
-  success: ['#10b981', '#34d399'],
-  warning: ['#f59e0b', '#fbbf24'],
-  danger: ['#ef4444', '#f87171'],
-};
 
 // --- KPI Card ---
-const KpiCard = ({ title, value, icon: Icon, trend, trendValue, color, loading }) => {
+const KpiCard = ({ title, value, icon: Icon, color, subtitle, loading }) => {
   const colorMap = {
     primary: { bg: 'bg-indigo-50', text: 'text-indigo-600', border: 'border-indigo-100' },
     success: { bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
@@ -52,17 +44,10 @@ const KpiCard = ({ title, value, icon: Icon, trend, trendValue, color, loading }
           <Icon size={18} className={c.text} />
         </div>
       </div>
-      <div className="flex items-end gap-2">
-        <h3 className="text-2xl font-bold text-gray-900">
-          {typeof value === 'number' ? value.toLocaleString('en-IN') : value}
-        </h3>
-        {trend && (
-          <span className={`flex items-center text-xs font-medium ${trend === 'up' ? 'text-emerald-600' : 'text-red-500'}`}>
-            {trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-            {trendValue}
-          </span>
-        )}
-      </div>
+      <h3 className="text-2xl font-bold text-gray-900">
+        {typeof value === 'number' ? value.toLocaleString('en-IN') : value}
+      </h3>
+      {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
     </div>
   );
 };
@@ -96,241 +81,97 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
+// --- Empty State ---
+const EmptyChart = ({ message = 'No data available' }) => (
+  <div className="flex items-center justify-center h-full text-gray-400 text-sm">{message}</div>
+);
+
 // --- Main Dashboard ---
 const AnalyticsDashboard = () => {
   const [loading, setLoading] = useState(true);
-  const [summaryData, setSummaryData] = useState(null);
-  const [lenderData, setLenderData] = useState([]);
-  const [kycData, setKycData] = useState([]);
-  const [leadsData, setLeadsData] = useState([]);
-  const [allLeadsData, setAllLeadsData] = useState([]);
-  const [mfUsersData, setMfUsersData] = useState([]);
-  const [mfLoansData, setMfLoansData] = useState([]);
-  const [dateRange, setDateRange] = useState({ fromDate: '', toDate: '' });
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  const fetchAllData = async () => {
+  const fetchData = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const [summaryRes, lenderRes, kycRes, leadsRes, allLeadsRes, mfUsersRes, mfLoansRes] = await Promise.allSettled([
-        getSummary({ fromDate: dateRange.fromDate, toDate: dateRange.toDate }),
-        getLenderWiseLeads(),
-        getKycStageStatistics(dateRange.fromDate, dateRange.toDate),
-        getLeads(),
-        getAllLeads(),
-        getAllMFUsers(),
-        getAllMFLoans(),
-      ]);
-
-      if (summaryRes.status === 'fulfilled' && summaryRes.value?.data?.success) {
-        // Backend returns: { data: { summary: { kpis, verificationStatus, ... } } }
-        const summaryPayload = summaryRes.value.data.data?.summary || summaryRes.value.data.data || {};
-        setSummaryData(summaryPayload);
-      }
-      if (lenderRes.status === 'fulfilled' && lenderRes.value?.data?.success) {
-        // Backend returns: { data: { lenders: [...] } }
-        const lenders = lenderRes.value.data.data?.lenders
-          || lenderRes.value.data.data
-          || [];
-        setLenderData(Array.isArray(lenders) ? lenders : []);
-      }
-      if (kycRes.status === 'fulfilled' && kycRes.value?.data?.success) {
-        // Backend returns: { data: { MFData: [...] } }
-        const mfData = kycRes.value.data.data?.MFData
-          || kycRes.value.data.data
-          || [];
-        setKycData(Array.isArray(mfData) ? mfData : []);
-      }
-      if (leadsRes.status === 'fulfilled' && leadsRes.value?.data?.success) {
-        setLeadsData(leadsRes.value.data.data?.rows || []);
-      }
-      if (allLeadsRes.status === 'fulfilled' && allLeadsRes.value?.data?.success) {
-        setAllLeadsData(allLeadsRes.value.data.data?.rows || allLeadsRes.value.data.data || []);
-      }
-      if (mfUsersRes.status === 'fulfilled' && mfUsersRes.value?.data?.success) {
-        const mfUsers = mfUsersRes.value.data.data;
-        // 50Fin API may return { code, detail, data: [...] } or directly an array
-        if (Array.isArray(mfUsers)) {
-          setMfUsersData(mfUsers);
-        } else if (mfUsers?.data && Array.isArray(mfUsers.data)) {
-          setMfUsersData(mfUsers.data);
-        } else {
-          setMfUsersData([]);
-        }
-      }
-      if (mfLoansRes.status === 'fulfilled' && mfLoansRes.value?.data?.success) {
-        const mfLoans = mfLoansRes.value.data.data;
-        // 50Fin loans: may return nested { data: { data: [...] } } or { data: [...] } or array
-        if (Array.isArray(mfLoans)) {
-          setMfLoansData(mfLoans);
-        } else if (mfLoans?.data?.data && Array.isArray(mfLoans.data.data)) {
-          setMfLoansData(mfLoans.data.data);
-        } else if (mfLoans?.data && Array.isArray(mfLoans.data)) {
-          setMfLoansData(mfLoans.data);
-        } else {
-          setMfLoansData([]);
-        }
+      const response = await getComprehensiveAnalytics();
+      if (response?.data?.success) {
+        setData(response.data.data);
+      } else {
+        setError('Failed to fetch analytics data');
       }
     } catch (err) {
-      console.error('Dashboard fetch error:', err);
+      console.error('Analytics fetch error:', err);
+      setError('Failed to connect to analytics API');
     } finally {
       setLoading(false);
-      // Debug: log resolved data in development
-      if (import.meta.env.DEV) {
-        console.log('[Analytics] Summary:', summaryRes?.status, summaryRes?.value?.data);
-        console.log('[Analytics] Lender:', lenderRes?.status, lenderRes?.value?.data);
-        console.log('[Analytics] KYC:', kycRes?.status, kycRes?.value?.data);
-        console.log('[Analytics] Leads:', leadsRes?.status, leadsRes?.value?.data?.data?.rows?.length);
-        console.log('[Analytics] AllLeads:', allLeadsRes?.status, allLeadsRes?.value?.data?.data);
-        console.log('[Analytics] MF Users:', mfUsersRes?.status, mfUsersRes?.value?.data);
-        console.log('[Analytics] MF Loans:', mfLoansRes?.status, mfLoansRes?.value?.data);
-      }
     }
   };
 
   useEffect(() => {
-    fetchAllData();
+    fetchData();
   }, []);
 
-  // --- Computed Metrics ---
-  const leadMetrics = useMemo(() => {
-    const allLeads = allLeadsData.length || leadsData.length;
-    const today = new Date().toDateString();
-    const todayLeads = (allLeadsData.length ? allLeadsData : leadsData).filter(
-      l => new Date(l.createdAt).toDateString() === today
-    ).length;
+  const leads = data?.leads || {};
+  const mf = data?.mutualFunds || {};
+  const lenders = data?.lenders || [];
 
-    const totalLoanAmount = (allLeadsData.length ? allLeadsData : leadsData).reduce(
-      (sum, item) => sum + Number(item.requiredLoanAmount || item.loanAmount || 0), 0
-    );
+  // Format daily trends for combined view
+  const combinedDailyTrend = useMemo(() => {
+    if (!leads.dailyLeads?.length && !mf.dailyMfUsers?.length) return [];
 
-    const verified = (allLeadsData.length ? allLeadsData : leadsData).filter(
-      l => l.isPhoneVerified || l.isEmailVerified
-    ).length;
+    const dateMap = {};
 
-    return { allLeads, todayLeads, totalLoanAmount, verified };
-  }, [leadsData, allLeadsData]);
-
-  const mfMetrics = useMemo(() => {
-    const totalUsers = mfUsersData.length;
-    const today = new Date().toDateString();
-    const todayUsers = mfUsersData.filter(u => {
-      const dateStr = u.createdAt || u.created_at;
-      return dateStr && new Date(dateStr).toDateString() === today;
-    }).length;
-    const consentGiven = mfUsersData.filter(u => u.consent || u.creditConsentText).length;
-    const totalLoans = mfLoansData.length;
-
-    // Stage distribution from loan_process_step or stage field
-    const stageDistribution = mfUsersData.reduce((acc, user) => {
-      const stage = user.loan_process_step || user.stage || 'Unknown';
-      acc[stage] = (acc[stage] || 0) + 1;
-      return acc;
-    }, {});
-
-    const stageChartData = Object.entries(stageDistribution).map(([name, value]) => ({ name, value }));
-
-    return { totalUsers, todayUsers, consentGiven, totalLoans, stageChartData };
-  }, [mfUsersData, mfLoansData]);
-
-  // --- Lead Trends (Last 30 days) ---
-  const leadTrends = useMemo(() => {
-    const source = allLeadsData.length ? allLeadsData : leadsData;
-    const last30 = {};
-    const now = new Date();
-
+    // Fill last 30 days
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
+      const d = new Date();
       d.setDate(d.getDate() - i);
       const key = d.toISOString().slice(0, 10);
-      last30[key] = { date: key, leads: 0, mfUsers: 0 };
+      dateMap[key] = { date: key, leads: 0, mfUsers: 0 };
     }
 
-    source.forEach(lead => {
-      const key = new Date(lead.createdAt).toISOString().slice(0, 10);
-      if (last30[key]) last30[key].leads += 1;
+    leads.dailyLeads?.forEach(item => {
+      if (dateMap[item.date]) dateMap[item.date].leads = item.count;
     });
 
-    mfUsersData.forEach(user => {
-      const dateStr = user.createdAt || user.created_at;
-      if (!dateStr) return;
-      const key = new Date(dateStr).toISOString().slice(0, 10);
-      if (last30[key]) last30[key].mfUsers += 1;
+    mf.dailyMfUsers?.forEach(item => {
+      if (dateMap[item.date]) dateMap[item.date].mfUsers = item.count;
     });
 
-    return Object.values(last30).map(item => ({
+    return Object.values(dateMap).map(item => ({
       ...item,
       date: new Date(item.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
     }));
-  }, [leadsData, allLeadsData, mfUsersData]);
+  }, [leads.dailyLeads, mf.dailyMfUsers]);
 
-  // --- Gender Distribution ---
-  const genderDistribution = useMemo(() => {
-    const source = allLeadsData.length ? allLeadsData : leadsData;
-    const dist = source.reduce((acc, lead) => {
-      const gender = lead.gender || 'Unknown';
-      acc[gender] = (acc[gender] || 0) + 1;
-      return acc;
-    }, {});
-    return Object.entries(dist)
-      .filter(([name]) => name && name !== 'Unknown')
-      .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
-  }, [leadsData, allLeadsData]);
-
-  // --- Income Distribution ---
-  const incomeDistribution = useMemo(() => {
-    const source = allLeadsData.length ? allLeadsData : leadsData;
-    const buckets = { '0-20K': 0, '20K-50K': 0, '50K-1L': 0, '1L-5L': 0, '5L+': 0 };
-
-    source.forEach(lead => {
-      const income = Number(lead.income || lead.monthlyIncome || 0);
-      if (income <= 20000) buckets['0-20K']++;
-      else if (income <= 50000) buckets['20K-50K']++;
-      else if (income <= 100000) buckets['50K-1L']++;
-      else if (income <= 500000) buckets['1L-5L']++;
-      else buckets['5L+']++;
-    });
-
-    return Object.entries(buckets).map(([range, count]) => ({ range, count }));
-  }, [leadsData, allLeadsData]);
-
-  // --- Job Type Distribution ---
-  const jobTypeDistribution = useMemo(() => {
-    const source = allLeadsData.length ? allLeadsData : leadsData;
-    const dist = source.reduce((acc, lead) => {
-      const job = lead.jobType || 'Unknown';
-      acc[job] = (acc[job] || 0) + 1;
-      return acc;
-    }, {});
-    return Object.entries(dist)
-      .filter(([name]) => name && name !== 'Unknown')
-      .map(([name, value]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), value }));
-  }, [leadsData, allLeadsData]);
-
-  // --- Lender Performance Data ---
+  // Lender performance with computed success rate
   const lenderPerformance = useMemo(() => {
-    return lenderData.map(l => ({
+    return lenders.map(l => ({
       ...l,
-      successRate: parseFloat(l.successRate) || 0,
+      successRate: l.totalLeads > 0 ? ((l.success / l.totalLeads) * 100).toFixed(1) : '0.0',
     })).sort((a, b) => b.totalLeads - a.totalLeads);
-  }, [lenderData]);
-
-  // --- Loan Amount Distribution ---
-  const loanAmountDistribution = useMemo(() => {
-    if (summaryData?.loanAmountBuckets) return summaryData.loanAmountBuckets;
-    return [];
-  }, [summaryData]);
-
-  const handleApplyDateFilter = () => {
-    fetchAllData();
-  };
+  }, [lenders]);
 
   const tabs = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'leads', label: 'Lead Analytics' },
-    { id: 'mutualfunds', label: 'Mutual Funds' },
-    { id: 'lenders', label: 'Lender Performance' },
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'leads', label: 'Lead Analytics', icon: Users },
+    { id: 'mutualfunds', label: 'Mutual Funds', icon: PieChartIcon },
+    { id: 'lenders', label: 'Lender Performance', icon: Target },
   ];
+
+  if (error && !data) {
+    return (
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <p className="text-red-500 text-sm">{error}</p>
+        <button onClick={fetchData} className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -338,55 +179,31 @@ const AnalyticsDashboard = () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Comprehensive overview of leads and mutual fund performance</p>
+          <p className="text-sm text-gray-500 mt-1">Comprehensive overview of leads, mutual funds & lender performance</p>
         </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-2">
-            <Calendar size={14} className="text-gray-400" />
-            <input
-              type="date"
-              className="text-sm border-none outline-none bg-transparent"
-              value={dateRange.fromDate}
-              onChange={(e) => setDateRange(prev => ({ ...prev, fromDate: e.target.value }))}
-            />
-            <span className="text-gray-300">-</span>
-            <input
-              type="date"
-              className="text-sm border-none outline-none bg-transparent"
-              value={dateRange.toDate}
-              onChange={(e) => setDateRange(prev => ({ ...prev, toDate: e.target.value }))}
-            />
-          </div>
-          <button
-            onClick={handleApplyDateFilter}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
-          >
-            <Filter size={14} />
-            Apply
-          </button>
-          <button
-            onClick={fetchAllData}
-            className="p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw size={16} className="text-gray-500" />
-          </button>
-        </div>
+        <button
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={`text-gray-500 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg w-fit overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
               activeTab === tab.id
                 ? 'bg-white text-indigo-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
+            <tab.icon size={14} />
             {tab.label}
           </button>
         ))}
@@ -396,129 +213,91 @@ const AnalyticsDashboard = () => {
       {activeTab === 'overview' && (
         <>
           {/* KPI Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            <KpiCard
-              title="Total Leads"
-              value={leadMetrics.allLeads}
-              icon={Users}
-              color="primary"
-              loading={loading}
-            />
-            <KpiCard
-              title="Today's Leads"
-              value={leadMetrics.todayLeads}
-              icon={TrendingUp}
-              color="success"
-              loading={loading}
-            />
-            <KpiCard
-              title="Loan Demand"
-              value={`${(leadMetrics.totalLoanAmount / 100000).toFixed(1)}L`}
-              icon={IndianRupee}
-              color="warning"
-              loading={loading}
-            />
-            <KpiCard
-              title="MF Users"
-              value={mfMetrics.totalUsers}
-              icon={UserCheck}
-              color="purple"
-              loading={loading}
-            />
-            <KpiCard
-              title="MF Loans"
-              value={mfMetrics.totalLoans}
-              icon={Activity}
-              color="cyan"
-              loading={loading}
-            />
-            <KpiCard
-              title="KYC Consent"
-              value={mfMetrics.consentGiven}
-              icon={ShieldCheck}
-              color="success"
-              loading={loading}
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <KpiCard title="Total Leads" value={leads.totalLeads || 0} icon={Users} color="primary" loading={loading} />
+            <KpiCard title="Today's Leads" value={leads.todayLeads || 0} icon={TrendingUp} color="success" loading={loading} />
+            <KpiCard title="Loan Demand" value={leads.totalLoanAmount ? `${(leads.totalLoanAmount / 100000).toFixed(1)}L` : '0'} icon={IndianRupee} color="warning" loading={loading} />
+            <KpiCard title="MF Users" value={mf.totalMfUsers || 0} icon={UserCheck} color="purple" loading={loading} />
+            <KpiCard title="MF Consent" value={mf.consentGiven || 0} icon={ShieldCheck} color="cyan" loading={loading} />
+            <KpiCard title="Active Lenders" value={lenderPerformance.length} icon={Activity} color="danger" loading={loading} />
           </div>
 
-          {/* Lead Trends Chart */}
+          {/* Verification Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KpiCard title="Email Verified" value={leads.verification?.emailVerified || 0} icon={Mail} color="primary" loading={loading} subtitle={`of ${leads.verification?.total || 0} total`} />
+            <KpiCard title="Phone Verified" value={leads.verification?.phoneVerified || 0} icon={Phone} color="success" loading={loading} subtitle={`of ${leads.verification?.total || 0} total`} />
+            <KpiCard title="PAN Verified" value={leads.verification?.panVerified || 0} icon={CreditCard} color="warning" loading={loading} subtitle={`of ${leads.verification?.total || 0} total`} />
+            <KpiCard title="Today MF Users" value={mf.todayMfUsers || 0} icon={Briefcase} color="purple" loading={loading} />
+          </div>
+
+          {/* Combined Trend */}
           <ChartCard title="Lead & MF User Acquisition Trend" subtitle="Last 30 days daily breakdown">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={leadTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="mfGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ fontSize: '12px' }} />
-                <Area type="monotone" dataKey="leads" stroke="#6366f1" fill="url(#leadGradient)" strokeWidth={2} name="Leads" />
-                <Area type="monotone" dataKey="mfUsers" stroke="#10b981" fill="url(#mfGradient)" strokeWidth={2} name="MF Users" />
-              </AreaChart>
+              {combinedDailyTrend.length > 0 ? (
+                <AreaChart data={combinedDailyTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="mfGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Area type="monotone" dataKey="leads" stroke="#6366f1" fill="url(#leadGradient)" strokeWidth={2} name="Leads" />
+                  <Area type="monotone" dataKey="mfUsers" stroke="#10b981" fill="url(#mfGradient)" strokeWidth={2} name="MF Users" />
+                </AreaChart>
+              ) : <EmptyChart />}
             </ResponsiveContainer>
           </ChartCard>
 
-          {/* Distribution Charts */}
+          {/* Distribution Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <ChartCard title="Gender Distribution" subtitle="Lead demographics">
+            <ChartCard title="Gender Distribution" subtitle="All leads by gender">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={genderDistribution}
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={4}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {genderDistribution.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                </PieChart>
+                {leads.genderDistribution?.length > 0 ? (
+                  <PieChart>
+                    <Pie data={leads.genderDistribution} innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value" nameKey="name">
+                      {leads.genderDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
 
             <ChartCard title="Income Distribution" subtitle="Monthly income ranges">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="range" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} name="Users" />
-                </BarChart>
+                {leads.incomeDistribution?.length > 0 ? (
+                  <BarChart data={leads.incomeDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="range" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} name="Users" />
+                  </BarChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
 
             <ChartCard title="Job Type Breakdown" subtitle="Employment categories">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={jobTypeDistribution}
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={4}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {jobTypeDistribution.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                </PieChart>
+                {leads.jobTypeDistribution?.length > 0 ? (
+                  <PieChart>
+                    <Pie data={leads.jobTypeDistribution} innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value" nameKey="name">
+                      {leads.jobTypeDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
           </div>
@@ -528,82 +307,142 @@ const AnalyticsDashboard = () => {
       {/* === LEADS TAB === */}
       {activeTab === 'leads' && (
         <>
-          {/* Lead KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard title="Total Leads" value={leadMetrics.allLeads} icon={Users} color="primary" loading={loading} />
-            <KpiCard title="Today's Leads" value={leadMetrics.todayLeads} icon={TrendingUp} color="success" loading={loading} />
-            <KpiCard title="Total Loan Demand" value={`${(leadMetrics.totalLoanAmount / 100000).toFixed(1)}L`} icon={IndianRupee} color="warning" loading={loading} />
-            <KpiCard title="Verified Leads" value={leadMetrics.verified} icon={UserCheck} color="purple" loading={loading} />
+            <KpiCard title="Total Leads" value={leads.totalLeads || 0} icon={Users} color="primary" loading={loading} />
+            <KpiCard title="Today's Leads" value={leads.todayLeads || 0} icon={TrendingUp} color="success" loading={loading} />
+            <KpiCard title="Total Loan Demand" value={leads.totalLoanAmount ? `${(leads.totalLoanAmount / 100000).toFixed(1)}L` : '0'} icon={IndianRupee} color="warning" loading={loading} />
+            <KpiCard title="PAN Verified" value={leads.verification?.panVerified || 0} icon={CreditCard} color="purple" loading={loading} />
           </div>
 
-          {/* Lead Trend */}
-          <ChartCard title="Daily Lead Acquisition" subtitle="Number of new leads per day">
+          {/* Daily Trend */}
+          <ChartCard title="Daily Lead Acquisition" subtitle="New leads per day (last 30 days)">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={leadTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="leadAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="leads" stroke="#6366f1" fill="url(#leadAreaGrad)" strokeWidth={2} name="Leads" />
-              </AreaChart>
+              {leads.dailyLeads?.length > 0 ? (
+                <AreaChart data={leads.dailyLeads.map(d => ({ ...d, date: new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) }))} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="leadAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="count" stroke="#6366f1" fill="url(#leadAreaGrad)" strokeWidth={2} name="Leads" />
+                </AreaChart>
+              ) : <EmptyChart />}
             </ResponsiveContainer>
           </ChartCard>
 
-          {/* Lead Details Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Gender Distribution" subtitle="Lead gender breakdown">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={genderDistribution} innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" nameKey="name">
-                    {genderDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend wrapperStyle={{ fontSize: '11px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </ChartCard>
-
-            <ChartCard title="Income Range Distribution" subtitle="Leads by monthly income">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={incomeDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          {/* Weekly Trend */}
+          <ChartCard title="Weekly Lead Trend" subtitle="Leads per week (last 12 weeks)">
+            <ResponsiveContainer width="100%" height="100%">
+              {leads.weeklyLeads?.length > 0 ? (
+                <BarChart data={leads.weeklyLeads.map(d => ({ ...d, week: new Date(d.week).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) }))} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="range" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                  <XAxis dataKey="week" tick={{ fontSize: 10 }} stroke="#94a3b8" />
                   <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Leads" />
                 </BarChart>
+              ) : <EmptyChart />}
+            </ResponsiveContainer>
+          </ChartCard>
+
+          {/* Distribution Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <ChartCard title="Gender Distribution" subtitle="Lead demographics">
+              <ResponsiveContainer width="100%" height="100%">
+                {leads.genderDistribution?.length > 0 ? (
+                  <PieChart>
+                    <Pie data={leads.genderDistribution} innerRadius={55} outerRadius={85} paddingAngle={4} dataKey="value" nameKey="name">
+                      {leads.genderDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                  </PieChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Job Type Distribution" subtitle="Employment type of leads">
+            <ChartCard title="Age Distribution" subtitle="Lead age groups">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={jobTypeDistribution} layout="vertical" margin={{ top: 10, right: 30, left: 60, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="value" fill="#06b6d4" radius={[0, 4, 4, 0]} name="Count" />
-                </BarChart>
+                {leads.ageDistribution?.length > 0 ? (
+                  <BarChart data={leads.ageDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="range" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="count" fill="#06b6d4" radius={[4, 4, 0, 0]} name="Users" />
+                  </BarChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="Loan Amount Buckets" subtitle="Requested loan amount distribution">
+            <ChartCard title="Job Type Distribution" subtitle="Employment breakdown">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={loanAmountDistribution.length ? loanAmountDistribution : incomeDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="range" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="count" fill="#f59e0b" radius={[4, 4, 0, 0]} name="Leads" />
-                </BarChart>
+                {leads.jobTypeDistribution?.length > 0 ? (
+                  <BarChart data={leads.jobTypeDistribution} layout="vertical" margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="value" fill="#f59e0b" radius={[0, 4, 4, 0]} name="Count" />
+                  </BarChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
+
+            <ChartCard title="Income Range" subtitle="Monthly income distribution">
+              <ResponsiveContainer width="100%" height="100%">
+                {leads.incomeDistribution?.length > 0 ? (
+                  <BarChart data={leads.incomeDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="range" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="count" fill="#ec4899" radius={[4, 4, 0, 0]} name="Users" />
+                  </BarChart>
+                ) : <EmptyChart />}
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard title="Loan Amount Demand" subtitle="Requested loan amount buckets">
+              <ResponsiveContainer width="100%" height="100%">
+                {leads.loanAmountBuckets?.length > 0 ? (
+                  <BarChart data={leads.loanAmountBuckets} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis dataKey="range" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="count" fill="#14b8a6" radius={[4, 4, 0, 0]} name="Leads" />
+                  </BarChart>
+                ) : <EmptyChart />}
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard title="Lead Sources (UTM)" subtitle="Top traffic sources">
+              <ResponsiveContainer width="100%" height="100%">
+                {leads.sourceDistribution?.length > 0 ? (
+                  <BarChart data={leads.sourceDistribution} layout="vertical" margin={{ top: 10, right: 30, left: 80, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="value" fill="#6366f1" radius={[0, 4, 4, 0]} name="Leads" />
+                  </BarChart>
+                ) : <EmptyChart />}
+              </ResponsiveContainer>
+            </ChartCard>
+          </div>
+
+          {/* Verification Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <KpiCard title="Total Users" value={leads.verification?.total || 0} icon={Users} color="primary" loading={loading} />
+            <KpiCard title="Email Verified" value={leads.verification?.emailVerified || 0} icon={Mail} color="success" loading={loading} subtitle={leads.verification?.total ? `${((leads.verification.emailVerified / leads.verification.total) * 100).toFixed(1)}%` : ''} />
+            <KpiCard title="Phone Verified" value={leads.verification?.phoneVerified || 0} icon={Phone} color="warning" loading={loading} subtitle={leads.verification?.total ? `${((leads.verification.phoneVerified / leads.verification.total) * 100).toFixed(1)}%` : ''} />
+            <KpiCard title="PAN Verified" value={leads.verification?.panVerified || 0} icon={CreditCard} color="purple" loading={loading} subtitle={leads.verification?.total ? `${((leads.verification.panVerified / leads.verification.total) * 100).toFixed(1)}%` : ''} />
           </div>
         </>
       )}
@@ -611,68 +450,86 @@ const AnalyticsDashboard = () => {
       {/* === MUTUAL FUNDS TAB === */}
       {activeTab === 'mutualfunds' && (
         <>
-          {/* MF KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard title="Total MF Users" value={mfMetrics.totalUsers} icon={Users} color="primary" loading={loading} />
-            <KpiCard title="Today's Registrations" value={mfMetrics.todayUsers} icon={TrendingUp} color="success" loading={loading} />
-            <KpiCard title="Consent Given" value={mfMetrics.consentGiven} icon={ShieldCheck} color="purple" loading={loading} />
-            <KpiCard title="Total Loans" value={mfMetrics.totalLoans} icon={IndianRupee} color="warning" loading={loading} />
+            <KpiCard title="Total MF Users" value={mf.totalMfUsers || 0} icon={Users} color="primary" loading={loading} />
+            <KpiCard title="Today's Registrations" value={mf.todayMfUsers || 0} icon={TrendingUp} color="success" loading={loading} />
+            <KpiCard title="Consent Given" value={mf.consentGiven || 0} icon={ShieldCheck} color="purple" loading={loading} />
+            <KpiCard title="Users with Portfolio" value={mf.portfolio?.usersWithPortfolio || 0} icon={Briefcase} color="warning" loading={loading} />
+          </div>
+
+          {/* Portfolio Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <KpiCard title="Total Portfolios" value={mf.portfolio?.totalPortfolios || 0} icon={Activity} color="cyan" loading={loading} />
+            <KpiCard title="Portfolio Value" value={mf.portfolio?.totalValue ? `${(mf.portfolio.totalValue / 10000000).toFixed(2)} Cr` : '0'} icon={IndianRupee} color="success" loading={loading} />
+            <KpiCard title="Users with Portfolio" value={mf.portfolio?.usersWithPortfolio || 0} icon={UserCheck} color="primary" loading={loading} />
           </div>
 
           {/* MF Trend */}
-          <ChartCard title="MF User Registration Trend" subtitle="Daily new MF user registrations">
+          <ChartCard title="MF User Registration Trend" subtitle="Daily new MF user registrations (last 30 days)">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={leadTrends} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="mfAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="mfUsers" stroke="#10b981" fill="url(#mfAreaGrad)" strokeWidth={2} name="MF Users" />
-              </AreaChart>
+              {mf.dailyMfUsers?.length > 0 ? (
+                <AreaChart data={mf.dailyMfUsers.map(d => ({ ...d, date: new Date(d.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) }))} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="mfAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="#94a3b8" />
+                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area type="monotone" dataKey="count" stroke="#10b981" fill="url(#mfAreaGrad)" strokeWidth={2} name="MF Users" />
+                </AreaChart>
+              ) : <EmptyChart />}
             </ResponsiveContainer>
           </ChartCard>
 
           {/* MF Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="MF User Stage Distribution" subtitle="Onboarding funnel stages">
+            <ChartCard title="Onboarding Stage Distribution" subtitle="MF user funnel stages">
               <ResponsiveContainer width="100%" height="100%">
-                {mfMetrics.stageChartData.length > 0 ? (
-                  <BarChart data={mfMetrics.stageChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                {mf.stageDistribution?.length > 0 ? (
+                  <BarChart data={mf.stageDistribution} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="name" tick={{ fontSize: 10 }} stroke="#94a3b8" angle={-20} textAnchor="end" height={60} />
+                    <XAxis dataKey="name" tick={{ fontSize: 9 }} stroke="#94a3b8" angle={-20} textAnchor="end" height={60} />
                     <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Users" />
+                    <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Users">
+                      {mf.stageDistribution.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Bar>
                   </BarChart>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 text-sm">No stage data available</div>
-                )}
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
 
-            <ChartCard title="KYC Stage Statistics" subtitle="KYC completion stages">
+            <ChartCard title="KYC Stage Statistics" subtitle="KYC completion status">
               <ResponsiveContainer width="100%" height="100%">
-                {kycData.length > 0 ? (
-                  <BarChart data={kycData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                {mf.kycStatistics?.length > 0 ? (
+                  <BarChart data={mf.kycStatistics} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="status" tick={{ fontSize: 11 }} stroke="#94a3b8" />
                     <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
                     <Tooltip content={<CustomTooltip />} />
                     <Bar dataKey="count" radius={[4, 4, 0, 0]} name="Users">
-                      {kycData.map((_, i) => (
-                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                      ))}
+                      {mf.kycStatistics.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Bar>
                   </BarChart>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 text-sm">No KYC data available</div>
-                )}
+                ) : <EmptyChart />}
+              </ResponsiveContainer>
+            </ChartCard>
+
+            <ChartCard title="Top AMCs" subtitle="Most popular Asset Management Companies" className="lg:col-span-2">
+              <ResponsiveContainer width="100%" height="100%">
+                {mf.topAmcs?.length > 0 ? (
+                  <BarChart data={mf.topAmcs} layout="vertical" margin={{ top: 10, right: 30, left: 100, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <XAxis type="number" tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                    <YAxis dataKey="name" type="category" tick={{ fontSize: 10 }} stroke="#94a3b8" width={90} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="count" fill="#8b5cf6" radius={[0, 4, 4, 0]} name="Holdings" />
+                  </BarChart>
+                ) : <EmptyChart />}
               </ResponsiveContainer>
             </ChartCard>
           </div>
@@ -682,70 +539,42 @@ const AnalyticsDashboard = () => {
       {/* === LENDER PERFORMANCE TAB === */}
       {activeTab === 'lenders' && (
         <>
-          {/* Lender Summary KPIs */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard
-              title="Total Lenders"
-              value={lenderPerformance.length}
-              icon={Users}
-              color="primary"
-              loading={loading}
-            />
-            <KpiCard
-              title="Total Leads Sent"
-              value={lenderPerformance.reduce((s, l) => s + l.totalLeads, 0)}
-              icon={TrendingUp}
-              color="success"
-              loading={loading}
-            />
-            <KpiCard
-              title="Total Approvals"
-              value={lenderPerformance.reduce((s, l) => s + l.success, 0)}
-              icon={UserCheck}
-              color="purple"
-              loading={loading}
-            />
-            <KpiCard
-              title="Total Rejections"
-              value={lenderPerformance.reduce((s, l) => s + l.rejected, 0)}
-              icon={Activity}
-              color="danger"
-              loading={loading}
-            />
+            <KpiCard title="Total Lenders" value={lenderPerformance.length} icon={Users} color="primary" loading={loading} />
+            <KpiCard title="Total Leads Sent" value={lenderPerformance.reduce((s, l) => s + l.totalLeads, 0)} icon={TrendingUp} color="success" loading={loading} />
+            <KpiCard title="Total Approved" value={lenderPerformance.reduce((s, l) => s + l.success, 0)} icon={UserCheck} color="purple" loading={loading} />
+            <KpiCard title="Total Rejected" value={lenderPerformance.reduce((s, l) => s + l.rejected, 0)} icon={Activity} color="danger" loading={loading} />
           </div>
 
-          {/* Lender Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <ChartCard title="Lender-wise Lead Distribution" subtitle="Total leads processed by each lender" className="lg:col-span-2">
-              <ResponsiveContainer width="100%" height="100%">
-                {lenderPerformance.length > 0 ? (
-                  <BarChart data={lenderPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="lenderName" tick={{ fontSize: 10 }} stroke="#94a3b8" angle={-25} textAnchor="end" height={70} />
-                    <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend wrapperStyle={{ fontSize: '12px' }} />
-                    <Bar dataKey="success" stackId="a" fill="#10b981" name="Approved" radius={[0, 0, 0, 0]} />
-                    <Bar dataKey="rejected" stackId="a" fill="#ef4444" name="Rejected" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400 text-sm">No lender data available</div>
-                )}
-              </ResponsiveContainer>
-            </ChartCard>
-          </div>
+          {/* Stacked Bar Chart */}
+          <ChartCard title="Lender-wise Approval vs Rejection" subtitle="Lead outcomes by each lender" className="lg:col-span-2">
+            <ResponsiveContainer width="100%" height="100%">
+              {lenderPerformance.length > 0 ? (
+                <BarChart data={lenderPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 40 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="lenderName" tick={{ fontSize: 9 }} stroke="#94a3b8" angle={-30} textAnchor="end" height={70} />
+                  <YAxis tick={{ fontSize: 11 }} stroke="#94a3b8" />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Bar dataKey="success" stackId="a" fill="#10b981" name="Approved" />
+                  <Bar dataKey="rejected" stackId="a" fill="#ef4444" name="Rejected" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : <EmptyChart />}
+            </ResponsiveContainer>
+          </ChartCard>
 
-          {/* Lender Table */}
+          {/* Lender Performance Table */}
           <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
             <div className="p-5 border-b border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-800">Lender Performance Table</h3>
-              <p className="text-xs text-gray-400 mt-0.5">Detailed success rates by lender</p>
+              <h3 className="text-sm font-semibold text-gray-800">Lender Performance Details</h3>
+              <p className="text-xs text-gray-400 mt-0.5">Detailed breakdown of success rates by lender</p>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Lender</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">#</th>
+                    <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Lender Name</th>
                     <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Total Leads</th>
                     <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Approved</th>
                     <th className="text-center px-5 py-3 text-xs font-semibold text-gray-500 uppercase">Rejected</th>
@@ -755,6 +584,7 @@ const AnalyticsDashboard = () => {
                 <tbody className="divide-y divide-gray-50">
                   {lenderPerformance.length > 0 ? lenderPerformance.map((lender, idx) => (
                     <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-5 py-3 text-gray-400 font-medium">{idx + 1}</td>
                       <td className="px-5 py-3 font-medium text-gray-800">{lender.lenderName}</td>
                       <td className="text-center px-5 py-3 text-gray-600">{lender.totalLeads.toLocaleString()}</td>
                       <td className="text-center px-5 py-3">
@@ -765,19 +595,19 @@ const AnalyticsDashboard = () => {
                       </td>
                       <td className="text-center px-5 py-3">
                         <div className="flex items-center justify-center gap-2">
-                          <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                          <div className="w-20 h-2 bg-gray-100 rounded-full overflow-hidden">
                             <div
-                              className="h-full bg-indigo-500 rounded-full"
-                              style={{ width: `${Math.min(lender.successRate, 100)}%` }}
+                              className={`h-full rounded-full ${Number(lender.successRate) >= 50 ? 'bg-emerald-500' : Number(lender.successRate) >= 25 ? 'bg-amber-500' : 'bg-red-400'}`}
+                              style={{ width: `${Math.min(Number(lender.successRate), 100)}%` }}
                             ></div>
                           </div>
-                          <span className="text-xs font-medium text-gray-600">{lender.successRate}%</span>
+                          <span className="text-xs font-semibold text-gray-700 w-12">{lender.successRate}%</span>
                         </div>
                       </td>
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={5} className="text-center py-8 text-gray-400">No lender data available</td>
+                      <td colSpan={6} className="text-center py-10 text-gray-400">No lender data available</td>
                     </tr>
                   )}
                 </tbody>

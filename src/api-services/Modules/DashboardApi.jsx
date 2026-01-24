@@ -24,3 +24,9 @@ export const getLenderWiseLeads = async () => {
     skipAdminAppend: true
   })
 };
+
+export const getComprehensiveAnalytics = async () => {
+  return Api().get(`/summary/admin/comprehensive-analytics`, {
+    skipAdminAppend: true
+  })
+};
