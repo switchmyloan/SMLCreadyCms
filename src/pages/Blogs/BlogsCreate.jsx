@@ -215,7 +215,7 @@ export default function BlogCreate() {
       metadata: { category: "", level: "" },
       // author_xid: null,
       tags: [],
-      blog_category_xid:null
+      blog_category_xid: null
     },
   });
 
@@ -307,7 +307,7 @@ export default function BlogCreate() {
             setValue("metadata.level", metadata.level || "");
             setValue("metadata.category", metadata.category || "");
             setValue("blog_category_xid", blog.categoryId || "");
-            // setValue('author_xid', blog.author.id || '')
+            setValue('author_xid', blog.author.id || '')
             setValue("tags", blog.tags?.map((t) => t.id) || []);
             const keywordArray = blog.metaKeywords
               ? blog.metaKeywords
@@ -362,7 +362,7 @@ export default function BlogCreate() {
     try {
       const response = await AddAuthor({
         name: data.name,
-        file: data.file,
+        profileImageUrl: data.file,
         description: data.description,
         designation: data.designation,
         socialLink: data.socialLink,
@@ -484,25 +484,8 @@ export default function BlogCreate() {
                 errors={errors}
                 placeholder="Enter slug"
               />
-              <ValidatedTextField
-                name="metaTitle"
-                control={control}
-                label="Meta Title"
-                errors={errors}
-                placeholder="Enter meta title"
-              />
-
-              <ValidatedTextArea
-                name="description"
-                control={control}
-                label="Description"
-                errors={errors}
-                className="col-span-2"
-                placeholder="Enter blog description"
-                rows={4}
-              />
-              <div>
-                <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className=" flex items-center justify-between">
                   <ValidatedLabel label="Select category" />
                   <button
                     type="button"
@@ -520,9 +503,52 @@ export default function BlogCreate() {
                   setGlobalFilter={setGlobalFilter}
                   globalFilter={globalFilter}
                   placeholder="Select category"
-                  // label="Select Blog Category"
+                // label="Select Blog Category"
                 />
               </div>
+
+              <div className="space-y-1 lg:sticky self-start">
+
+                <div className="flex justify-between items-center ">
+
+                  <ValidatedLabel label="Select Author" />
+                 
+                  <button
+                    type="button"
+                    className="btn btn-xs btn-outline btn-primary"
+                    onClick={() => { setModalType("author"); setOpenModal(true) }}
+                  >
+                    + Create
+                  </button>
+                </div>
+                <ValidatedSearchableSelectField
+                  name="author_xid"
+                  control={control}
+                  options={author}
+                  errors={errors}
+                  setGlobalFilter={setGlobalFilter}
+                  globalFilter={globalFilter}
+                />
+
+              </div>
+              <ValidatedTextField
+                name="metaTitle"
+                control={control}
+                label="Meta Title"
+                errors={errors}
+                placeholder="Enter meta title"
+              />
+
+              <ValidatedTextArea
+                name="description"
+                control={control}
+                label="Description"
+                errors={errors}
+                className="col-span-2"
+                placeholder="Enter blog description"
+                rows={4}
+              />
+              
               <RichTextEditor
                 name="content"
                 control={control}
@@ -603,21 +629,21 @@ export default function BlogCreate() {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6 lg:sticky lg:top-10 self-start">
-            {/* <div className="bg-white shadow p-4 rounded-xl">
-            {/* <div className="flex justify-between items-center mb-2">
-              <h3 className="font-semibold">Select Author</h3>
-              <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
-                className="px-3 py-1 text-sm border rounded">Create</button>
+            <div className="bg-white shadow p-4 rounded-xl">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold">Select Author</h3>
+                <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
+                  className="px-3 py-1 text-sm border rounded">Create</button>
+              </div>
+              <ValidatedSearchableSelectField
+                name="author_xid"
+                control={control}
+                options={author}
+                errors={errors}
+                setGlobalFilter={setGlobalFilter}
+                globalFilter={globalFilter}
+              />
             </div>
-            <ValidatedSearchableSelectField
-              name="author_xid"
-              control={control}
-              options={author}
-              errors={errors}
-              setGlobalFilter={setGlobalFilter}
-              globalFilter={globalFilter}
-            />
-          </div> */}
             {/* <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
