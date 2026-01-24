@@ -629,7 +629,7 @@ export default function BlogCreate() {
 
           {/* RIGHT COLUMN */}
           <div className="space-y-6 lg:sticky lg:top-10 self-start">
-            <div className="bg-white shadow p-4 rounded-xl">
+            {/* <div className="bg-white shadow p-4 rounded-xl">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">Select Author</h3>
                 <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
@@ -643,7 +643,7 @@ export default function BlogCreate() {
                 setGlobalFilter={setGlobalFilter}
                 globalFilter={globalFilter}
               />
-            </div>
+            </div> */}
             {/* <div className="bg-white shadow p-4 rounded-xl">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold">Select Tags</h3>
