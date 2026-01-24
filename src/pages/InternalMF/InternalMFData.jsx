@@ -23,11 +23,17 @@ const StatCard = ({ title, value, icon: Icon, colorClass }) => (
   </div>
 );
 
-const LOAN_STATUS_OPTIONS = [
-  { label: "Pending", value: "1" },
-  { label: "Approved", value: "2" },
-  { label: "Rejected", value: "3" },
+const STATUS_OPTIONS = [
+  { label: "Pending", value: "pending" },
+  { label: "Initiated", value: "initiate" },
+  { label: "In Progress", value: "inProgress" },
+  { label: "Unfinished", value: "unFinish" },
+  { label: "Completed", value: "completed" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Expired", value: "expired" },
+  { label: "Unused", value: "unused" },
 ];
+
 
 const LTV_OPTIONS = [
   { label: "50% LTV", value: "0.500000" },
@@ -107,7 +113,7 @@ const exportToExcel = async (rawData) => {
 
 const MFAllUsers = () => {
   const navigate = useNavigate();
-  // const [selectedStatus, setSelectedStatus] = useState;
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedLTV, setSelectedLTV] = useState();
 
   const [rawData, setRawData] = useState([]);
@@ -203,7 +209,7 @@ const MFAllUsers = () => {
       });
     }
 
-  
+
 
     // 3. LTV Ratio Filter (New Logic)
     if (selectedLTV) {
@@ -215,9 +221,18 @@ const MFAllUsers = () => {
       );
     }
 
+    if (selectedStatus) {
+      rows = rows.filter(item => {
+        const loanInfo = item.loanCreation?.[0];
+        return loanInfo?.status === selectedStatus;
+        // agar status_xid ho toh:
+        // return loanInfo?.status_xid?.toString() === selectedStatus;
+      });
+    }
+
 
     return rows;
-  }, [rawData, query, selectedLTV]);
+  }, [rawData, query, selectedLTV, selectedStatus]);
 
   /* ========================= PAGINATION ========================= */
 
@@ -339,7 +354,16 @@ const MFAllUsers = () => {
           columns={MFAllInternalUsersColumn({ handleEdit })}
           data={data}
           dynamicFilters={[
-
+            {
+              label: "Status",
+              key: "status_filter",
+              options: STATUS_OPTIONS,
+              activeValue: selectedStatus,
+              onChange: (val) => {
+                setSelectedStatus(val);
+                setPagination(p => ({ ...p, pageIndex: 0 }));
+              },
+            },
             {
               label: "LTV Ratio",
               key: "ltv_filter",
