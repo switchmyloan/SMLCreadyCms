@@ -335,14 +335,20 @@ import {
   LucideMonitor,
   Camera,
   File,Upload,
-  LineChart
+  LineChart,
+  LayoutDashboard,
+  Target,
+  Smartphone,
+  TrendingUp,
+  PieChart,
 } from "lucide-react";
 
 const ICONS = {
   Home, FileText, Users, HelpCircle, Newspaper, MessageSquare,
   UserPlus, UserMinus, UserCheck, Building2, BookOpen, ClipboardList,
   ShieldCheck, Settings,Phone,Users2,LucideMonitor, Camera,
-  File,Upload,LineChart
+  File,Upload,LineChart,
+  LayoutDashboard, Target, Smartphone, TrendingUp, PieChart,
 };
 
 

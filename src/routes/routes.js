@@ -1,4 +1,56 @@
 export const routes = [
+  // --- Executive Dashboards (Founder) ---
+  {
+    path: "/executive-dashboard",
+    label: "Executive Overview",
+    icon: "LayoutDashboard",
+    showInSidebar: true,
+    group: "Executive",
+    groupOrder: 0,
+    order: 1,
+    roles: ["super-admin"],
+  },
+  {
+    path: "/lender-management-pro",
+    label: "Lender Performance",
+    icon: "Target",
+    showInSidebar: true,
+    group: "Executive",
+    groupOrder: 0,
+    order: 2,
+    roles: ["super-admin"],
+  },
+  {
+    path: "/app-statistics-pro",
+    label: "App Statistics Pro",
+    icon: "Smartphone",
+    showInSidebar: true,
+    group: "Executive",
+    groupOrder: 0,
+    order: 3,
+    roles: ["super-admin", "admin"],
+  },
+  {
+    path: "/mutual-funds-dashboard",
+    label: "MF Dashboard",
+    icon: "TrendingUp",
+    showInSidebar: true,
+    group: "Executive",
+    groupOrder: 0,
+    order: 4,
+    roles: ["super-admin", "admin"],
+  },
+  {
+    path: "/internal-mf-dashboard",
+    label: "Internal MF Pro",
+    icon: "PieChart",
+    showInSidebar: true,
+    group: "Executive",
+    groupOrder: 0,
+    order: 5,
+    roles: ["super-admin"],
+  },
+
   // --- Non-grouped ---
   {
     path: "/",

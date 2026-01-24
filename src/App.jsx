@@ -47,6 +47,11 @@ import RawMisZypeData from './pages/MIS/RawMisZypeData';
 import InternalMFData from './pages/InternalMF/InternalMFData'
 import InternalMFDetail from './pages/InternalMF/InternalMFDetail';
 import AnalyticsDashboard from './pages/AnalyticsDashboard/AnalyticsDashboard';
+import ExecutiveDashboard from './pages/DashboardPro/ExecutiveDashboard';
+import LenderManagementPro from './pages/DashboardPro/LenderManagementPro';
+import AppStatisticsPro from './pages/DashboardPro/AppStatisticsPro';
+import MutualFundsDashboard from './pages/DashboardPro/MutualFundsDashboard';
+import InternalMFDashboard from './pages/DashboardPro/InternalMFDashboard';
 
 function App() {
   return (
@@ -101,6 +106,11 @@ function App() {
             <Route path="internal-mf" element={<InternalMFData />} />
             <Route path="internal-MF-Detail/:id" element={<InternalMFDetail />} />
             <Route path="analytics-dashboard" element={<AnalyticsDashboard />} />
+            <Route path="executive-dashboard" element={<ExecutiveDashboard />} />
+            <Route path="lender-management-pro" element={<LenderManagementPro />} />
+            <Route path="app-statistics-pro" element={<AppStatisticsPro />} />
+            <Route path="mutual-funds-dashboard" element={<MutualFundsDashboard />} />
+            <Route path="internal-mf-dashboard" element={<InternalMFDashboard />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
