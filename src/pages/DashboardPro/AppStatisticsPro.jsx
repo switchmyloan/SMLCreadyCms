@@ -176,7 +176,7 @@ const AppStatisticsPro = () => {
       )}
 
       {/* Daily Leads + KYC Funnel */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {dailyLeadsTrend.length > 0 && (
           <TrendChart
             title="Daily Lead Registrations"
@@ -195,10 +195,10 @@ const AppStatisticsPro = () => {
             showPercentage={true}
           />
         )}
-      </div>
+      </div> */}
 
       {/* Source + Gender Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {sourceDistribution.length > 0 && (
           <div className="bg-white rounded-xl border border-gray-100 p-5">
             <h4 className="text-base font-semibold text-gray-800 mb-1">Source Distribution</h4>
@@ -234,10 +234,10 @@ const AppStatisticsPro = () => {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Age + Income Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {ageData.length > 0 && (
           <TrendChart
             title="Age Distribution"
@@ -260,7 +260,7 @@ const AppStatisticsPro = () => {
             height="h-64"
           />
         )}
-      </div>
+      </div> */}
 
       {/* Job Type + Loan Amount Buckets */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
