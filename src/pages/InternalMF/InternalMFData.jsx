@@ -354,16 +354,16 @@ const MFAllUsers = () => {
           columns={MFAllInternalUsersColumn({ handleEdit })}
           data={data}
           dynamicFilters={[
-            {
-              label: "Status",
-              key: "status_filter",
-              options: STATUS_OPTIONS,
-              activeValue: selectedStatus,
-              onChange: (val) => {
-                setSelectedStatus(val);
-                setPagination(p => ({ ...p, pageIndex: 0 }));
-              },
-            },
+            // {
+            //   label: "Status",
+            //   key: "status_filter",
+            //   options: STATUS_OPTIONS,
+            //   activeValue: selectedStatus,
+            //   onChange: (val) => {
+            //     setSelectedStatus(val);
+            //     setPagination(p => ({ ...p, pageIndex: 0 }));
+            //   },
+            // },
             {
               label: "LTV Ratio",
               key: "ltv_filter",
