@@ -381,4 +381,26 @@ export const routes = [
     order: 1,
     roles: ["admin", "super-admin", "reporting-manager"],
   },
+
+  // --- Admin Management ---
+  {
+    path: "/admin/roles",
+    label: "Roles",
+    icon: "Shield",
+    showInSidebar: true,
+    group: "Admin Management",
+    groupOrder: 99,
+    order: 1,
+    roles: ["super-admin"],
+  },
+  {
+    path: "/admin/users",
+    label: "Admin Users",
+    icon: "UserCog",
+    showInSidebar: true,
+    group: "Admin Management",
+    groupOrder: 99,
+    order: 2,
+    roles: ["super-admin"],
+  },
 ];

@@ -23,6 +23,11 @@ import NotFound from '@pages/NotFound';
 import PrivacyPolicy from '@pages/CMSManagement/Privacy/PrivacyPolicy';
 import Roles from "@pages/AdminManagement/Roles/Roles"
 import Users from '@pages/AdminManagement/Users/Users';
+import RoleList from '@pages/AdminManagement/Roles/RoleList';
+import RoleCreate from '@pages/AdminManagement/Roles/RoleCreate';
+import RoleEdit from '@pages/AdminManagement/Roles/RoleEdit';
+import AdminUserList from '@pages/AdminManagement/Users/AdminUserList';
+import AdminUserForm from '@pages/AdminManagement/Users/AdminUserForm';
 
 import LeadDetail from '@pages/LeadManagement/Leads/LeadDetail';
 import PushNotificationList from './pages/PushNotification/PushNotificationsList';
@@ -115,6 +120,16 @@ function App() {
             <Route path="internal-mf-dashboard" element={<InternalMFDashboard />} />
             <Route path="active-users-dashboard" element={<ActiveUsersDashboard />} />
             <Route path="active-users-list" element={<ActiveUsersList />} />
+
+            {/* Admin Management */}
+            <Route path="admin/roles" element={<RoleList />} />
+            <Route path="admin/roles/create" element={<RoleCreate />} />
+            <Route path="admin/roles/:id" element={<RoleEdit />} />
+            <Route path="admin/roles/:id/edit" element={<RoleEdit />} />
+            <Route path="admin/users" element={<AdminUserList />} />
+            <Route path="admin/users/create" element={<AdminUserForm />} />
+            <Route path="admin/users/:id/edit" element={<AdminUserForm />} />
+
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
