@@ -49,14 +49,16 @@ const AppStatisticsPro = () => {
   const mf = analyticsData?.mutualFunds || {};
 
   // KPI values
-  const totalInstalls = appMetrics?.summary?.newInstalls || 0;
+  const newInstalls = appMetrics?.summary?.newInstalls || 0;
+  const totalUninstalls = (appMetrics?.summary?.uninstallsAfterInstall || 0) + (appMetrics?.summary?.uninstallsAfterUpdate || 0);
+  const installBase = newInstalls - totalUninstalls; // Net active installs (matches Google Play Console)
   const totalUpdates = appMetrics?.summary?.updates || 0;
   const totalLeads = leads.totalLeads || 0;
   const todayLeads = leads.todayLeads || 0;
   const totalMfUsers = mf.totalMfUsers || 0;
 
-  // Install-to-registration rate
-  const installToRegRate = totalInstalls > 0 ? ((totalLeads / totalInstalls) * 100) : 0;
+  // Install-to-registration rate (based on install base)
+  const installToRegRate = installBase > 0 ? ((totalLeads / installBase) * 100) : 0;
 
   // Daily app metrics trend
   const dailyAppTrend = useMemo(() => {
@@ -150,12 +152,13 @@ const AppStatisticsPro = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard title="Total Installs" value={totalInstalls} icon={Download} color="primary" format="number" />
-        <StatCard title="Total Leads" value={totalLeads} icon={UserPlus} color="success" format="number" subtitle={`${todayLeads} today`} />
-        <StatCard title="MF Users" value={totalMfUsers} icon={Activity} color="purple" format="number" subtitle={`${mf.todayMfUsers || 0} today`} />
-        <StatCard title="App Updates" value={totalUpdates} icon={Users} color="cyan" format="number" />
-        <StatCard title="Install → Lead" value={installToRegRate} icon={Percent} color="warning" format="percentage" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <StatCard title="Total Installs" value={newInstalls} icon={Download} color="primary" format="number" />
+        <StatCard title="Install Base" value={installBase} icon={Download} color="success" format="number" subtitle="Active installs" />
+        <StatCard title="Total Leads" value={totalLeads} icon={UserPlus} color="purple" format="number" subtitle={`${todayLeads} today`} />
+        <StatCard title="MF Users" value={totalMfUsers} icon={Activity} color="cyan" format="number" subtitle={`${mf.todayMfUsers || 0} today`} />
+        <StatCard title="App Updates" value={totalUpdates} icon={Users} color="warning" format="number" />
+        <StatCard title="Install → Lead" value={installToRegRate} icon={Percent} color="danger" format="percentage" />
       </div>
 
       {/* Daily App Metrics Trend */}
