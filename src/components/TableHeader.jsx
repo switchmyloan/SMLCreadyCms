@@ -512,7 +512,7 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     header: 'PlatForm',
     accessorKey: 'DeviceAndBioMetric',
     cell: info => {
-      const source = info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
+      const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
       return (
         <div
           className="truncate"
