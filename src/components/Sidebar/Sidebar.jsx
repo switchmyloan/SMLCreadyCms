@@ -341,6 +341,7 @@ import {
   Smartphone,
   TrendingUp,
   PieChart,
+  Activity,
 } from "lucide-react";
 
 const ICONS = {
@@ -349,6 +350,7 @@ const ICONS = {
   ShieldCheck, Settings,Phone,Users2,LucideMonitor, Camera,
   File,Upload,LineChart,
   LayoutDashboard, Target, Smartphone, TrendingUp, PieChart,
+  Activity,
 };
 
 

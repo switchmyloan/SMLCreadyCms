@@ -1,4 +1,26 @@
 export const routes = [
+  // --- Active Users ---
+  {
+    path: "/active-users-dashboard",
+    label: "Active Users Stats",
+    icon: "Activity",
+    showInSidebar: true,
+    group: "Active Users",
+    groupOrder: -1,
+    order: 1,
+    roles: ["super-admin", "admin"],
+  },
+  {
+    path: "/active-users-list",
+    label: "Active Users List",
+    icon: "Users",
+    showInSidebar: true,
+    group: "Active Users",
+    groupOrder: -1,
+    order: 2,
+    roles: ["super-admin", "admin"],
+  },
+
   // --- Executive Dashboards (Founder) ---
   {
     path: "/executive-dashboard",

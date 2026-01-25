@@ -52,6 +52,8 @@ import LenderManagementPro from './pages/DashboardPro/LenderManagementPro';
 import AppStatisticsPro from './pages/DashboardPro/AppStatisticsPro';
 import MutualFundsDashboard from './pages/DashboardPro/MutualFundsDashboard';
 import InternalMFDashboard from './pages/DashboardPro/InternalMFDashboard';
+import ActiveUsersDashboard from './pages/ActiveUsers/ActiveUsersDashboard';
+import ActiveUsersList from './pages/ActiveUsers/ActiveUsersList';
 
 function App() {
   return (
@@ -111,6 +113,8 @@ function App() {
             <Route path="app-statistics-pro" element={<AppStatisticsPro />} />
             <Route path="mutual-funds-dashboard" element={<MutualFundsDashboard />} />
             <Route path="internal-mf-dashboard" element={<InternalMFDashboard />} />
+            <Route path="active-users-dashboard" element={<ActiveUsersDashboard />} />
+            <Route path="active-users-list" element={<ActiveUsersList />} />
           <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
