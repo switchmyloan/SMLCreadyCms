@@ -54,3 +54,10 @@ export const getLendersForFilter = async () => {
     skipAdminAppend: true,
   });
 };
+
+// Get detailed user information
+export const getUserDetail = async (principalId) => {
+  return Api().get(`/active-users/${principalId}/detail`, {
+    skipAdminAppend: true,
+  });
+};

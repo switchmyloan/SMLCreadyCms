@@ -25,9 +25,10 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { getActiveUsers, getLendersForFilter } from '../../api-services/Modules/ActiveUsersApi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ActiveUsersList = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
@@ -179,24 +180,27 @@ const ActiveUsersList = () => {
         header: 'User',
         cell: ({ row }) => {
           const user = row.original;
+          const displayName = user.fullName?.trim() || user.firstName || user.phoneNumber || `User #${user.id}`;
+          const initials = user.firstName?.[0] || user.phoneNumber?.[0] || 'U';
+          const secondInitial = user.lastName?.[0] || '';
           return (
             <div className="flex items-center gap-3">
               {user.profileImage ? (
                 <img
                   src={user.profileImage}
-                  alt={user.fullName}
+                  alt={displayName}
                   className="w-9 h-9 rounded-full object-cover"
                 />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center">
                   <span className="text-xs font-semibold text-indigo-600">
-                    {user.firstName?.[0]}{user.lastName?.[0]}
+                    {initials}{secondInitial}
                   </span>
                 </div>
               )}
               <div>
                 <p className="font-medium text-gray-800 text-sm">
-                  {user.fullName || `${user.firstName} ${user.lastName}`}
+                  {displayName}
                 </p>
               </div>
             </div>
@@ -208,7 +212,7 @@ const ActiveUsersList = () => {
         accessorKey: 'emailAddress',
         header: 'Email',
         cell: ({ row }) => (
-          <span className="text-gray-600 text-sm">{row.original.emailAddress}</span>
+          <span className="text-gray-600 text-sm">{row.original.emailAddress || '-'}</span>
         ),
         size: 220,
       },
@@ -567,7 +571,11 @@ const ActiveUsersList = () => {
                 ))
               ) : table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50">
+                  <tr
+                    key={row.id}
+                    className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => navigate(`/active-user/${row.original.id}`)}
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="py-3 px-4">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}

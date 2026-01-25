@@ -310,25 +310,27 @@ const ActiveUsersDashboard = () => {
                         {user.profileImage ? (
                           <img
                             src={user.profileImage}
-                            alt={user.fullName}
+                            alt={user.fullName || user.phoneNumber}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                             <span className="text-xs font-semibold text-indigo-600">
-                              {user.firstName?.[0]}{user.lastName?.[0]}
+                              {user.firstName?.[0] || user.phoneNumber?.[0] || 'U'}{user.lastName?.[0] || ''}
                             </span>
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-gray-800">{user.fullName || `${user.firstName} ${user.lastName}`}</p>
+                          <p className="font-medium text-gray-800">
+                            {user.fullName?.trim() || user.firstName || user.phoneNumber || `User #${user.id}`}
+                          </p>
                           <p className="text-xs text-gray-500">ID: {user.id}</p>
                         </div>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <p className="text-gray-600 text-xs">{user.emailAddress}</p>
-                      <p className="text-gray-500 text-xs">{user.phoneNumber}</p>
+                      <p className="text-gray-600 text-xs">{user.emailAddress || '-'}</p>
+                      <p className="text-gray-500 text-xs">{user.phoneNumber || '-'}</p>
                     </td>
                     <td className="py-3 px-4 text-center">
                       {user.isOnline ? (

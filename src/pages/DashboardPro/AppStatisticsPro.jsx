@@ -1,15 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Download, UserPlus, Activity, Users, Percent, RefreshCw } from 'lucide-react';
+import { Download, UserPlus, Activity, Users, Percent, RefreshCw, Wifi, WifiOff, Clock } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
 import FunnelChart from '../../components/dashboard-pro/FunnelChart';
 import SkeletonLoader from '../../components/dashboard-pro/SkeletonLoader';
 import { getComprehensiveAnalytics } from '../../api-services/Modules/DashboardApi';
+import { getActivityStats, getActiveUsers } from '../../api-services/Modules/ActiveUsersApi';
+import { Link } from 'react-router-dom';
 
 const AppStatisticsPro = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
   const [appMetrics, setAppMetrics] = useState(null);
+  const [activeUsersStats, setActiveUsersStats] = useState(null);
+  const [recentActiveUsers, setRecentActiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,9 +23,11 @@ const AppStatisticsPro = () => {
     setLoading(true);
     setError(null);
     try {
-      const [analyticsRes, appMetricsRes] = await Promise.allSettled([
+      const [analyticsRes, appMetricsRes, activeUsersStatsRes, activeUsersListRes] = await Promise.allSettled([
         getComprehensiveAnalytics(),
         fetch(`${BASE_URL}/public/admin/app-metrics`).then(r => r.json()),
+        getActivityStats(),
+        getActiveUsers(1, 10),
       ]);
 
       if (analyticsRes.status === 'fulfilled' && analyticsRes.value?.data?.success) {
@@ -29,6 +35,14 @@ const AppStatisticsPro = () => {
       }
       if (appMetricsRes.status === 'fulfilled' && appMetricsRes.value?.success) {
         setAppMetrics(appMetricsRes.value);
+      }
+      if (activeUsersStatsRes.status === 'fulfilled') {
+        const data = activeUsersStatsRes.value?.data?.data || activeUsersStatsRes.value?.data;
+        setActiveUsersStats(data);
+      }
+      if (activeUsersListRes.status === 'fulfilled') {
+        const data = activeUsersListRes.value?.data?.data?.users || activeUsersListRes.value?.data?.users || [];
+        setRecentActiveUsers(data);
       }
 
       if (analyticsRes.status === 'rejected' && appMetricsRes.status === 'rejected') {
@@ -161,6 +175,56 @@ const AppStatisticsPro = () => {
         <StatCard title="Install → Lead" value={installToRegRate} icon={Percent} color="danger" format="percentage" />
       </div>
 
+      {/* Active Users Section */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-800">Active Users</h2>
+            <p className="text-sm text-gray-500">Real-time user activity monitoring</p>
+          </div>
+          <Link
+            to="/active-users-list"
+            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            View All Users
+          </Link>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Online Now"
+            value={activeUsersStats?.onlineUsersNow || 0}
+            icon={Wifi}
+            color="success"
+            format="number"
+            subtitle="Active in last 5 min"
+          />
+          <StatCard
+            title="Active Users (24h)"
+            value={activeUsersStats?.totalActiveUsers24h || 0}
+            icon={Users}
+            color="primary"
+            format="number"
+            subtitle="Unique users today"
+          />
+          <StatCard
+            title="Total Activities (24h)"
+            value={activeUsersStats?.totalActivities24h || 0}
+            icon={Activity}
+            color="purple"
+            format="number"
+            subtitle="All activity types"
+          />
+          <StatCard
+            title="Page Views (24h)"
+            value={activeUsersStats?.activityBreakdown?.pageViews || 0}
+            icon={Activity}
+            color="cyan"
+            format="number"
+            subtitle="Screen visits"
+          />
+        </div>
+      </div>
+
       {/* Daily App Metrics Trend */}
       {dailyAppTrend.length > 0 && (
         <TrendChart
@@ -289,6 +353,103 @@ const AppStatisticsPro = () => {
             height="h-64"
           />
         )}
+      </div>
+
+      {/* Recent Active Users Table */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-base font-semibold text-gray-800">Recently Active Users</h3>
+          </div>
+          <Link
+            to="/active-users-list"
+            className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+          >
+            View All
+          </Link>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="text-left py-3 px-4 font-semibold text-gray-600">User</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-600">Contact</th>
+                <th className="text-center py-3 px-4 font-semibold text-gray-600">Status</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-600">Activities</th>
+                <th className="text-right py-3 px-4 font-semibold text-gray-600">Last Active</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentActiveUsers.length > 0 ? (
+                recentActiveUsers.map((user, index) => (
+                  <tr key={user.id || index} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        {user.profileImage ? (
+                          <img
+                            src={user.profileImage}
+                            alt={user.fullName}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <span className="text-xs font-semibold text-indigo-600">
+                              {user.firstName?.[0]}{user.lastName?.[0]}
+                            </span>
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-medium text-gray-800">{user.fullName || `${user.firstName} ${user.lastName}`}</p>
+                          <p className="text-xs text-gray-500">ID: {user.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <p className="text-gray-600 text-xs">{user.emailAddress}</p>
+                      <p className="text-gray-500 text-xs">{user.phoneNumber}</p>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      {user.isOnline ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                          <Wifi size={12} />
+                          Online
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                          <WifiOff size={12} />
+                          Offline
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="font-medium text-gray-700">
+                        {(user.activityCount || 0).toLocaleString('en-IN')}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1 text-gray-500 text-xs">
+                        <Clock size={12} />
+                        {user.lastActivityAt ? new Date(user.lastActivityAt).toLocaleString('en-IN', {
+                          day: '2-digit',
+                          month: 'short',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        }) : 'N/A'}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-500">
+                    No active users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -59,6 +59,7 @@ import MutualFundsDashboard from './pages/DashboardPro/MutualFundsDashboard';
 import InternalMFDashboard from './pages/DashboardPro/InternalMFDashboard';
 import ActiveUsersDashboard from './pages/ActiveUsers/ActiveUsersDashboard';
 import ActiveUsersList from './pages/ActiveUsers/ActiveUsersList';
+import ActiveUserDetail from './pages/ActiveUsers/ActiveUserDetail';
 
 function App() {
   return (
@@ -120,6 +121,7 @@ function App() {
             <Route path="internal-mf-dashboard" element={<InternalMFDashboard />} />
             <Route path="active-users-dashboard" element={<ActiveUsersDashboard />} />
             <Route path="active-users-list" element={<ActiveUsersList />} />
+            <Route path="active-user/:id" element={<ActiveUserDetail />} />
 
             {/* Admin Management */}
             <Route path="admin/roles" element={<RoleList />} />
