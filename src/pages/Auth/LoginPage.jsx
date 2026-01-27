@@ -134,6 +134,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../custom-hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
+import { adminLogin } from "../../api-services/Modules/AdminRoleApi";
 
 function LoginPage() {
   const { login, logout } = useAuth();
@@ -142,59 +143,46 @@ function LoginPage() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
-  const dummyUsers = [
-    {
-      id: 1,
-      name: "Admin User",
-      email: "admin@cready.in",
-      password: "Admin@123",
-      role: "admin",
-    },
-    {
-      id: 2,
-      name: "Super Admin",
-      email: "super@cready.in",
-      password: "Super@321",
-      role: "super-admin",
-    },
-    {
-      id: 3,
-      name: "Marketing",
-      email: "marketing@cready.in",
-      password: "Marketing@123",
-      role: "marketing",
-    },
-    {
-      id: 3,
-      name: "Manager",
-      email: "manager@cready.in",
-      password: "Manager@1234",
-      role: "reporting-manager",
-    }
-  ];
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
-    const email = formData.email.trim().toLowerCase();
+    const email = formData.email.trim();
     const password = formData.password;
 
-    const foundUser = dummyUsers.find(
-      (u) => u.email.toLowerCase() === email && u.password === password
-    );
+    if (!email || !password) {
+      setError("Please enter both email and password");
+      setIsLoading(false);
+      return;
+    }
 
-    if (foundUser) {
-      const token = "dummy_token_" + foundUser.role;
-      login(token, foundUser);
-      navigate("/signin-user");
-    } else {
-      setError("Invalid email or password");
+    try {
+      const response = await adminLogin(email, password);
+      const { token, user, permissions } = response.data.data;
+
+      // Store user with permissions and role info
+      const userData = {
+        ...user,
+        permissions,
+        role: user.role?.slug || user.role?.name || 'admin',
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+      };
+
+      login(token, userData);
+      navigate("/");
+    } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || "Login failed. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -223,7 +211,13 @@ function LoginPage() {
           </button>
         </div>
         {error && <p className="text-red-600 text-sm">{error}</p>}
-        <button type="submit" className="bg-indigo-600 w-full text-white p-2 rounded">Login</button>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="bg-indigo-600 w-full text-white p-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
       </form>
     </div>
   );

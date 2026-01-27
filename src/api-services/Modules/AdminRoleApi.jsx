@@ -20,6 +20,12 @@ export const seedPermissions = async () => {
   });
 };
 
+export const reseedPermissions = async () => {
+  return Api().post("/admin/role-management/permissions/reseed", {}, {
+    skipAdminAppend: true,
+  });
+};
+
 // ==================== ROLES ====================
 
 export const getAllRoles = async () => {

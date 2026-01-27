@@ -7,28 +7,34 @@ import {
   ArrowLeft,
   Check,
   Loader2,
+  RefreshCw,
 } from 'lucide-react';
 import {
   getRoleById,
   getAllPermissions,
   assignPermissions,
   updateRole,
+  reseedPermissions,
 } from '../../../api-services/Modules/AdminRoleApi';
 import toast, { Toaster } from 'react-hot-toast';
 
-// Permission modules for grouping
+// Permission modules matching sidebar groups exactly
 const PERMISSION_MODULES = [
-  { key: 'CAMPAIGNS', label: 'Campaigns', icon: '📢' },
-  { key: 'SEGMENTS', label: 'Segments', icon: '👥' },
-  { key: 'ANALYTICS', label: 'Analytics', icon: '📊' },
-  { key: 'USERS', label: 'Users', icon: '👤' },
-  { key: 'LEADS', label: 'Leads', icon: '📋' },
-  { key: 'LENDERS', label: 'Lenders', icon: '🏦' },
-  { key: 'PUSH_NOTIFICATIONS', label: 'Push Notifications', icon: '🔔' },
-  { key: 'CMS', label: 'CMS Content', icon: '📝' },
-  { key: 'SETTINGS', label: 'Settings', icon: '⚙️' },
-  { key: 'ROLES', label: 'Roles', icon: '🛡️' },
   { key: 'ACTIVE_USERS', label: 'Active Users', icon: '🟢' },
+  { key: 'EXECUTIVE_DASHBOARD', label: 'Executive', icon: '📊' },
+  { key: 'LEAD_MANAGEMENT', label: 'Lead Management', icon: '👥' },
+  { key: 'APP_STATISTICS', label: 'App Statistics', icon: '📱' },
+  { key: 'ANALYTICS', label: 'Analytics', icon: '📈' },
+  { key: 'INTERNAL_MUTUAL_FUNDS', label: 'Internal Mutual Funds', icon: '💹' },
+  { key: 'MUTUAL_FUNDS', label: 'Mutual Funds', icon: '💰' },
+  { key: 'LENDER_MANAGEMENT', label: 'Lender Management', icon: '🏦' },
+  { key: 'BLOGS', label: 'Blogs', icon: '📝' },
+  { key: 'PUSH_NOTIFICATION', label: 'Push Notification', icon: '🔔' },
+  { key: 'UTM', label: 'UTM', icon: '🔗' },
+  { key: 'FAQ', label: 'FAQ', icon: '❓' },
+  { key: 'MIS_RAW', label: 'MIS Raw', icon: '📑' },
+  { key: 'CMS_MANAGEMENT', label: 'CMS Management', icon: '📰' },
+  { key: 'ADMIN_MANAGEMENT', label: 'Admin Management', icon: '👨‍💼' },
 ];
 
 const RoleEdit = () => {
@@ -36,6 +42,7 @@ const RoleEdit = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [reseeding, setReseeding] = useState(false);
   const [role, setRole] = useState(null);
   const [allPermissions, setAllPermissions] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState(new Set());
@@ -90,6 +97,34 @@ const RoleEdit = () => {
     permissions: allPermissions.filter(p => p.module === module.key),
   })).filter(g => g.permissions.length > 0);
 
+  // Debug: always log permission details
+  useEffect(() => {
+    if (allPermissions.length > 0) {
+      console.log('=== PERMISSION DEBUG ===');
+      console.log('Total permissions from API:', allPermissions.length);
+      console.log('Available modules in DB:', [...new Set(allPermissions.map(p => p.module))]);
+      console.log('Expected modules:', PERMISSION_MODULES.map(m => m.key));
+      console.log('Grouped permissions count:', groupedPermissions.length);
+      console.log('Sample permission:', allPermissions[0]);
+    }
+  }, [allPermissions, groupedPermissions]);
+
+  // Select/Deselect all permissions
+  const toggleAllPermissions = () => {
+    const allSelected = allPermissions.every(p => selectedPermissions.has(p.id));
+    setSelectedPermissions(prev => {
+      const newSet = new Set(prev);
+      allPermissions.forEach(p => {
+        if (allSelected) {
+          newSet.delete(p.id);
+        } else {
+          newSet.add(p.id);
+        }
+      });
+      return newSet;
+    });
+  };
+
   // Handle permission toggle
   const togglePermission = (permId) => {
     setSelectedPermissions(prev => {
@@ -138,6 +173,28 @@ const RoleEdit = () => {
       toast.error(err?.response?.data?.message || 'Failed to save role');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Handle reseed permissions
+  const handleReseed = async () => {
+    if (!window.confirm('This will reset all permissions to default. Continue?')) {
+      return;
+    }
+    setReseeding(true);
+    try {
+      const response = await reseedPermissions();
+      console.log('Reseed response:', response);
+      toast.success('Permissions reseeded successfully! Refreshing...');
+      // Reload the page to fetch fresh data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to reseed permissions:', err);
+      toast.error(err?.response?.data?.message || 'Failed to reseed permissions');
+    } finally {
+      setReseeding(false);
     }
   };
 
@@ -241,8 +298,26 @@ const RoleEdit = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold">Permissions</h2>
-          <div className="text-sm text-gray-500">
-            {selectedPermissions.size} of {allPermissions.length} permissions selected
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-500">
+              {selectedPermissions.size} of {allPermissions.length} permissions selected
+            </div>
+            <button
+              type="button"
+              onClick={handleReseed}
+              disabled={reseeding}
+              className="flex items-center gap-1 text-sm text-orange-600 hover:text-orange-800 font-medium disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${reseeding ? 'animate-spin' : ''}`} />
+              {reseeding ? 'Reseeding...' : 'Reseed Permissions'}
+            </button>
+            <button
+              type="button"
+              onClick={toggleAllPermissions}
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              {allPermissions.every(p => selectedPermissions.has(p.id)) ? 'Deselect All' : 'Select All'}
+            </button>
           </div>
         </div>
 
@@ -263,9 +338,9 @@ const RoleEdit = () => {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{group.icon}</span>
-                    <span className="font-medium">{group.label}</span>
-                    <span className="text-xs text-gray-500">
-                      ({group.permissions.filter(p => selectedPermissions.has(p.id)).length}/{group.permissions.length})
+                    <span className="font-semibold text-gray-800">{group.label}</span>
+                    <span className="text-xs text-gray-500 bg-gray-200 px-2 py-0.5 rounded-full">
+                      {group.permissions.filter(p => selectedPermissions.has(p.id)).length}/{group.permissions.length}
                     </span>
                   </div>
                   <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
@@ -280,28 +355,37 @@ const RoleEdit = () => {
                   </div>
                 </div>
 
-                {/* Permissions List */}
-                <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {/* Permissions Grid */}
+                <div className="px-4 py-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {group.permissions.map((perm) => (
                     <label
                       key={perm.id}
-                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
                         selectedPermissions.has(perm.id)
                           ? 'bg-indigo-50 border border-indigo-200'
-                          : 'hover:bg-gray-50 border border-transparent'
+                          : 'hover:bg-gray-50 border border-gray-100'
                       }`}
+                      title={perm.description || perm.name}
                     >
                       <input
                         type="checkbox"
                         checked={selectedPermissions.has(perm.id)}
                         onChange={() => togglePermission(perm.id)}
-                        className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                        className="w-4 h-4 mt-0.5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                       />
-                      <div>
-                        <span className="text-sm font-medium text-gray-700">
+                      <div className="flex-1 min-w-0">
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
+                          perm.action === 'VIEW' ? 'bg-blue-100 text-blue-700' :
+                          perm.action === 'CREATE' ? 'bg-green-100 text-green-700' :
+                          perm.action === 'EDIT' ? 'bg-yellow-100 text-yellow-700' :
+                          perm.action === 'DELETE' ? 'bg-red-100 text-red-700' :
+                          perm.action === 'EXPORT' ? 'bg-purple-100 text-purple-700' :
+                          perm.action === 'SEND' ? 'bg-orange-100 text-orange-700' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>
                           {perm.action}
                         </span>
-                        <p className="text-xs text-gray-500">{perm.name}</p>
+                        <p className="text-xs text-gray-600 mt-1 truncate">{perm.name}</p>
                       </div>
                     </label>
                   ))}
