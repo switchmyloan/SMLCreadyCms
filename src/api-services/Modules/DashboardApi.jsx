@@ -18,3 +18,15 @@ export const getKycStageStatistics = async (fromDate, toDate) => {
     skipAdminAppend : true
   })
 };
+
+export const getLenderWiseLeads = async () => {
+  return Api().get(`/summary/admin/lender-wise-leads`, {
+    skipAdminAppend: true
+  })
+};
+
+export const getComprehensiveAnalytics = async () => {
+  return Api().get(`/summary/admin/comprehensive-analytics`, {
+    skipAdminAppend: true
+  })
+};
