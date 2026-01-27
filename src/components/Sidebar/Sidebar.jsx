@@ -312,6 +312,7 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { routes } from "../../routes/routes";
 import { useAuth } from "../../custom-hooks/useAuth";
+import { usePermissions } from "../../custom-hooks/usePermissions";
 import logo from "../../assets/cready.webp";
 import shortLogo from "../../assets/shortLogo.svg";
 
@@ -355,7 +356,8 @@ const ICONS = {
 
 
 function Sidebar({ onClose, collapsed, onToggleCollapse }) {
-  const { user } = useAuth(); // ✅ get logged-in user
+  const { user } = useAuth();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
   const [openGroup, setOpenGroup] = useState(null);
@@ -363,8 +365,15 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
   const buttonRefs = useRef({});
   const sidebarRef = useRef(null);
 
-  // Filter routes based on user role
-  const allowedRoutes = routes.filter(r => r.roles?.includes(user?.role));
+  // Filter routes based on user permissions
+  const allowedRoutes = routes.filter(r => {
+    // No permission required - allow everyone
+    if (!r.permission) return true;
+    // Super admin has all permissions
+    if (isSuperAdmin) return true;
+    // Check if user has the required permission
+    return hasPermission(r.permission);
+  });
 
   // Close dropdown if location is not inside the group's children
   useEffect(() => {

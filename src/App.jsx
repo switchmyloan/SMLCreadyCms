@@ -9,6 +9,7 @@ import Faq from '@pages/FAQ/Faq'
 import Press from '@pages/CMSManagement/PressRoom/Press'
 import LoginPage from '@pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
+import PermissionGuard from './components/PermissionGuard';
 import Testimonials from '@pages/CMSManagement/Testimonials/Testimonial';
 import SigninUser from "@pages/LeadManagement/SignInUserApp/SigninUser"
 import Leads from "@pages/LeadManagement/Leads/Leads"
@@ -69,70 +70,98 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
           <Route element={<DefaultLayout />}>
-            <Route index element={<Home />} />   {/* path="/" */}
+            <Route index element={<Home />} />
             <Route path="about" element={<About />} />
-            <Route path="blogs" element={<Blogs />} />
-            <Route path="blog/create" element={<BlogCreate />} />
-            <Route path="blog/:id" element={<BlogCreate />} />
-            <Route path="faq" element={<Faq />} />
-            <Route path="press" element={<Press />} />
-            <Route path="testimonials" element={<Testimonials />} />
-            <Route path="signin-user" element={<SigninUser />} />
-            <Route path="leads" element={<Leads />} />
-            <Route path="lead-detail/:id" element={<LeadDetail />} />
-            <Route path="archive-users" element={<ArchiveUsers />} />
-            <Route path="on-borde-lender-from" element={<OnBoardLender />} />
-            <Route path="on-borde-lender-from/:id" element={<OnBoardLender />} />
-            <Route path="list-of-lenders" element={<ListOfLender />} />
-            <Route path="social-icons" element={<SocialIcons />} />
-            <Route path="offer" element={<Offers />} />
-            <Route path="banners" element={<Banner />} />
-            <Route path="terms-conditions" element={<TermsAndConditions />} />
-            <Route path="privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="roles" element={<Roles />} />
-            <Route path="users" element={<Users />} />
-            <Route path="push-notification" element={<PushNotificationList/>} />
-            <Route path="push-notification/create" element={<PushNotificationCreate/>} />
-            <Route path="push-notification/:id" element={<PushNotificationCreate/>} />
-            <Route path="group" element={<GroupList/>}/>
-            <Route path="group/create" element={<GroupCreate/>}/>
-            <Route path="contact" element={<Contact />}/>
-            <Route path="utm-generate" element={<UTMGenerator />}/>
-            <Route path="all-leads" element={<AllLeads />}/>
-            <Route path="partner-leads" element={<PartnersLeads />}/>
-            <Route path="partner-detail/:id" element={<PartnerDetail />} />
-            <Route path="kyc-statistics" element={<GetKycStageStatistics />} />
-            <Route path="fetch-all-mf-users" element={<MFAllUsers />} />
-            <Route path="fetch-all-mf-loans" element={<MFAllLoans />} />
-            <Route path="fetch-mf-loans-summary" element={<MFLoansSummary />} />
-            <Route path="fetch-mf-loans/:id" element={<LoanDetail />} />
-            <Route path="fetch-all-mf-users/:id" element={<AllUserDetail />} />
-            <Route path="upload-app-metrics" element={<UploadAppMatrix />} />
-            <Route path="app-metrics" element={<AppMetricsDisplay />} />
-            <Route path="mis-zype-upload" element={<RawMisZypeUpload />} />
-            <Route path="mis-zype-data" element={<RawMisZypeData />} />
-            <Route path="internal-mf" element={<InternalMFData />} />
-            <Route path="internal-MF-Detail/:id" element={<InternalMFDetail />} />
-            <Route path="analytics-dashboard" element={<AnalyticsDashboard />} />
-            <Route path="executive-dashboard" element={<ExecutiveDashboard />} />
-            <Route path="lender-management-pro" element={<LenderManagementPro />} />
-            <Route path="app-statistics-pro" element={<AppStatisticsPro />} />
-            <Route path="mutual-funds-dashboard" element={<MutualFundsDashboard />} />
-            <Route path="internal-mf-dashboard" element={<InternalMFDashboard />} />
-            <Route path="active-users-dashboard" element={<ActiveUsersDashboard />} />
-            <Route path="active-users-list" element={<ActiveUsersList />} />
-            <Route path="active-user/:id" element={<ActiveUserDetail />} />
+
+            {/* Active Users */}
+            <Route path="active-users-dashboard" element={<PermissionGuard permission="active_users.view"><ActiveUsersDashboard /></PermissionGuard>} />
+            <Route path="active-users-list" element={<PermissionGuard permission="active_users.view"><ActiveUsersList /></PermissionGuard>} />
+            <Route path="active-user/:id" element={<PermissionGuard permission="active_users.view"><ActiveUserDetail /></PermissionGuard>} />
+
+            {/* Executive Dashboards */}
+            <Route path="executive-dashboard" element={<PermissionGuard permission="executive_dashboard.view"><ExecutiveDashboard /></PermissionGuard>} />
+            <Route path="lender-management-pro" element={<PermissionGuard permission="executive_dashboard.view"><LenderManagementPro /></PermissionGuard>} />
+            <Route path="app-statistics-pro" element={<PermissionGuard permission="executive_dashboard.view"><AppStatisticsPro /></PermissionGuard>} />
+            <Route path="mutual-funds-dashboard" element={<PermissionGuard permission="executive_dashboard.view"><MutualFundsDashboard /></PermissionGuard>} />
+            <Route path="internal-mf-dashboard" element={<PermissionGuard permission="executive_dashboard.view"><InternalMFDashboard /></PermissionGuard>} />
+
+            {/* Lead Management */}
+            <Route path="signin-user" element={<PermissionGuard permission="lead_management.view"><SigninUser /></PermissionGuard>} />
+            <Route path="leads" element={<PermissionGuard permission="lead_management.view"><Leads /></PermissionGuard>} />
+            <Route path="lead-detail/:id" element={<PermissionGuard permission="lead_management.view"><LeadDetail /></PermissionGuard>} />
+            <Route path="all-leads" element={<PermissionGuard permission="lead_management.view"><AllLeads /></PermissionGuard>} />
+            <Route path="partner-leads" element={<PermissionGuard permission="lead_management.view"><PartnersLeads /></PermissionGuard>} />
+            <Route path="partner-detail/:id" element={<PermissionGuard permission="lead_management.view"><PartnerDetail /></PermissionGuard>} />
+            <Route path="archive-users" element={<PermissionGuard permission="lead_management.delete"><ArchiveUsers /></PermissionGuard>} />
+            <Route path="contact" element={<PermissionGuard permission="lead_management.view"><Contact /></PermissionGuard>} />
+
+            {/* App Statistics */}
+            <Route path="app-metrics" element={<PermissionGuard permission="app_statistics.view"><AppMetricsDisplay /></PermissionGuard>} />
+            <Route path="upload-app-metrics" element={<PermissionGuard permission="app_statistics.create"><UploadAppMatrix /></PermissionGuard>} />
+            <Route path="kyc-statistics" element={<PermissionGuard permission="app_statistics.view"><GetKycStageStatistics /></PermissionGuard>} />
+
+            {/* Analytics */}
+            <Route path="analytics-dashboard" element={<PermissionGuard permission="analytics.view"><AnalyticsDashboard /></PermissionGuard>} />
+
+            {/* Internal Mutual Funds */}
+            <Route path="internal-mf" element={<PermissionGuard permission="internal_mutual_funds.view"><InternalMFData /></PermissionGuard>} />
+            <Route path="internal-MF-Detail/:id" element={<PermissionGuard permission="internal_mutual_funds.view"><InternalMFDetail /></PermissionGuard>} />
+
+            {/* Mutual Funds */}
+            <Route path="fetch-all-mf-users" element={<PermissionGuard permission="mutual_funds.view"><MFAllUsers /></PermissionGuard>} />
+            <Route path="fetch-all-mf-loans" element={<PermissionGuard permission="mutual_funds.view"><MFAllLoans /></PermissionGuard>} />
+            <Route path="fetch-mf-loans-summary" element={<PermissionGuard permission="mutual_funds.view"><MFLoansSummary /></PermissionGuard>} />
+            <Route path="fetch-mf-loans/:id" element={<PermissionGuard permission="mutual_funds.view"><LoanDetail /></PermissionGuard>} />
+            <Route path="fetch-all-mf-users/:id" element={<PermissionGuard permission="mutual_funds.view"><AllUserDetail /></PermissionGuard>} />
+
+            {/* Lender Management */}
+            <Route path="list-of-lenders" element={<PermissionGuard permission="lender_management.view"><ListOfLender /></PermissionGuard>} />
+            <Route path="on-borde-lender-from" element={<PermissionGuard permission="lender_management.create"><OnBoardLender /></PermissionGuard>} />
+            <Route path="on-borde-lender-from/:id" element={<PermissionGuard permission="lender_management.edit"><OnBoardLender /></PermissionGuard>} />
+
+            {/* Blogs */}
+            <Route path="blogs" element={<PermissionGuard permission="blogs.view"><Blogs /></PermissionGuard>} />
+            <Route path="blog/create" element={<PermissionGuard permission="blogs.create"><BlogCreate /></PermissionGuard>} />
+            <Route path="blog/:id" element={<PermissionGuard permission="blogs.edit"><BlogCreate /></PermissionGuard>} />
+
+            {/* Push Notification */}
+            <Route path="push-notification" element={<PermissionGuard permission="push_notification.view"><PushNotificationList /></PermissionGuard>} />
+            <Route path="push-notification/create" element={<PermissionGuard permission="push_notification.create"><PushNotificationCreate /></PermissionGuard>} />
+            <Route path="push-notification/:id" element={<PermissionGuard permission="push_notification.edit"><PushNotificationCreate /></PermissionGuard>} />
+            <Route path="group" element={<PermissionGuard permission="push_notification.view"><GroupList /></PermissionGuard>} />
+            <Route path="group/create" element={<PermissionGuard permission="push_notification.create"><GroupCreate /></PermissionGuard>} />
+
+            {/* UTM */}
+            <Route path="utm-generate" element={<PermissionGuard permission="utm.view"><UTMGenerator /></PermissionGuard>} />
+
+            {/* FAQ */}
+            <Route path="faq" element={<PermissionGuard permission="faq.view"><Faq /></PermissionGuard>} />
+
+            {/* MIS Raw */}
+            <Route path="mis-zype-upload" element={<PermissionGuard permission="mis_raw.create"><RawMisZypeUpload /></PermissionGuard>} />
+            <Route path="mis-zype-data" element={<PermissionGuard permission="mis_raw.view"><RawMisZypeData /></PermissionGuard>} />
+
+            {/* CMS Management */}
+            <Route path="press" element={<PermissionGuard permission="cms_management.view"><Press /></PermissionGuard>} />
+            <Route path="testimonials" element={<PermissionGuard permission="cms_management.view"><Testimonials /></PermissionGuard>} />
+            <Route path="banners" element={<PermissionGuard permission="cms_management.view"><Banner /></PermissionGuard>} />
+            <Route path="terms-conditions" element={<PermissionGuard permission="cms_management.edit"><TermsAndConditions /></PermissionGuard>} />
+            <Route path="privacy-policy" element={<PermissionGuard permission="cms_management.view"><PrivacyPolicy /></PermissionGuard>} />
+            <Route path="social-icons" element={<PermissionGuard permission="cms_management.view"><SocialIcons /></PermissionGuard>} />
+            <Route path="offer" element={<PermissionGuard permission="cms_management.view"><Offers /></PermissionGuard>} />
 
             {/* Admin Management */}
-            <Route path="admin/roles" element={<RoleList />} />
-            <Route path="admin/roles/create" element={<RoleCreate />} />
-            <Route path="admin/roles/:id" element={<RoleEdit />} />
-            <Route path="admin/roles/:id/edit" element={<RoleEdit />} />
-            <Route path="admin/users" element={<AdminUserList />} />
-            <Route path="admin/users/create" element={<AdminUserForm />} />
-            <Route path="admin/users/:id/edit" element={<AdminUserForm />} />
+            <Route path="roles" element={<PermissionGuard permission="admin_management.view"><Roles /></PermissionGuard>} />
+            <Route path="users" element={<PermissionGuard permission="admin_management.view"><Users /></PermissionGuard>} />
+            <Route path="admin/roles" element={<PermissionGuard permission="admin_management.view"><RoleList /></PermissionGuard>} />
+            <Route path="admin/roles/create" element={<PermissionGuard permission="admin_management.create"><RoleCreate /></PermissionGuard>} />
+            <Route path="admin/roles/:id" element={<PermissionGuard permission="admin_management.edit"><RoleEdit /></PermissionGuard>} />
+            <Route path="admin/roles/:id/edit" element={<PermissionGuard permission="admin_management.edit"><RoleEdit /></PermissionGuard>} />
+            <Route path="admin/users" element={<PermissionGuard permission="admin_management.view"><AdminUserList /></PermissionGuard>} />
+            <Route path="admin/users/create" element={<PermissionGuard permission="admin_management.create"><AdminUserForm /></PermissionGuard>} />
+            <Route path="admin/users/:id/edit" element={<PermissionGuard permission="admin_management.edit"><AdminUserForm /></PermissionGuard>} />
 
-          <Route path="*" element={<NotFound />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
           </Route>
         </Routes>
