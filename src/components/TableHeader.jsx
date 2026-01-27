@@ -105,33 +105,12 @@ export const blogColumn = ({ handleEdit }) => [
     },
   },
 ];
-export const faqColumn = ({ handleEdit, handleDelete }) => [
+export const faqColumn = ({ handleEdit, handleDelete, permissions = [] }) => [
   {
     header: 'Questions',
     accessorKey: 'question',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
-  // {
-  //   header: "Answers",
-  //   accessorKey: "answer",
-  //   cell: ({ getValue }) => (
-  //     <div
-  //       style={{
-  //         minWidth: "150px",
-  //         maxWidth: "200px",
-  //         whiteSpace: "nowrap",
-  //         overflow: "hidden",
-  //         textOverflow: "ellipsis",
-  //       }}
-  //       className="tooltip cursor-pointer "
-  //       data-tip={getValue() || "N/A"}
-  //       title={getValue() || "N/A"}
-  //     >
-  //       {getValue() || "N/A"}
-  //     </div>
-  //   ),
-  // },
-
   {
     header: 'Category',
     accessorKey: 'category_xid',
@@ -155,24 +134,38 @@ export const faqColumn = ({ handleEdit, handleDelete }) => [
     header: 'Actions',
     accessorKey: 'actions',
     cell: ({ row }) => {
+      // Permissions check
+      const canEdit = permissions.includes("faq.edit");
+      const canDelete = permissions.includes("faq.delete");
+
+      // Agar dono me se koi permission nahi hai toh Actions column khali dikhega
+      if (!canEdit && !canDelete) return <span className="text-gray-400">No Access</span>;
+
       return (
         <div className="flex space-x-3">
-          <button
-            onClick={() => handleEdit(row.original)}
-            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
-          >
-            <Edit2 size={20} />
-          </button>
-          <button
-            onClick={() => handleDelete(row.original)}
-            className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
-          >
-            <Trash2 size={20} />
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => handleEdit(row.original)}
+              className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+              title="Edit FAQ"
+            >
+              <Edit2 size={20} />
+            </button>
+          )}
+
+          {canDelete && (
+            <button
+              onClick={() => handleDelete(row.original)}
+              className="p-2 rounded-lg hover:bg-red-100 text-red-600 transition"
+              title="Delete FAQ"
+            >
+              <Trash2 size={20} />
+            </button>
+          )}
         </div>
       );
-    },
-  },
+    }
+  }
 ];
 export const testimonialsColumn = ({ handleEdit }) => [
   {
@@ -470,9 +463,9 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
   {
-    header: 'SN', 
+    header: 'SN',
     id: 'sn',
-    enableSorting: false, 
+    enableSorting: false,
     maxSize: 50,
     cell: ({ row, table }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
@@ -482,7 +475,7 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Name',
     accessorKey: 'name',
-    size: 120,  
+    size: 120,
     minSize: 120,
     maxSize: 120,
     cell: ({ row }) => {
@@ -516,8 +509,8 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
       return (
         <div
           className="truncate"
-          style={{ maxWidth: '150px' }} 
-          title={source} 
+          style={{ maxWidth: '150px' }}
+          title={source}
         >
           {source}
         </div>
@@ -764,7 +757,7 @@ export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
       );
     },
   },
- 
+
   {
     header: 'DOB',
     accessorKey: 'date_of_birth',
@@ -801,9 +794,9 @@ export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
 ];
 export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
   {
-    header: 'SN', 
+    header: 'SN',
     id: 'sn',
-    enableSorting: false, 
+    enableSorting: false,
     maxSize: 50,
     cell: ({ row, table }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
@@ -813,7 +806,7 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Name',
     accessorKey: 'name',
-    size: 120, 
+    size: 120,
     minSize: 120,
     maxSize: 120,
     cell: ({ row }) => {
@@ -833,7 +826,7 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'User ID',
     accessorKey: 'user_id',
-    size: 120, 
+    size: 120,
     minSize: 120,
     maxSize: 120,
     cell: ({ row }) => {
@@ -855,7 +848,7 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'loanCreation',
     cell: ({ row }) => {
       const loan_id = row.original?.loanCreation[0]?.loan_id || 'N/A';
-     
+
       return (
         <div
           className="truncate"
@@ -874,7 +867,7 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'phoneNumber',
     cell: ({ row }) => {
       const loan_id = row.original?.user?.phoneNumber || 'N/A';
-     
+
       return (
         <div
           className="truncate"
@@ -886,13 +879,13 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
       );
     },
   },
-  
+
   {
     header: 'Email',
     accessorKey: 'emailAddress',
     cell: ({ row }) => {
       const loan_id = row.original?.user?.emailAddress || 'N/A';
-     
+
       return (
         <div
           className="truncate"
@@ -909,7 +902,7 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
     accessorKey: 'disburshmentAmount',
     cell: ({ row }) => {
       const loan_id = row.original?.loanCreation[0]?.disburshmentAmount || 'N/A';
-     
+
       return (
         <div
           className="truncate"
@@ -980,7 +973,7 @@ export const MFAllLoansColumn = ({ handleEdit, handleDelete }) => [
     cell: ({ getValue }) => getValue() || 'N/A',
   },
 
- 
+
   {
     header: 'Start Date',
     accessorKey: 'start_date',
