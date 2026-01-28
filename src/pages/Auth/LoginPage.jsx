@@ -135,6 +135,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../custom-hooks/useAuth";
 import { Eye, EyeOff } from "lucide-react";
 import { adminLogin } from "../../api-services/Modules/AdminRoleApi";
+import { trackLogin, clearTrackingData } from "../../services/activityTrackingService";
 
 function LoginPage() {
   const { login, logout } = useAuth();
@@ -177,6 +178,10 @@ function LoginPage() {
       };
 
       login(token, userData);
+
+      // Track login activity
+      trackLogin();
+
       navigate("/");
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || "Login failed. Please try again.";
@@ -186,7 +191,10 @@ function LoginPage() {
     }
   };
 
-  useEffect(() => logout(), []);
+  useEffect(() => {
+    clearTrackingData();
+    logout();
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

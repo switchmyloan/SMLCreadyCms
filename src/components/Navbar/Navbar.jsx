@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../custom-hooks/useAuth";
 import { UserService } from "../../custom-hooks";
 import { useUpload } from "../../context/UploadContext";
+import { trackLogout } from "../../services/activityTrackingService";
 
 function Navbar({ onToggleSidebar }) {
   const navigate = useNavigate();
@@ -11,7 +12,9 @@ function Navbar({ onToggleSidebar }) {
   const getUser = UserService.getUser()
   console.log(getUser, "getUser>>>>>>>>")
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Track logout before clearing data
+    await trackLogout();
     logout(); // clear token + user
     navigate("/login"); // redirect
   };

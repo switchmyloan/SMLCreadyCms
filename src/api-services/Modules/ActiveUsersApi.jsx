@@ -61,3 +61,35 @@ export const getUserDetail = async (principalId) => {
     skipAdminAppend: true,
   });
 };
+
+// Get live users with their current pages
+export const getLiveUsers = async () => {
+  return Api().get(`/active-users/live`, {
+    skipAdminAppend: true,
+  });
+};
+
+// Get user journey for a specific user
+export const getUserJourney = async (principalId) => {
+  return Api().get(`/active-users/${principalId}/journey`, {
+    skipAdminAppend: true,
+  });
+};
+
+// Get funnel analytics
+// pages: array of page paths in order (e.g., ['login', 'register', 'profile', 'dashboard'])
+export const getFunnelAnalytics = async (funnelName, pages) => {
+  const pagesParam = pages.join(',');
+  return Api().get(`/active-users/funnel?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}`, {
+    skipAdminAppend: true,
+  });
+};
+
+// Get user-level funnel analytics with individual user progress
+// pages: array of page paths in order (e.g., ['login', 'register', 'profile', 'dashboard'])
+export const getUserFunnelAnalytics = async (funnelName, pages) => {
+  const pagesParam = pages.join(',');
+  return Api().get(`/active-users/funnel/users?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}`, {
+    skipAdminAppend: true,
+  });
+};

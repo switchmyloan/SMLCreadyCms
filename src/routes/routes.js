@@ -20,6 +20,26 @@ export const routes = [
     order: 2,
     permission: "active_users.view",
   },
+  {
+    path: "/live-users",
+    label: "Live Users",
+    icon: "Activity",
+    showInSidebar: true,
+    group: "Active Users",
+    groupOrder: -1,
+    order: 3,
+    permission: "active_users.view",
+  },
+  {
+    path: "/funnel-analytics",
+    label: "Funnel Analytics",
+    icon: "TrendingUp",
+    showInSidebar: true,
+    group: "Active Users",
+    groupOrder: -1,
+    order: 4,
+    permission: "active_users.view",
+  },
 
   // --- Executive Dashboards (Founder) ---
   {
