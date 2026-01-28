@@ -50,53 +50,8 @@ const Faq = () => {
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [globalFilter, setGlobalFilter] = useState('');
   const [categoryData, setCategoryData] = useState([]);
-  // const [module, setModule] = useState([
-  //   {
-  //     label: "Emergency Loan",
-  //     value: 'emergency_loan'
-  //   },
-  //   {
-  //     label: "Home Renovation Loan",
-  //     value: 'home_renovation_loan'
-  //   },
-  //   {
-  //     label: "Wedding Loan",
-  //     value: 'wedding_loan'
-  //   },
-  //   {
-  //     label: "Travel & Vacation Loan",
-  //     value: 'travel_vacation_loan'
-  //   },
-  //   {
-  //     label: "Instant Personal Loan",
-  //     value: 'instant_personal_loan'
-  //   },
-  //   {
-  //     label: "Debt Consolidation Loan",
-  //     value: 'debt_consolidation_loan'
-  //   },
-  //   {
-  //     label: "Credit Card",
-  //     value: 'credit_card'
-  //   },
-  //   {
-  //     label: "Blog",
-  //     value: 'blog'
-  //   },
-  //   {
-  //     label: "Faq",
-  //     value: 'faq'
-  //   },
-  //   {
-  //     label: "Home",
-  //     value: 'home'
-  //   },
-  //   {
-  //     label: "Other",
-  //     value: 'other'
-  //   },
-  // ]);
-
+  const userData = JSON.parse(localStorage.getItem("USER_DATA") || "{}");
+  const permissions = userData.permissions || [];
 
   const [module, setModule] = useState([
     { label: "Faq", value: "faq" },
@@ -504,7 +459,8 @@ const Faq = () => {
       <DataTable
         columns={faqColumn({
           handleEdit,
-          handleDelete
+          handleDelete,
+          permissions
         })}
         title="FAQ"
         data={data}

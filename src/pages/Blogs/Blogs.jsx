@@ -16,6 +16,12 @@ const Blogs = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteBlog, setDeleteBlog] = useState(null)
   const menuRef = useRef(null);
+  const userPermissions = JSON.parse(localStorage.getItem("USER_DATA") || "{}").permissions || [];
+
+  const canCreate = userPermissions.includes("blogs.create");
+  const canEdit = userPermissions.includes("blogs.edit");
+  const canDelete = userPermissions.includes("blogs.delete");
+  const canView = userPermissions.includes("blogs.view");
 
   const [query, setQuery] = useState({
     limit: 10,
@@ -102,6 +108,10 @@ const Blogs = () => {
     fetchBlogs();
   }, [query.page_no, query.search]);
 
+  if (!canView) {
+    return <div className="text-center mt-20 text-red-600 font-bold">You do not have permission to view blogs.</div>;
+  }
+
   return (
     <div className="text-gray-800 min-h-screen font-sans">
       <Toaster />
@@ -126,12 +136,13 @@ const Blogs = () => {
               onChange={handleSearch}
             />
           </div>
-          <button
+         {canCreate && ( <button
             className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md border-none cursor-pointer font-bold whitespace-nowrap transition-colors duration-200"
             onClick={handleCreate}
           >
             Create blog
           </button>
+         )}
         </div>
       </div>
       <div className="flex flex-col gap-4">
@@ -142,7 +153,7 @@ const Blogs = () => {
             <div
               key={blog.id}
               className="flex flex-col sm:flex-row bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-              onClick={() => handleEdit(blog?.id)}
+              onClick={() => canEdit && handleEdit(blog?.id)}
             >
               <div className="w-full sm:w-1/3 h-48 sm:h-40">
                 <img
@@ -189,7 +200,7 @@ const Blogs = () => {
                 </span>
 
                 {/* --- Actions Menu Start --- */}
-                <div className="relative mt-4" ref={activeMenu === blog.id ? menuRef : null}>
+               {(canEdit || canDelete) && ( <div className="relative mt-4" ref={activeMenu === blog.id ? menuRef : null}>
                   <button
                     className="bg-transparent border-none text-gray-500 hover:text-gray-700 text-xl cursor-pointer"
                     onClick={(e) => {
@@ -202,7 +213,7 @@ const Blogs = () => {
 
                   {activeMenu === blog.id && (
                     <div className="absolute right-0 bottom-8 w-28 bg-white border border-gray-200 rounded shadow-md z-50">
-                      <div
+                      {canEdit && (<div
                         className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer text-left"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -211,8 +222,8 @@ const Blogs = () => {
                         }}
                       >
                         Edit
-                      </div>
-                      <div
+                      </div>)}
+                      {canDelete && (<div
                         className="px-4 py-2 hover:bg-gray-100 text-sm cursor-pointer text-red-600 border-t border-gray-100 text-left"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -222,10 +233,12 @@ const Blogs = () => {
                       >
                         Delete
                       </div>
+                      )}
                     </div>
                   )}
                 </div>
-                {/* --- Actions Menu End --- */}
+                  )}
+         
               </div>
             </div>
           ))
