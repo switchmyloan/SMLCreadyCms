@@ -36,9 +36,35 @@ export const getActivityStats = async (mobileOnly = false) => {
   });
 };
 
-// Track user activity (for CMS tracking)
+// Track user activity (for CMS tracking) - Single event
 export const trackActivity = async (payload) => {
   return Api().post(`/active-users/activity/track`, payload, {
+    skipAdminAppend: true,
+  });
+};
+
+// ============================================================================
+// INSTAGRAM-LEVEL BATCH TRACKING - Optimized for high-scale
+// ============================================================================
+
+/**
+ * Batch track activities - Standard format
+ * Accepts multiple activities in a single request
+ * @param {Object} payload - { sessionId, deviceType, deviceModel, platform, appVersion, activities[] }
+ */
+export const trackActivityBatch = async (payload) => {
+  return Api().post(`/active-users/activity/batch`, payload, {
+    skipAdminAppend: true,
+  });
+};
+
+/**
+ * Batch track activities - V2 Compact format (Instagram-level)
+ * Ultra-compact payload for minimal bandwidth usage
+ * @param {Object} payload - Compact format { sid, dt, dm, pl, v, ev[] }
+ */
+export const trackActivityBatchV2 = async (payload) => {
+  return Api().post(`/active-users/activity/batch-v2`, payload, {
     skipAdminAppend: true,
   });
 };

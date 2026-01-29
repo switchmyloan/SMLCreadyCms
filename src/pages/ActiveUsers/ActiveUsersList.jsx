@@ -142,7 +142,7 @@ const ActiveUsersList = () => {
   const handleExport = () => {
     if (data.length === 0) return;
 
-    const headers = ['ID', 'Name', 'Email', 'Phone', 'Status', 'Activities', 'Last Active', 'Last Login'];
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'Device', 'Status', 'Activities', 'Last Active', 'Last Login'];
     const csvRows = [headers.join(',')];
 
     data.forEach(user => {
@@ -151,6 +151,7 @@ const ActiveUsersList = () => {
         `"${user.fullName || `${user.firstName} ${user.lastName}`}"`,
         user.emailAddress,
         user.phoneNumber,
+        user.deviceModel || '',
         user.isOnline ? 'Online' : 'Offline',
         user.activityCount || 0,
         user.lastActivityAt ? new Date(user.lastActivityAt).toISOString() : '',
@@ -226,6 +227,23 @@ const ActiveUsersList = () => {
           <span className="text-gray-600 text-sm">{row.original.phoneNumber}</span>
         ),
         size: 140,
+      },
+      {
+        accessorKey: 'deviceModel',
+        header: 'Device',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5">
+            {row.original.deviceModel ? (
+              <>
+                <Smartphone size={12} className="text-gray-400" />
+                <span className="text-gray-600 text-sm">{row.original.deviceModel}</span>
+              </>
+            ) : (
+              <span className="text-gray-400 text-sm">-</span>
+            )}
+          </div>
+        ),
+        size: 150,
       },
       {
         accessorKey: 'isOnline',
