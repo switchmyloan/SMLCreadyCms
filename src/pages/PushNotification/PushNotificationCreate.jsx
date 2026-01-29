@@ -69,11 +69,11 @@ export default function PushNotificationCreate() {
     const list = json?.data?.data || [];
 
     const formatted = list.map((item) => ({
-      value: item.id,       // must be `value`
-      label: item.groupName // must be `label`
+      value: item.id,
+      label: `${item.groupName} (${item.memberCount || 0} users)`
     }));
 
-    setOptions(formatted); // assuming setOptions is defined in your component
+    setOptions(formatted);
     return formatted;
   };
   const fetchTemplate = async () => {

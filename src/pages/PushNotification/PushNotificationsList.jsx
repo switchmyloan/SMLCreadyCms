@@ -36,10 +36,12 @@ export default function PushNotificationList() {
     const response = await sendPushNotification({ templateId: templateId });
 
     if (response?.data?.success) {
-      console.log(response?.data?.success)
-      ToastNotification.success(`Notification Send Successfully!`);
+      const { successCount, failureCount, totalUsers } = response.data;
+      ToastNotification.success(
+        `Notification sent! ${successCount}/${totalUsers} delivered${failureCount > 0 ? `, ${failureCount} failed` : ''}`
+      );
     } else {
-      ToastNotification.error(`Failed to add lender || 'Unknown error'}`);
+      ToastNotification.error(`Failed to send notification`);
     }
   }
 
