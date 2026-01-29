@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import ComparisonBadge from './ComparisonBadge';
 
 const colorMap = {
@@ -54,6 +55,7 @@ const StatCard = ({
   loading = false,
   period = 'MoM',
   subtitle,
+  to,
 }) => {
   const colors = colorMap[color] || colorMap.primary;
 
@@ -75,8 +77,8 @@ const StatCard = ({
     );
   }
 
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+  const cardContent = (
+    <>
       <div className="flex items-center justify-between mb-3">
         <p className="text-sm font-medium text-gray-500">{title}</p>
         {Icon && (
@@ -98,8 +100,20 @@ const StatCard = ({
           <span className="text-xs text-gray-400">{subtitle}</span>
         )}
       </div>
-    </div>
+    </>
   );
+
+  const cardClassName = `bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow ${to ? 'cursor-pointer' : ''}`;
+
+  if (to) {
+    return (
+      <Link to={to} className={cardClassName}>
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return <div className={cardClassName}>{cardContent}</div>;
 };
 
 export default StatCard;

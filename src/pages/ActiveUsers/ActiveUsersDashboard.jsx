@@ -150,6 +150,7 @@ const ActiveUsersDashboard = () => {
           color="success"
           format="number"
           subtitle="Active in last 5 min"
+          to="/live-users"
         />
         <StatCard
           title="Active Users (24h)"
@@ -158,6 +159,7 @@ const ActiveUsersDashboard = () => {
           color="primary"
           format="number"
           subtitle="Unique users today"
+          to="/active-users-list"
         />
         <StatCard
           title="Total Activities (24h)"
@@ -166,6 +168,7 @@ const ActiveUsersDashboard = () => {
           color="purple"
           format="number"
           subtitle="All activity types"
+          to="/active-users-list"
         />
         <StatCard
           title="Page Views (24h)"
@@ -174,47 +177,8 @@ const ActiveUsersDashboard = () => {
           color="cyan"
           format="number"
           subtitle="Screen visits"
+          to="/funnel-analytics"
         />
-      </div>
-
-      {/* Activity Breakdown Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Eye className="w-4 h-4 text-indigo-500" />
-            <span className="text-sm font-medium text-gray-600">Page Views</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.pageViews || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-medium text-gray-600">API Calls</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.apiCalls || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-medium text-gray-600">Heartbeats</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.heartbeats || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-medium text-gray-600">Actions</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.actions || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
       </div>
 
       {/* Charts Row */}
