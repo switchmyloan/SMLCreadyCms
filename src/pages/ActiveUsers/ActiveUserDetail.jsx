@@ -421,6 +421,12 @@ const ActiveUserDetail = () => {
                             )}
                             <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                               {activity.deviceType && <span>{activity.deviceType}</span>}
+                              {activity.deviceModel && (
+                                <>
+                                  <span className="text-gray-300">|</span>
+                                  <span className="text-indigo-600 font-medium">{activity.deviceModel}</span>
+                                </>
+                              )}
                               {activity.ipAddress && (
                                 <>
                                   <span className="text-gray-300">|</span>

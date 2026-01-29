@@ -23,6 +23,7 @@ import {
   Download,
   LayoutDashboard,
   SlidersHorizontal,
+  Smartphone,
 } from 'lucide-react';
 import { getActiveUsers, getLendersForFilter } from '../../api-services/Modules/ActiveUsersApi';
 import { Link, useNavigate } from 'react-router-dom';
@@ -55,6 +56,7 @@ const ActiveUsersList = () => {
     gender: '',
     employmentType: '',
     isOnline: '',
+    mobileOnly: false, // Default to show all users
   });
 
   // Fetch lenders for dropdown
@@ -117,6 +119,7 @@ const ActiveUsersList = () => {
       gender: '',
       employmentType: '',
       isOnline: '',
+      mobileOnly: false, // Default to show all users
     };
     setFilters(resetFilters);
     setGlobalFilter('');
@@ -310,6 +313,22 @@ const ActiveUsersList = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              const newFilters = { ...filters, mobileOnly: !filters.mobileOnly };
+              setFilters(newFilters);
+              fetchData(1, pagination.limit, newFilters);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filters.mobileOnly
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+          >
+            <Smartphone size={14} />
+            Mobile Only
+            <span className={`w-2 h-2 rounded-full ${filters.mobileOnly ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+          </button>
           <Link
             to="/active-users-dashboard"
             className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"

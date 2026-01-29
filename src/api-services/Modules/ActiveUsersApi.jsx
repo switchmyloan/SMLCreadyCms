@@ -19,6 +19,7 @@ export const getActiveUsers = async (page = 1, limit = 20, filters = {}) => {
   if (filters.gender) params.append('gender', filters.gender);
   if (filters.employmentType) params.append('employmentType', filters.employmentType);
   if (filters.isOnline !== undefined) params.append('isOnline', filters.isOnline);
+  if (filters.mobileOnly !== undefined) params.append('mobileOnly', filters.mobileOnly);
 
   const queryString = params.toString();
 
@@ -28,8 +29,9 @@ export const getActiveUsers = async (page = 1, limit = 20, filters = {}) => {
 };
 
 // Get activity statistics
-export const getActivityStats = async () => {
-  return Api().get(`/active-users/stats`, {
+export const getActivityStats = async (mobileOnly = false) => {
+  const params = mobileOnly ? '?mobileOnly=true' : '';
+  return Api().get(`/active-users/stats${params}`, {
     skipAdminAppend: true,
   });
 };
@@ -63,8 +65,9 @@ export const getUserDetail = async (principalId) => {
 };
 
 // Get live users with their current pages
-export const getLiveUsers = async () => {
-  return Api().get(`/active-users/live`, {
+export const getLiveUsers = async (mobileOnly = false) => {
+  const params = mobileOnly ? '?mobileOnly=true' : '';
+  return Api().get(`/active-users/live${params}`, {
     skipAdminAppend: true,
   });
 };
@@ -78,18 +81,20 @@ export const getUserJourney = async (principalId) => {
 
 // Get funnel analytics
 // pages: array of page paths in order (e.g., ['login', 'register', 'profile', 'dashboard'])
-export const getFunnelAnalytics = async (funnelName, pages) => {
+export const getFunnelAnalytics = async (funnelName, pages, mobileOnly = false) => {
   const pagesParam = pages.join(',');
-  return Api().get(`/active-users/funnel?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}`, {
+  const mobileParam = mobileOnly ? '&mobileOnly=true' : '';
+  return Api().get(`/active-users/funnel?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}${mobileParam}`, {
     skipAdminAppend: true,
   });
 };
 
 // Get user-level funnel analytics with individual user progress
 // pages: array of page paths in order (e.g., ['login', 'register', 'profile', 'dashboard'])
-export const getUserFunnelAnalytics = async (funnelName, pages) => {
+export const getUserFunnelAnalytics = async (funnelName, pages, mobileOnly = false) => {
   const pagesParam = pages.join(',');
-  return Api().get(`/active-users/funnel/users?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}`, {
+  const mobileParam = mobileOnly ? '&mobileOnly=true' : '';
+  return Api().get(`/active-users/funnel/users?name=${encodeURIComponent(funnelName)}&pages=${encodeURIComponent(pagesParam)}${mobileParam}`, {
     skipAdminAppend: true,
   });
 };

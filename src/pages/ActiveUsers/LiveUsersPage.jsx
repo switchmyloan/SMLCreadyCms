@@ -22,12 +22,13 @@ const LiveUsersPage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userJourney, setUserJourney] = useState(null);
   const [journeyLoading, setJourneyLoading] = useState(false);
+  const [mobileOnly, setMobileOnly] = useState(false); // Default to show all users
 
   const fetchLiveUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getLiveUsers();
+      const response = await getLiveUsers(mobileOnly);
       const data = response?.data?.data || [];
       setLiveUsers(data);
     } catch (err) {
@@ -36,7 +37,7 @@ const LiveUsersPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mobileOnly]);
 
   const fetchUserJourney = useCallback(async (userId) => {
     setJourneyLoading(true);
@@ -99,6 +100,18 @@ const LiveUsersPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileOnly(!mobileOnly)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              mobileOnly
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+          >
+            <Smartphone size={14} />
+            Mobile Only
+            <span className={`w-2 h-2 rounded-full ${mobileOnly ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+          </button>
           <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium">
             <Wifi size={14} />
             {onlineUsers.length} Online
@@ -167,8 +180,13 @@ const LiveUsersPage = () => {
                           <p className="text-xs text-gray-500">{user.phoneNumber}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-2">
                         {getDeviceIcon(user.deviceType)}
+                        {user.deviceModel && (
+                          <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
+                            {user.deviceModel}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-sm">

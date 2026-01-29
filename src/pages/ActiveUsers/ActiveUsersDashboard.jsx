@@ -11,7 +11,8 @@ import {
   Monitor,
   Smartphone,
   BarChart3,
-  PieChart
+  PieChart,
+  Filter
 } from 'lucide-react';
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
@@ -24,14 +25,15 @@ const ActiveUsersDashboard = () => {
   const [recentUsers, setRecentUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileOnly, setMobileOnly] = useState(false); // Default to show all users
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [statsRes, usersRes] = await Promise.allSettled([
-        getActivityStats(),
-        getActiveUsers(1, 10),
+        getActivityStats(mobileOnly),
+        getActiveUsers(1, 10, { mobileOnly }),
       ]);
 
       if (statsRes.status === 'fulfilled') {
@@ -52,7 +54,7 @@ const ActiveUsersDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mobileOnly]);
 
   useEffect(() => {
     fetchData();
@@ -123,6 +125,18 @@ const ActiveUsersDashboard = () => {
           <p className="text-sm text-gray-500 mt-1">Real-time user activity monitoring</p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileOnly(!mobileOnly)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              mobileOnly
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+          >
+            <Smartphone size={14} />
+            Mobile Only
+            <span className={`w-2 h-2 rounded-full ${mobileOnly ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+          </button>
           <Link
             to="/active-users-list"
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
