@@ -219,64 +219,6 @@ const ActiveUsersDashboard = () => {
         />
       </div>
 
-      {/* Live Users Section */}
-      {liveUsers.length > 0 && (
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Wifi className="w-5 h-5 text-emerald-600" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              </div>
-              <h3 className="text-base font-semibold text-gray-800">Live Users Right Now</h3>
-              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
-                {liveUsers.length} online
-              </span>
-            </div>
-            <Link
-              to="/live-users"
-              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
-            >
-              View All Live
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-            {liveUsers.map((user, index) => (
-              <div
-                key={user.userId || index}
-                className="bg-white rounded-lg p-3 border border-emerald-100 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  {user.profileImage ? (
-                    <img
-                      src={user.profileImage}
-                      alt={user.fullName}
-                      className="w-8 h-8 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <span className="text-xs font-semibold text-emerald-600">
-                        {user.fullName?.[0] || 'U'}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">
-                      {user.fullName || `User #${user.userId}`}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">{user.phoneNumber || '-'}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-emerald-600 bg-emerald-50 rounded px-2 py-1">
-                  <Navigation size={10} />
-                  <span className="truncate">{user.currentPage || 'Unknown'}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <TrendChart
