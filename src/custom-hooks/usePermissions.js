@@ -10,6 +10,9 @@ export function usePermissions() {
   // Get permissions array from user data
   const permissions = user?.permissions || [];
 
+  // Check if user is super admin - role can be object with slug or string
+  const isSuperAdmin = user?.role?.slug === 'super-admin' || user?.role === 'super-admin';
+
   /**
    * Check if user has a specific permission
    * @param {string} permissionCode - e.g., "active_users.view"
@@ -18,7 +21,7 @@ export function usePermissions() {
   const hasPermission = (permissionCode) => {
     if (!permissionCode) return true;
     // Super admin has all permissions
-    if (user?.role === 'super-admin') return true;
+    if (isSuperAdmin) return true;
     return permissions.includes(permissionCode);
   };
 
@@ -29,7 +32,7 @@ export function usePermissions() {
    */
   const hasAnyPermission = (permissionCodes) => {
     if (!permissionCodes || permissionCodes.length === 0) return true;
-    if (user?.role === 'super-admin') return true;
+    if (isSuperAdmin) return true;
     return permissionCodes.some(code => permissions.includes(code));
   };
 
@@ -40,7 +43,7 @@ export function usePermissions() {
    */
   const hasAllPermissions = (permissionCodes) => {
     if (!permissionCodes || permissionCodes.length === 0) return true;
-    if (user?.role === 'super-admin') return true;
+    if (isSuperAdmin) return true;
     return permissionCodes.every(code => permissions.includes(code));
   };
 
@@ -51,7 +54,7 @@ export function usePermissions() {
    */
   const canAccessModule = (moduleKey) => {
     if (!moduleKey) return true;
-    if (user?.role === 'super-admin') return true;
+    if (isSuperAdmin) return true;
     const viewPermission = `${moduleKey.toLowerCase()}.view`;
     return permissions.includes(viewPermission);
   };
@@ -62,6 +65,6 @@ export function usePermissions() {
     hasAnyPermission,
     hasAllPermissions,
     canAccessModule,
-    isSuperAdmin: user?.role === 'super-admin',
+    isSuperAdmin,
   };
 }
