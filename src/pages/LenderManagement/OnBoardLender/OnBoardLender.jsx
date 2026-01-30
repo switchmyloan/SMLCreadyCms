@@ -206,7 +206,11 @@ export default function LenderCreate() {
             setValue('features', lender?.features)
             setValue('sortedOrder', lender.sortedOrder ? String(lender.sortedOrder) : '');
             setValue('isActive', lender.isActive !== undefined ? lender.isActive : true);
-
+            // Line 209 ke baad ye add karo:
+            if (lender?.features && Array.isArray(lender.features)) {
+              const featuresList = lender.features.map(f => f.title); // ya jo bhi property name ho
+              setFeatures(featuresList);
+            }
             // Handle logo image
             if (lender.logo) {
               setBannerImageKey(lender.logo);
