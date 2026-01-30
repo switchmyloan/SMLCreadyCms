@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import ValidatedTextField from "../../components/Form/ValidatedTextField";
 import ValidatedTextArea from "../../components/Form/ValidatedTextArea";
-import Uploader from "../../components/Form/Uploader";
 import { createTemplate, updateTemplate } from "../../api-services/Modules/Leads";
 import ValidatedSingleSelect from "../../components/Form/ValidatedSingleSelect";
 import { useNavigate, useParams } from "react-router-dom";
@@ -32,29 +31,6 @@ export default function PushNotificationCreate() {
     title: '',
     message: ''
   });
-
-  const uploadImage = async (file) => {
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await fetch(
-      // "https://admin.cready.in/api/public/admin",
-      `${import.meta.env.VITE_API_URL}/public/admin`,
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    const json = await res.json();
-
-    if (!json?.success) {
-      throw new Error("Image upload failed");
-    }
-
-    return json.data.path; // 👈 IMPORTANT
-  };
-
 
   const fetchGroups = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/group`);
@@ -92,7 +68,7 @@ export default function PushNotificationCreate() {
     setValue('title', list?.title)
     setValue('group_xid', list?.group_xid)
     setValue('message', list?.message)
-    setValue('imageUrl', import.meta.env.VITE_API_URL + '/' + list?.imageUrl)
+    setValue('imageUrl', list?.imageUrl || '')
   };
 
 
@@ -102,20 +78,20 @@ export default function PushNotificationCreate() {
 
   const onSubmit = async (data) => {
     try {
-      let imagePath = null;
+      // Use imageUrl directly if provided (must be absolute URL)
+      const imageUrl = data.imageUrl?.trim() || null;
 
-      // Only upload if image is provided
-      if (data.imageUrl instanceof File) {
-        imagePath = await uploadImage(data.imageUrl);
-      } else if (data.imageUrl && typeof data.imageUrl === 'string') {
-        imagePath = data.imageUrl;
+      // Validate image URL format if provided
+      if (imageUrl && !imageUrl.startsWith('http://') && !imageUrl.startsWith('https://')) {
+        ToastNotification.error("Image URL must start with http:// or https://");
+        return;
       }
 
       const payload = {
         title: data.title,
         message: data.message,
         group_xid: data.group_xid,
-        ...(imagePath && { imageUrl: import.meta.env.VITE_IMAGE_URL + imagePath }),
+        ...(imageUrl && { imageUrl }),
       };
 
       const response = id
@@ -212,13 +188,17 @@ export default function PushNotificationCreate() {
           </div>
 
           <div>
-            <Uploader
+            <ValidatedTextField
               name="imageUrl"
               control={control}
-              label="Upload Image (Optional)"
               errors={errors}
+              label="Notification Image (Optional)"
+              placeholder="https://yourapp.com/image.png"
               rules={{}}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Enter a valid image URL starting with http:// or https://
+            </p>
           </div>
 
 
