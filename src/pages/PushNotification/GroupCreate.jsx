@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SelectableDataTable from "../../components/Table/SelectableDataTable";
 import { addGroupUsers, getInAppLeads } from "../../api-services/Modules/Leads";
-import { Calendar, ChevronDown, DollarSign, Filter, RotateCcw, Search, CheckSquare, Users } from "lucide-react";
+import { Calendar, ChevronDown, DollarSign, Filter, RotateCcw, Search, CheckSquare, Users, Copy, Check } from "lucide-react";
 
 // --- Helpers ---
 const normalizeGender = (gender) => {
@@ -58,6 +58,7 @@ export default function GroupCreate() {
     // Dropdown States
     const [openDropdown, setOpenDropdown] = useState(null);
     const [tempRange, setTempRange] = useState({ start: '', end: '' });
+    const [copiedToken, setCopiedToken] = useState(null);
 
     const { register, handleSubmit, setValue, reset } = useForm({
         defaultValues: { title: groupTitle || '' }
@@ -71,6 +72,39 @@ export default function GroupCreate() {
         { accessorKey: 'dateOfBirth', header: 'DOB' },
         { accessorKey: 'monthlyIncome', header: 'Income' },
         { accessorKey: 'createdAt', header: 'Created' },
+        {
+            accessorKey: 'fcmToken',
+            header: 'FCM Token',
+            cell: ({ row }) => {
+                const token = row.original.fcmToken;
+                const userId = row.original.id;
+                if (!token) return <span className="text-gray-400 text-xs">No Token</span>;
+
+                const handleCopy = async (e) => {
+                    e.stopPropagation();
+                    await navigator.clipboard.writeText(token);
+                    setCopiedToken(userId);
+                    setTimeout(() => setCopiedToken(null), 2000);
+                };
+
+                return (
+                    <div className="flex items-center gap-2">
+                        <span className="text-green-600 text-xs font-medium">✓ Has Token</span>
+                        <button
+                            onClick={handleCopy}
+                            className="p-1 hover:bg-gray-100 rounded transition-all"
+                            title="Copy FCM Token"
+                        >
+                            {copiedToken === userId ? (
+                                <Check size={14} className="text-green-500" />
+                            ) : (
+                                <Copy size={14} className="text-gray-400 hover:text-blue-500" />
+                            )}
+                        </button>
+                    </div>
+                );
+            }
+        },
     ];
 
     // --- Logic 1: Fetch Group Members and PRE-SELECT rows ---
@@ -107,7 +141,8 @@ export default function GroupCreate() {
                         gender: normalizeGender(u.gender).toUpperCase(),
                         dateOfBirth: dob || 'N/A',
                         age: calculateAge(dob),
-                        cleanIncome: u.monthlyIncome ? Number(u.monthlyIncome.toString().replace(/[^0-9.-]+/g, "")) : 0
+                        cleanIncome: u.monthlyIncome ? Number(u.monthlyIncome.toString().replace(/[^0-9.-]+/g, "")) : 0,
+                        fcmToken: u.DeviceAndBioMetric?.[0]?.FCMtoken || null
                     };
                 });
                 setData(formattedRows);

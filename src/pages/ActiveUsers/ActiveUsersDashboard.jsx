@@ -10,19 +10,17 @@ import {
   Smartphone,
   PieChart,
   Zap,
-  Navigation,
   Target
 } from 'lucide-react';
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
 import SkeletonLoader from '../../components/dashboard-pro/SkeletonLoader';
-import { getActivityStats, getActiveUsers, getLiveUsers } from '../../api-services/Modules/ActiveUsersApi';
+import { getActivityStats, getActiveUsers } from '../../api-services/Modules/ActiveUsersApi';
 import { Link } from 'react-router-dom';
 
 const ActiveUsersDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentUsers, setRecentUsers] = useState([]);
-  const [liveUsers, setLiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mobileOnly, setMobileOnly] = useState(false);
@@ -32,10 +30,9 @@ const ActiveUsersDashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, usersRes, liveRes] = await Promise.allSettled([
+      const [statsRes, usersRes] = await Promise.allSettled([
         getActivityStats(mobileOnly),
         getActiveUsers(1, 10, { mobileOnly }),
-        getLiveUsers(mobileOnly),
       ]);
 
       if (statsRes.status === 'fulfilled') {
@@ -46,11 +43,6 @@ const ActiveUsersDashboard = () => {
       if (usersRes.status === 'fulfilled') {
         const data = usersRes.value?.data?.data?.users || usersRes.value?.data?.users || [];
         setRecentUsers(data);
-      }
-
-      if (liveRes.status === 'fulfilled') {
-        const data = liveRes.value?.data?.data || liveRes.value?.data || [];
-        setLiveUsers(Array.isArray(data) ? data.slice(0, 5) : []);
       }
 
       if (statsRes.status === 'rejected' && usersRes.status === 'rejected') {
@@ -104,10 +96,13 @@ const ActiveUsersDashboard = () => {
 
   const topPagesData = useMemo(() => {
     if (!stats?.topPages) return [];
-    return stats.topPages.slice(0, 8).map(item => ({
-      page: item.path?.split('/').pop() || item.path || 'Unknown',
-      visits: item.count || 0,
-    }));
+    return stats.topPages
+      .filter(item => item.path !== 'app-init' && item.path !== '/')
+      .slice(0, 8)
+      .map(item => ({
+        page: item.path?.split('/').pop() || item.path || 'Unknown',
+        visits: item.count || 0,
+      }));
   }, [stats]);
 
   if (loading && !stats) {

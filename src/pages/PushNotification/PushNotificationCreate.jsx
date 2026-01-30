@@ -102,19 +102,20 @@ export default function PushNotificationCreate() {
 
   const onSubmit = async (data) => {
     try {
-      let imagePath = data.imageUrl;
+      let imagePath = null;
 
-      // 🟡 Agar image File hai tabhi upload karo
+      // Only upload if image is provided
       if (data.imageUrl instanceof File) {
-         imagePath = await uploadImage(data.imageUrl);
-        
+        imagePath = await uploadImage(data.imageUrl);
+      } else if (data.imageUrl && typeof data.imageUrl === 'string') {
+        imagePath = data.imageUrl;
       }
 
       const payload = {
         title: data.title,
         message: data.message,
         group_xid: data.group_xid,
-        imageUrl: import.meta.env.VITE_IMAGE_URL+imagePath, // 👈 sirf path jayega
+        ...(imagePath && { imageUrl: import.meta.env.VITE_IMAGE_URL + imagePath }),
       };
 
       const response = id
@@ -214,9 +215,9 @@ export default function PushNotificationCreate() {
             <Uploader
               name="imageUrl"
               control={control}
-              label="Upload Profile Image"
+              label="Upload Image (Optional)"
               errors={errors}
-              rules={{ required: "Profile image is required" }}
+              rules={{}}
             />
           </div>
 
