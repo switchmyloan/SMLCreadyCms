@@ -23,6 +23,7 @@ import {
   Download,
   LayoutDashboard,
   SlidersHorizontal,
+  Smartphone,
 } from 'lucide-react';
 import { getActiveUsers, getLendersForFilter } from '../../api-services/Modules/ActiveUsersApi';
 import { Link, useNavigate } from 'react-router-dom';
@@ -55,6 +56,7 @@ const ActiveUsersList = () => {
     gender: '',
     employmentType: '',
     isOnline: '',
+    mobileOnly: false, // Default to show all users
   });
 
   // Fetch lenders for dropdown
@@ -117,6 +119,7 @@ const ActiveUsersList = () => {
       gender: '',
       employmentType: '',
       isOnline: '',
+      mobileOnly: false, // Default to show all users
     };
     setFilters(resetFilters);
     setGlobalFilter('');
@@ -139,7 +142,7 @@ const ActiveUsersList = () => {
   const handleExport = () => {
     if (data.length === 0) return;
 
-    const headers = ['ID', 'Name', 'Email', 'Phone', 'Status', 'Activities', 'Last Active', 'Last Login'];
+    const headers = ['ID', 'Name', 'Email', 'Phone', 'Device', 'Status', 'Activities', 'Last Active', 'Last Login'];
     const csvRows = [headers.join(',')];
 
     data.forEach(user => {
@@ -148,6 +151,7 @@ const ActiveUsersList = () => {
         `"${user.fullName || `${user.firstName} ${user.lastName}`}"`,
         user.emailAddress,
         user.phoneNumber,
+        user.deviceModel || '',
         user.isOnline ? 'Online' : 'Offline',
         user.activityCount || 0,
         user.lastActivityAt ? new Date(user.lastActivityAt).toISOString() : '',
@@ -223,6 +227,23 @@ const ActiveUsersList = () => {
           <span className="text-gray-600 text-sm">{row.original.phoneNumber}</span>
         ),
         size: 140,
+      },
+      {
+        accessorKey: 'deviceModel',
+        header: 'Device',
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1.5">
+            {row.original.deviceModel ? (
+              <>
+                <Smartphone size={12} className="text-gray-400" />
+                <span className="text-gray-600 text-sm">{row.original.deviceModel}</span>
+              </>
+            ) : (
+              <span className="text-gray-400 text-sm">-</span>
+            )}
+          </div>
+        ),
+        size: 150,
       },
       {
         accessorKey: 'isOnline',
@@ -310,6 +331,22 @@ const ActiveUsersList = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              const newFilters = { ...filters, mobileOnly: !filters.mobileOnly };
+              setFilters(newFilters);
+              fetchData(1, pagination.limit, newFilters);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              filters.mobileOnly
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+          >
+            <Smartphone size={14} />
+            Mobile Only
+            <span className={`w-2 h-2 rounded-full ${filters.mobileOnly ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+          </button>
           <Link
             to="/active-users-dashboard"
             className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm"

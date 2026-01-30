@@ -1,4 +1,4 @@
-import { Edit2, Image, Trash2, Eye, Trash } from 'lucide-react';
+import { Edit2, Image, Trash2, Eye, Trash, Smartphone } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 import { FaUserPlus } from "react-icons/fa";
 
@@ -513,6 +513,27 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
           title={source}
         >
           {source}
+        </div>
+      );
+    }
+  },
+  {
+    header: 'Device',
+    accessorKey: 'deviceModel',
+    cell: info => {
+      const deviceModel = info.row.original?.DeviceAndBioMetric?.[0]?.deviceModel || null;
+      return (
+        <div className="flex items-center gap-1.5">
+          {deviceModel ? (
+            <>
+              <Smartphone size={12} className="text-gray-400" />
+              <span className="text-gray-600 text-sm truncate" style={{ maxWidth: '120px' }} title={deviceModel}>
+                {deviceModel}
+              </span>
+            </>
+          ) : (
+            <span className="text-gray-400 text-sm">-</span>
+          )}
         </div>
       );
     }

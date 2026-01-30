@@ -61,6 +61,8 @@ import InternalMFDashboard from './pages/DashboardPro/InternalMFDashboard';
 import ActiveUsersDashboard from './pages/ActiveUsers/ActiveUsersDashboard';
 import ActiveUsersList from './pages/ActiveUsers/ActiveUsersList';
 import ActiveUserDetail from './pages/ActiveUsers/ActiveUserDetail';
+import LiveUsersPage from './pages/ActiveUsers/LiveUsersPage';
+import FunnelAnalyticsPage from './pages/ActiveUsers/FunnelAnalyticsPage';
 
 function App() {
   return (
@@ -77,6 +79,8 @@ function App() {
             <Route path="active-users-dashboard" element={<PermissionGuard permission="active_users.view"><ActiveUsersDashboard /></PermissionGuard>} />
             <Route path="active-users-list" element={<PermissionGuard permission="active_users.view"><ActiveUsersList /></PermissionGuard>} />
             <Route path="active-user/:id" element={<PermissionGuard permission="active_users.view"><ActiveUserDetail /></PermissionGuard>} />
+            <Route path="live-users" element={<PermissionGuard permission="active_users.view"><LiveUsersPage /></PermissionGuard>} />
+            <Route path="funnel-analytics" element={<PermissionGuard permission="active_users.view"><FunnelAnalyticsPage /></PermissionGuard>} />
 
             {/* Executive Dashboards */}
             <Route path="executive-dashboard" element={<PermissionGuard permission="executive_dashboard.view"><ExecutiveDashboard /></PermissionGuard>} />

@@ -5,23 +5,24 @@ import { deleteBlogById, getBlogs } from "../../api-services/Modules/BlogsApi";
 import ToastNotification from "@components/Notification/ToastNotification";
 import { CiSearch, CiMenuKebab } from "react-icons/ci";
 import ConfirmModal from "../../components/ConfirmationationModal";
+import { usePermissions } from "../../custom-hooks/usePermissions";
 
 const BASE_URL = import.meta.env.VITE_IMAGE_URL;
 
 const Blogs = () => {
   const navigate = useNavigate();
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteBlog, setDeleteBlog] = useState(null)
   const menuRef = useRef(null);
-  const userPermissions = JSON.parse(localStorage.getItem("USER_DATA") || "{}").permissions || [];
 
-  const canCreate = userPermissions.includes("blogs.create");
-  const canEdit = userPermissions.includes("blogs.edit");
-  const canDelete = userPermissions.includes("blogs.delete");
-  const canView = userPermissions.includes("blogs.view");
+  const canCreate = isSuperAdmin || hasPermission("blogs.create");
+  const canEdit = isSuperAdmin || hasPermission("blogs.edit");
+  const canDelete = isSuperAdmin || hasPermission("blogs.delete");
+  const canView = isSuperAdmin || hasPermission("blogs.view");
 
   const [query, setQuery] = useState({
     limit: 10,

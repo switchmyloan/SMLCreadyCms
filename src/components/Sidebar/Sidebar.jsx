@@ -335,7 +335,8 @@ import {
   Users2,
   LucideMonitor,
   Camera,
-  File,Upload,
+  File,
+  Upload,
   LineChart,
   LayoutDashboard,
   Target,
@@ -343,15 +344,38 @@ import {
   TrendingUp,
   PieChart,
   Activity,
+  // New icons for updated routes
+  Zap,
+  Globe,
+  Link,
+  Archive,
+  BarChart2,
+  Wallet,
+  DollarSign,
+  CreditCard,
+  PenTool,
+  Bell,
+  Send,
+  Link2,
+  Database,
+  Quote,
+  Image,
+  Shield,
+  UserCog,
+  MessageCircle,
 } from "lucide-react";
 
 const ICONS = {
   Home, FileText, Users, HelpCircle, Newspaper, MessageSquare,
   UserPlus, UserMinus, UserCheck, Building2, BookOpen, ClipboardList,
-  ShieldCheck, Settings,Phone,Users2,LucideMonitor, Camera,
-  File,Upload,LineChart,
+  ShieldCheck, Settings, Phone, Users2, LucideMonitor, Camera,
+  File, Upload, LineChart,
   LayoutDashboard, Target, Smartphone, TrendingUp, PieChart,
   Activity,
+  // New icons
+  Zap, Globe, Link, Archive, BarChart2, Wallet, DollarSign, CreditCard,
+  PenTool, Bell, Send, Link2, Database, Quote, Image, Shield, UserCog,
+  MessageCircle,
 };
 
 
@@ -387,7 +411,13 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
     .filter((r) => r.showInSidebar)
     .reduce((acc, route) => {
       if (route.group) {
-        if (!acc[route.group]) acc[route.group] = { order: route.groupOrder, items: [] };
+        if (!acc[route.group]) {
+          acc[route.group] = {
+            order: route.groupOrder,
+            items: [],
+            groupIcon: route.groupIcon // Store the group icon
+          };
+        }
         acc[route.group].items.push(route);
       } else {
         acc[route.label] = route;
@@ -402,7 +432,15 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
       const orderB = valueB.items ? valueB.order : valueB.order;
       return orderA - orderB;
     })
-    .map(([key, value]) => (value.items ? [key, value.items.sort((a, b) => a.order - b.order)] : [key, value]));
+    .map(([key, value]) => {
+      if (value.items) {
+        return [key, {
+          items: value.items.sort((a, b) => a.order - b.order),
+          groupIcon: value.groupIcon
+        }];
+      }
+      return [key, value];
+    });
 
   // Dropdown toggle
   const handleGroupClick = (groupName, items) => {
@@ -466,27 +504,33 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
       {/* Nav Links */}
       <ul className="mt-6 flex-1 px-3 overflow-y-auto">
         {sortedGroupedRoutes.map(([key, value]) => {
-          if (Array.isArray(value)) {
-            // Group
-            const groupIcon = ICONS[value[0].icon] || HelpCircle;
+          if (value.items) {
+            // Group with items
+            const items = value.items;
+            const GroupIcon = ICONS[value.groupIcon] || ICONS[items[0]?.icon] || HelpCircle;
             return (
               <li key={key} className="mb-2 relative">
                 <button
                   ref={(el) => (buttonRefs.current[key] = el)}
-                  onClick={() => handleGroupClick(key, value)}
+                  onClick={() => handleGroupClick(key, items)}
                   className={`w-full flex items-center justify-between px-2 py-2 rounded-lg transition-all duration-200 font-semibold ${openGroup === key && !collapsed ? "bg-purple-100 text-purple-700" : "text-gray-700 hover:bg-purple-50 hover:text-purple-700"}`}
-                  title={collapsed ? `${key} (${value.length})` : ""}
+                  title={collapsed ? `${key} (${items.length})` : ""}
                 >
                   <div className="flex items-center gap-2">
-                    {groupIcon && React.createElement(groupIcon, { size: 16 })}
+                    <GroupIcon size={16} />
                     {!collapsed && key}
                   </div>
-                  {!collapsed && <ChevronDown size={16} />}
+                  {!collapsed && (
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${openGroup === key ? "rotate-180" : ""}`}
+                    />
+                  )}
                 </button>
 
                 {openGroup === key && !collapsed && (
                   <ul className="ml-2 mt-1 space-y-1">
-                    {value.map((route) => {
+                    {items.map((route) => {
                       const SubIcon = ICONS[route.icon] || HelpCircle;
                       return (
                         <li key={route.path}>
@@ -523,6 +567,52 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
           }
         })}
       </ul>
+
+      {/* Collapsed Dropdown Menu */}
+      {dropdownData && collapsed && sidebarRef.current && (
+        <div
+          className="absolute bg-white border border-gray-200 rounded-lg shadow-xl p-3 dropdown-menu z-50"
+          style={{
+            top: buttonRefs.current[dropdownData.key]?.getBoundingClientRect().top - sidebarRef.current.getBoundingClientRect().top + sidebarRef.current.scrollTop,
+            left: buttonRefs.current[dropdownData.key]?.offsetWidth + 8 || 0,
+            minWidth: '200px',
+          }}
+        >
+          <h4 className="font-semibold text-gray-800 mb-2 pb-2 border-b border-gray-100">
+            {dropdownData.groupName}
+          </h4>
+          <ul className="space-y-1">
+            {dropdownData.items.map((route) => {
+              const SubIcon = ICONS[route.icon] || HelpCircle;
+              return (
+                <li key={route.path}>
+                  <NavLink
+                    to={route.path}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors duration-200 ${
+                        isActive
+                          ? "bg-purple-600 text-white shadow-sm"
+                          : "text-gray-600 hover:bg-purple-50 hover:text-purple-700"
+                      }`
+                    }
+                    onClick={() => setDropdownData(null)}
+                  >
+                    <SubIcon size={16} />
+                    {route.label}
+                  </NavLink>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Footer */}
+      {!collapsed && (
+        <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
+          © 2026 Cready CMS
+        </div>
+      )}
     </div>
   );
 }

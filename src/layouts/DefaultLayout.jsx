@@ -4,10 +4,14 @@ import Navbar from "../components/Navbar/Navbar";
 import Breadcrumb from "../components/BreadCrumb/BreadCrumb";
 import { Outlet } from "react-router-dom";
 import { UploadProvider } from "../context/UploadContext";
+import { useActivityTracking } from "../custom-hooks/useActivityTracking";
 
 function DefaultLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Track user activity (daily heartbeat + page views)
+  useActivityTracking(); 
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);

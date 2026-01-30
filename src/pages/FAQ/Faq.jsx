@@ -15,6 +15,7 @@ import { AddCategory } from '../../api-services/Modules/CategoryApi';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import ConfirmModal from '../../components/ConfirmationationModal';
+import { usePermissions } from '../../custom-hooks/usePermissions';
 
 // Yup validation schema
 const validationSchema = Yup.object().shape({
@@ -45,13 +46,16 @@ const debounce = (func, delay) => {
 };
 
 const Faq = () => {
-
+  const { hasPermission, isSuperAdmin } = usePermissions();
   const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [globalFilter, setGlobalFilter] = useState('');
   const [categoryData, setCategoryData] = useState([]);
-  const userData = JSON.parse(localStorage.getItem("USER_DATA") || "{}");
-  const permissions = userData.permissions || [];
+
+  // Build permissions object for faqColumn - super admin has all permissions
+  const permissions = isSuperAdmin
+    ? ['faq.view', 'faq.create', 'faq.edit', 'faq.delete']
+    : JSON.parse(localStorage.getItem("USER_DATA") || "{}").permissions || [];
 
   const [module, setModule] = useState([
     { label: "Faq", value: "faq" },

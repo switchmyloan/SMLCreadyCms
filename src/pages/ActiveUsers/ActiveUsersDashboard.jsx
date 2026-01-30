@@ -4,34 +4,38 @@ import {
   Activity,
   Eye,
   Clock,
-  TrendingUp,
   RefreshCw,
   Wifi,
   WifiOff,
-  Monitor,
   Smartphone,
-  BarChart3,
-  PieChart
+  PieChart,
+  Zap,
+  Navigation,
+  Target
 } from 'lucide-react';
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
 import SkeletonLoader from '../../components/dashboard-pro/SkeletonLoader';
-import { getActivityStats, getActiveUsers } from '../../api-services/Modules/ActiveUsersApi';
+import { getActivityStats, getActiveUsers, getLiveUsers } from '../../api-services/Modules/ActiveUsersApi';
 import { Link } from 'react-router-dom';
 
 const ActiveUsersDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentUsers, setRecentUsers] = useState([]);
+  const [liveUsers, setLiveUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [mobileOnly, setMobileOnly] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, usersRes] = await Promise.allSettled([
-        getActivityStats(),
-        getActiveUsers(1, 10),
+      const [statsRes, usersRes, liveRes] = await Promise.allSettled([
+        getActivityStats(mobileOnly),
+        getActiveUsers(1, 10, { mobileOnly }),
+        getLiveUsers(mobileOnly),
       ]);
 
       if (statsRes.status === 'fulfilled') {
@@ -44,45 +48,60 @@ const ActiveUsersDashboard = () => {
         setRecentUsers(data);
       }
 
+      if (liveRes.status === 'fulfilled') {
+        const data = liveRes.value?.data?.data || liveRes.value?.data || [];
+        setLiveUsers(Array.isArray(data) ? data.slice(0, 5) : []);
+      }
+
       if (statsRes.status === 'rejected' && usersRes.status === 'rejected') {
         setError('Failed to fetch data from server');
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect to server');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mobileOnly]);
 
   useEffect(() => {
     fetchData();
-    // Auto-refresh every 30 seconds
     const interval = setInterval(fetchData, 30000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
-  // Format activity breakdown for chart
+  useEffect(() => {
+    const timeInterval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timeInterval);
+  }, []);
+
   const activityBreakdownData = useMemo(() => {
     if (!stats?.activityBreakdown) return [];
     const { pageViews, apiCalls, heartbeats, actions } = stats.activityBreakdown;
     return [
-      { name: 'Page Views', value: pageViews || 0, color: '#6366f1' },
-      { name: 'API Calls', value: apiCalls || 0, color: '#8b5cf6' },
-      { name: 'Heartbeats', value: heartbeats || 0, color: '#10b981' },
-      { name: 'Actions', value: actions || 0, color: '#f59e0b' },
+      { name: 'Page Views', value: pageViews || 0, color: '#6366f1', icon: Eye },
+      { name: 'API Calls', value: apiCalls || 0, color: '#8b5cf6', icon: Zap },
+      { name: 'Heartbeats', value: heartbeats || 0, color: '#10b981', icon: Activity },
+      { name: 'Actions', value: actions || 0, color: '#f59e0b', icon: Target },
     ].filter(item => item.value > 0);
   }, [stats]);
 
-  // Format activity by hour for chart
   const activityByHourData = useMemo(() => {
-    if (!stats?.activityByHour) return [];
-    return stats.activityByHour.map(item => ({
-      hour: `${item.hour}:00`,
-      activities: item.count || 0,
+    const currentHour = currentTime.getHours();
+    const hourDataMap = new Map();
+    if (stats?.activityByHour) {
+      stats.activityByHour.forEach(item => {
+        hourDataMap.set(item.hour, item.count || 0);
+      });
+    }
+    return Array.from({ length: 24 }, (_, i) => ({
+      hour: `${i}:00`,
+      activities: hourDataMap.get(i) || 0,
+      isCurrentHour: i === currentHour,
     }));
-  }, [stats]);
+  }, [stats, currentTime]);
 
-  // Format top pages for chart
   const topPagesData = useMemo(() => {
     if (!stats?.topPages) return [];
     return stats.topPages.slice(0, 8).map(item => ({
@@ -120,9 +139,28 @@ const ActiveUsersDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Active Users Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Real-time user activity monitoring</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-sm text-gray-500">Real-time user activity monitoring</p>
+            <span className="text-xs text-gray-400">|</span>
+            <div className="flex items-center gap-1 text-sm text-indigo-600 font-medium">
+              <Clock size={14} />
+              {currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })}
+            </div>
+          </div>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setMobileOnly(!mobileOnly)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              mobileOnly
+                ? 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                : 'bg-gray-100 text-gray-600 border border-gray-200'
+            }`}
+          >
+            <Smartphone size={14} />
+            Mobile Only
+            <span className={`w-2 h-2 rounded-full ${mobileOnly ? 'bg-indigo-500' : 'bg-gray-400'}`} />
+          </button>
           <Link
             to="/active-users-list"
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
@@ -150,6 +188,7 @@ const ActiveUsersDashboard = () => {
           color="success"
           format="number"
           subtitle="Active in last 5 min"
+          to="/live-users"
         />
         <StatCard
           title="Active Users (24h)"
@@ -158,6 +197,7 @@ const ActiveUsersDashboard = () => {
           color="primary"
           format="number"
           subtitle="Unique users today"
+          to="/active-users-list"
         />
         <StatCard
           title="Total Activities (24h)"
@@ -166,6 +206,7 @@ const ActiveUsersDashboard = () => {
           color="purple"
           format="number"
           subtitle="All activity types"
+          to="/active-users-list"
         />
         <StatCard
           title="Page Views (24h)"
@@ -174,83 +215,37 @@ const ActiveUsersDashboard = () => {
           color="cyan"
           format="number"
           subtitle="Screen visits"
+          to="/funnel-analytics"
         />
-      </div>
-
-      {/* Activity Breakdown Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Eye className="w-4 h-4 text-indigo-500" />
-            <span className="text-sm font-medium text-gray-600">Page Views</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.pageViews || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-purple-500" />
-            <span className="text-sm font-medium text-gray-600">API Calls</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.apiCalls || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Activity className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-medium text-gray-600">Heartbeats</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.heartbeats || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
-        <div className="bg-white rounded-xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-4 h-4 text-amber-500" />
-            <span className="text-sm font-medium text-gray-600">Actions</span>
-          </div>
-          <p className="text-xl font-bold text-gray-900">
-            {(stats?.activityBreakdown?.actions || 0).toLocaleString('en-IN')}
-          </p>
-        </div>
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Activity by Hour */}
-        {activityByHourData.length > 0 && (
-          <TrendChart
-            title="Activity by Hour"
-            subtitle="User activity distribution throughout the day"
-            type="bar"
-            data={activityByHourData}
-            xAxisKey="hour"
-            dataKeys={[
-              { key: 'activities', name: 'Activities', color: '#6366f1' },
-            ]}
-            height="h-72"
-          />
-        )}
-
-        {/* Top Pages */}
-        {topPagesData.length > 0 && (
-          <TrendChart
-            title="Top Pages"
-            subtitle="Most visited screens in the app"
-            type="bar"
-            data={topPagesData}
-            xAxisKey="page"
-            dataKeys={[
-              { key: 'visits', name: 'Visits', color: '#10b981' },
-            ]}
-            height="h-72"
-          />
-        )}
+        <TrendChart
+          title={`Activity by Hour (Now: ${currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })})`}
+          subtitle="User activity distribution throughout the day (24h view)"
+          type="bar"
+          data={activityByHourData}
+          xAxisKey="hour"
+          dataKeys={[
+            { key: 'activities', name: 'Activities', color: '#6366f1' },
+          ]}
+          height="h-72"
+        />
+        <TrendChart
+          title="Top Pages"
+          subtitle="Most visited screens in the app"
+          type="bar"
+          data={topPagesData.length > 0 ? topPagesData : [{ page: 'No data', visits: 0 }]}
+          xAxisKey="page"
+          dataKeys={[
+            { key: 'visits', name: 'Visits', color: '#10b981' },
+          ]}
+          height="h-72"
+        />
       </div>
 
-      {/* Activity Breakdown Pie Chart */}
+      {/* Activity Breakdown */}
       {activityBreakdownData.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -258,23 +253,67 @@ const ActiveUsersDashboard = () => {
             <h3 className="text-base font-semibold text-gray-800">Activity Type Breakdown</h3>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {activityBreakdownData.map((item, index) => (
-              <div key={index} className="text-center">
-                <div
-                  className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-2"
-                  style={{ backgroundColor: `${item.color}20` }}
-                >
-                  <span className="text-lg font-bold" style={{ color: item.color }}>
+            {activityBreakdownData.map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <div key={index} className="text-center p-4 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div
+                    className="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-2"
+                    style={{ backgroundColor: `${item.color}15` }}
+                  >
+                    <IconComponent size={24} style={{ color: item.color }} />
+                  </div>
+                  <p className="text-2xl font-bold" style={{ color: item.color }}>
                     {((item.value / (stats?.totalActivities24h || 1)) * 100).toFixed(0)}%
-                  </span>
+                  </p>
+                  <p className="text-sm font-medium text-gray-700">{item.name}</p>
+                  <p className="text-xs text-gray-500">{item.value.toLocaleString('en-IN')}</p>
                 </div>
-                <p className="text-sm font-medium text-gray-700">{item.name}</p>
-                <p className="text-xs text-gray-500">{item.value.toLocaleString('en-IN')}</p>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link
+          to="/live-users"
+          className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-5 text-white hover:from-emerald-600 hover:to-teal-600 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <Wifi size={24} />
+            <div>
+              <p className="font-semibold">Live Users</p>
+              <p className="text-sm text-emerald-100">Real-time tracking</p>
+            </div>
+          </div>
+        </Link>
+        <Link
+          to="/funnel-analytics"
+          className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-5 text-white hover:from-indigo-600 hover:to-purple-600 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <Target size={24} />
+            <div>
+              <p className="font-semibold">Funnel Analytics</p>
+              <p className="text-sm text-indigo-100">Conversion tracking</p>
+            </div>
+          </div>
+        </Link>
+        <Link
+          to="/active-users-list"
+          className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-5 text-white hover:from-orange-600 hover:to-amber-600 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <Users size={24} />
+            <div>
+              <p className="font-semibold">All Users</p>
+              <p className="text-sm text-orange-100">Full user list</p>
+            </div>
+          </div>
+        </Link>
+      </div>
 
       {/* Recent Active Users */}
       <div className="bg-white rounded-xl border border-gray-100 p-5">
