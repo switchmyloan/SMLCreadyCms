@@ -55,8 +55,8 @@ const LiveUsersPage = () => {
 
   useEffect(() => {
     fetchLiveUsers();
-    // Auto-refresh every 10 seconds
-    const interval = setInterval(fetchLiveUsers, 10000);
+    // Auto-refresh every 15 seconds (balanced between real-time and API load)
+    const interval = setInterval(fetchLiveUsers, 15000);
     return () => clearInterval(interval);
   }, [fetchLiveUsers]);
 
