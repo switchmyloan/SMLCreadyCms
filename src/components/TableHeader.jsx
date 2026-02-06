@@ -512,13 +512,12 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     header: 'PlatForm',
     accessorKey: 'DeviceAndBioMetric',
     cell: info => {
-      console.log(info.row.original, "source");
-      const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
+      const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'WEB'; // optional chaining + fallback
       return (
         <div
           className="truncate"
-          style={{ maxWidth: '150px' }} 
-          title={source} 
+          style={{ maxWidth: '150px' }}
+          title={source}
         >
           {source}
         </div>
