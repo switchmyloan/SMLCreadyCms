@@ -86,11 +86,16 @@ function DataTable({
 
   activeIncomeFilter,
   incomeRanges,
-  onFilterByIncome 
+  onFilterByIncome,
+
+  // Server-side pagination props
+  pagination: externalPagination,
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [pagination, setPagination] = React.useState({ pageIndex: 0, pageSize: 10 });
+  const [pagination, setPagination] = React.useState(
+    externalPagination || { pageIndex: 0, pageSize: 10 }
+  );
   const [selectedGoTo, setSelectedGoTo] = React.useState(pagination.pageIndex + 1);
   const dropdownRef = useRef(null);
   const [showDateRangeInputs, setShowDateRangeInputs] = React.useState(false);
@@ -152,6 +157,31 @@ function DataTable({
     manualFiltering: true,
   });
 
+  // Sync with external pagination prop (for server-side pagination)
+  // Only sync when external prop actually changes from parent (server response)
+  const isExternalSyncRef = React.useRef(false);
+
+  useEffect(() => {
+    if (externalPagination) {
+      // Mark that we're syncing from external to avoid triggering onPageChange
+      isExternalSyncRef.current = true;
+      setPagination(prev => {
+        if (prev.pageIndex !== externalPagination.pageIndex ||
+            prev.pageSize !== externalPagination.pageSize) {
+          return {
+            pageIndex: externalPagination.pageIndex,
+            pageSize: externalPagination.pageSize,
+          };
+        }
+        return prev;
+      });
+      // Reset the flag after state update
+      setTimeout(() => {
+        isExternalSyncRef.current = false;
+      }, 0);
+    }
+  }, [externalPagination?.pageIndex, externalPagination?.pageSize]);
+
   useEffect(() => {
     setPagination(prev => ({
       ...prev,
@@ -159,9 +189,14 @@ function DataTable({
     }));
   }, [totalDataCount]);
 
-  useEffect(() => {
-    onPageChange(pagination);
-  }, [pagination, onPageChange])
+  // Handler for user-initiated page changes
+  const handlePaginationChange = React.useCallback((newPagination) => {
+    setPagination(newPagination);
+    // Only call onPageChange for user-initiated changes
+    if (onPageChange && !isExternalSyncRef.current) {
+      onPageChange(newPagination);
+    }
+  }, [onPageChange]);
 
   useEffect(() => {
     if (onSearch) {
@@ -175,7 +210,8 @@ function DataTable({
   const handleGoToChange = (e) => {
     const page = Number(e.target.value);
     setSelectedGoTo(page);
-    setPagination((prev) => ({ ...prev, pageIndex: page - 1 }));
+    const newPagination = { ...pagination, pageIndex: page - 1 };
+    handlePaginationChange(newPagination);
   };
 
   // const handleDateRangeApply = () => {
@@ -537,7 +573,7 @@ function DataTable({
           {/* Pagination buttons */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: 0 }))}
+              onClick={() => handlePaginationChange({ ...pagination, pageIndex: 0 })}
               disabled={!table.getCanPreviousPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
              bg-white hover:bg-purple-50 hover:text-purple-700 
@@ -547,7 +583,7 @@ function DataTable({
               <ChevronsLeft size={16} />
             </button>
             <button
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
+              onClick={() => handlePaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}
               disabled={!table.getCanPreviousPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
              bg-white hover:bg-purple-50 hover:text-purple-700 
@@ -558,14 +594,14 @@ function DataTable({
             </button>
             <span className="text-gray-700 text-sm px-2">{pagination.pageIndex + 1} of {table.getPageCount()}</span>
             <button
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
+              onClick={() => handlePaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}
               disabled={!table.getCanNextPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <ChevronRight size={16} />
             </button>
             <button
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: table.getPageCount() - 1 }))}
+              onClick={() => handlePaginationChange({ ...pagination, pageIndex: table.getPageCount() - 1 })}
               disabled={!table.getCanNextPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >

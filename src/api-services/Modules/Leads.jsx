@@ -22,8 +22,12 @@ export const getPartnerLeads = async () => {
         }
     )
 };
-export const getAllLeads = async () => {
-    return Api().get(`/leads/admin/all-leads`,
+export const getAllLeads = async (pageNo = 1, limit = 10) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', pageNo);
+    params.append('perPage', limit);
+
+    return Api().get(`/leads/admin/all-leads?${params.toString()}`,
         {
             skipAdminAppend: true,
         }

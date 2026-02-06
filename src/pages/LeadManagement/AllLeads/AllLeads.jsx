@@ -183,32 +183,45 @@ const AllLeads = () => {
 
   /* ========================= FETCH ========================= */
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async (page = 1, limit = 10) => {
     try {
       setLoading(true);
-      const response = await getAllLeads();
+      const response = await getAllLeads(page, limit);
 
       if (response?.data?.success) {
-        setRawData(response.data.data.rows || []);
+        const responseData = response.data.data;
+        setRawData(responseData.rows || []);
+        setData(responseData.rows || []);
+
+        // Set total from pagination response
+        setTotalDataCount(responseData.pagination?.total || 0);
 
         setSummaryMetrics({
-          totalLeads: response?.data?.data?.summary?.totalLeads || 10,
-          totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
-          todayLeads: response?.data?.data?.summary?.todayLeads,
-          dedupe: response?.data?.data?.summary?.dedupe,
+          totalLeads: responseData.pagination?.total || responseData.summary?.totalLeads || 0,
+          totalLoanAmount: responseData.summary?.totalLoanAmount || 0,
+          todayLeads: responseData.summary?.todayLeads || 0,
+          dedupe: responseData.summary?.dedupe || 0,
         });
+
+        // Update pagination state with server response
+        setPagination(prev => ({
+          ...prev,
+          pageIndex: (responseData.pagination?.currentPage || 1) - 1,
+          pageSize: responseData.pagination?.perPage || limit,
+        }));
       } else {
         ToastNotification.error("Failed to fetch leads");
       }
     } catch (err) {
+      console.error(err);
       ToastNotification.error("API Error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchLeads();
+    fetchLeads(1, pagination.pageSize);
   }, []);
 
   /* ========================= FILTERING ========================= */
@@ -306,13 +319,10 @@ const AllLeads = () => {
 
   /* ========================= PAGINATION ========================= */
 
+  // Apply local filters to fetched data (for current page filtering)
   useEffect(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const end = start + pagination.pageSize;
-
-    setData(filteredData.slice(start, end));
-    setTotalDataCount(filteredData.length);
-  }, [filteredData, pagination]);
+    setData(filteredData);
+  }, [filteredData]);
 
   /* ========================= HANDLERS ========================= */
 
@@ -322,7 +332,9 @@ const AllLeads = () => {
 
   const onPageChange = useCallback((pageInfo) => {
     setPagination(pageInfo);
-  }, []);
+    // Fetch new page from server (pageIndex is 0-based, API expects 1-based)
+    fetchLeads(pageInfo.pageIndex + 1, pageInfo.pageSize);
+  }, [fetchLeads]);
 
   const onSearchHandler = useCallback((term) => {
     setQuery(prev => ({ ...prev, search: term }));
@@ -615,7 +627,7 @@ const AllLeads = () => {
         onPageChange={onPageChange}
 
         onSearch={onSearchHandler}
-        onRefresh={fetchLeads}
+        onRefresh={() => fetchLeads(pagination.pageIndex + 1, pagination.pageSize)}
 
         onFilterByDate={onFilterByDate}
         activeFilter={query.filter_date}
