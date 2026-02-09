@@ -317,6 +317,7 @@ export const bannerColumn = ({ handleEdit, handleDelete }) => [
         </>
       )
     },
+    
   },
   {
     header: 'Status',

@@ -30,3 +30,23 @@ export const getComprehensiveAnalytics = async () => {
     skipAdminAppend: true
   })
 };
+
+// Lender Response Stats APIs
+export const getRejectionReasonsStats = async () => {
+  return Api().get(`/lender/admin/response/rejection-reasons`, {
+    skipAdminAppend: true
+  })
+};
+
+export const getRejectionReasonsByLender = async (lenderId) => {
+  const params = lenderId ? `?lenderId=${lenderId}` : '';
+  return Api().get(`/lender/admin/response/rejection-reasons-by-lender${params}`, {
+    skipAdminAppend: true
+  })
+};
+
+export const getLenderResponseStats = async () => {
+  return Api().get(`/lender/admin/response/stats`, {
+    skipAdminAppend: true
+  })
+};

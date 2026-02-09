@@ -1,15 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Send, CheckCircle, Clock, IndianRupee, Building2, RefreshCw } from 'lucide-react';
+import { Send, CheckCircle, Clock, IndianRupee, Building2, RefreshCw, AlertCircle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
 import SkeletonLoader from '../../components/dashboard-pro/SkeletonLoader';
-import { getComprehensiveAnalytics, getLenderWiseLeads } from '../../api-services/Modules/DashboardApi';
+import { getComprehensiveAnalytics, getLenderWiseLeads, getRejectionReasonsStats } from '../../api-services/Modules/DashboardApi';
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'];
 
 const LenderManagementPro = () => {
   const [analyticsData, setAnalyticsData] = useState(null);
+  const [rejectionReasons, setRejectionReasons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,9 +18,10 @@ const LenderManagementPro = () => {
     setLoading(true);
     setError(null);
     try {
-      const [analyticsRes, lenderRes] = await Promise.allSettled([
+      const [analyticsRes, lenderRes, rejectionRes] = await Promise.allSettled([
         getComprehensiveAnalytics(),
         getLenderWiseLeads(),
+        getRejectionReasonsStats(),
       ]);
 
       let lenders = [];
@@ -32,6 +34,12 @@ const LenderManagementPro = () => {
         if (Array.isArray(lenderWise) && lenderWise.length > 0 && lenders.length === 0) {
           setAnalyticsData(prev => ({ ...prev, lenders: lenderWise }));
         }
+      }
+
+      // Fetch rejection reasons from lender_responses table
+      if (rejectionRes.status === 'fulfilled') {
+        const data = rejectionRes.value?.data?.data || rejectionRes.value?.data || [];
+        setRejectionReasons(Array.isArray(data) ? data : []);
       }
 
       if (analyticsRes.status === 'rejected' && lenderRes.status === 'rejected') {
@@ -63,10 +71,22 @@ const LenderManagementPro = () => {
   const overallApprovalRate = totalLeadsSent > 0 ? ((totalApproved / totalLeadsSent) * 100) : 0;
   const activeLendersCount = lenders.filter(l => (l.totalLeads || 0) > 0).length;
 
-  // Rejection reasons from lead data (if available)
-  const rejectionData = useMemo(() => {
+  // Rejection reasons from lender_responses table (actual reasons)
+  const rejectionReasonsData = useMemo(() => {
+    if (!rejectionReasons.length) return [];
+    const total = rejectionReasons.reduce((sum, r) => sum + (r.count || 0), 0);
+    return rejectionReasons
+      .slice(0, 10) // Top 10 reasons
+      .map(r => ({
+        reason: r.reason || 'Unknown',
+        count: r.count || 0,
+        percentage: total > 0 ? ((r.count / total) * 100).toFixed(1) : 0,
+      }));
+  }, [rejectionReasons]);
+
+  // Rejection distribution by lender (fallback)
+  const rejectionByLenderData = useMemo(() => {
     if (totalRejected === 0) return [];
-    // Compute per-lender rejection share
     return lenders
       .filter(l => (l.rejected || 0) > 0)
       .map(l => ({
@@ -151,38 +171,84 @@ const LenderManagementPro = () => {
         />
       )}
 
-      {/* Two Column: Success Rate + Rejection Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {successRateData.length > 0 && (
-          <TrendChart
-            title="Success Rate by Lender"
-            subtitle="Approval percentage comparison"
-            type="bar"
-            data={successRateData}
-            xAxisKey="name"
-            dataKeys={[{ key: 'Success Rate', name: 'Success Rate %', color: '#6366f1' }]}
-            height="h-72"
-          />
-        )}
+      {/* Success Rate Chart */}
+      {successRateData.length > 0 && (
+        <TrendChart
+          title="Success Rate by Lender"
+          subtitle="Approval percentage comparison"
+          type="bar"
+          data={successRateData}
+          xAxisKey="name"
+          dataKeys={[{ key: 'Success Rate', name: 'Success Rate %', color: '#6366f1' }]}
+          height="h-72"
+        />
+      )}
 
-        {/* Rejection Distribution Pie */}
-        {rejectionData.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
-            <h4 className="text-base font-semibold text-gray-800 mb-1">Rejection Distribution</h4>
-            <p className="text-sm text-gray-500 mb-4">Rejected leads by lender</p>
+      {/* Two Column: Rejection Reasons + Rejection by Lender */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Rejection Reasons Pie (from message column) */}
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <h4 className="text-base font-semibold text-gray-800">Rejection Reasons</h4>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">Top reasons for lead rejection</p>
+          {rejectionReasonsData.length > 0 ? (
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={rejectionData}
+                    data={rejectionReasonsData}
                     dataKey="count"
                     nameKey="reason"
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
-                    label={({ reason, percentage }) => `${percentage}%`}
+                    label={({ percentage }) => `${percentage}%`}
                   >
-                    {rejectionData.map((_, i) => (
+                    {rejectionReasonsData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v, name) => [v.toLocaleString('en-IN'), name]}
+                    contentStyle={{ fontSize: 12 }}
+                  />
+                  <Legend
+                    wrapperStyle={{ fontSize: 10 }}
+                    formatter={(value) => value.length > 25 ? value.slice(0, 25) + '...' : value}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="h-64 flex items-center justify-center text-gray-400 text-sm">
+              No rejection data available
+            </div>
+          )}
+        </div>
+
+        {/* Rejection Distribution by Lender */}
+        {rejectionByLenderData.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-100 p-5">
+            <div className="flex items-center gap-2 mb-1">
+              <Building2 className="w-5 h-5 text-amber-500" />
+              <h4 className="text-base font-semibold text-gray-800">Rejections by Lender</h4>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">Rejected leads distribution by lender</p>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={rejectionByLenderData}
+                    dataKey="count"
+                    nameKey="reason"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ percentage }) => `${percentage}%`}
+                  >
+                    {rejectionByLenderData.map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
                   </Pie>
@@ -194,6 +260,48 @@ const LenderManagementPro = () => {
           </div>
         )}
       </div>
+
+      {/* Rejection Reasons Table */}
+      {rejectionReasonsData.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertCircle className="w-5 h-5 text-red-500" />
+            <h4 className="text-base font-semibold text-gray-800">Rejection Reasons Breakdown</h4>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-600">#</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-600">Reason</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-600">Count</th>
+                  <th className="text-right py-3 px-4 font-semibold text-gray-600">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rejectionReasonsData.map((item, i) => (
+                  <tr key={i} className="border-b border-gray-50 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-gray-400">{i + 1}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full"
+                          style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                        />
+                        <span className="font-medium text-gray-800">{item.reason}</span>
+                      </div>
+                    </td>
+                    <td className="text-right py-3 px-4 text-red-500 font-medium">
+                      {item.count.toLocaleString('en-IN')}
+                    </td>
+                    <td className="text-right py-3 px-4 text-gray-600">{item.percentage}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Performance Table */}
       {lenders.length > 0 && (
