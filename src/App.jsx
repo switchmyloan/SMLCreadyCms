@@ -72,7 +72,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route element={<ProtectedRoute />}>
           <Route element={<DefaultLayout />}>
-            <Route index element={<Home />} />
+            {/* <Route index element={<Home />} /> */}
+            <Route index element={<PermissionGuard permission="active_users.view"><ActiveUsersDashboard /></PermissionGuard>} />
             <Route path="about" element={<About />} />
 
             {/* Active Users */}
