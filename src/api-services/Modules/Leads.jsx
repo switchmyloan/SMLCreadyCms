@@ -54,7 +54,20 @@ export const getAllLeads = async () => {
 //     });
 // };
 
-export const getInAppLeads = async (pageNo, limit, globalFilter, gender, minIncome, maxIncome) => {
+export const getInAppLeads = async (
+    pageNo,
+    limit,
+    globalFilter,
+    gender,
+    minIncome,
+    maxIncome,
+    fromDate,
+    toDate,
+    minAge,
+    maxAge,
+    jobType,
+    type
+) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
 
@@ -65,13 +78,21 @@ export const getInAppLeads = async (pageNo, limit, globalFilter, gender, minInco
     if (limit) params.append('perPage', limit);
     if (globalFilter) params.append('search', globalFilter);
     if (gender) params.append('gender', gender);
-    // if (filter_date) params.append('type', filter_date);
+    if (type) {
+        params.append('type', type);
+    } else {
+        if (fromDate) params.append('fromDate', fromDate);
+        if (toDate) params.append('toDate', toDate);
+    }
     if (minIncome !== undefined && minIncome !== null) params.append('minIncome', Number(minIncome));
     if (maxIncome !== undefined && maxIncome !== null) params.append('maxIncome', Number(maxIncome));
+    if (minAge !== undefined && minAge !== null) params.append('minAge', Number(minAge));
+    if (maxAge !== undefined && maxAge !== null) params.append('maxAge', Number(maxAge));
+    if (jobType) params.append('jobType', jobType);
 
     const queryString = params.toString(); // Automatically encodes the values
 
-    return Api().get(`${baseUrl}?${queryString}`, {
+    return Api().get(`${baseUrl}${queryString ? `?${queryString}` : ''}`, {
         skipAdminAppend: true,
     });
 };

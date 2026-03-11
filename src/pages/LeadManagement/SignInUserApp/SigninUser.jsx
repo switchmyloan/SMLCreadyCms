@@ -10,14 +10,45 @@ import SummaryCards from '../../../components/SummaryCards';
 import ExportModal from '../../../components/ExportModal';
 import { leadsColumn } from '../../../components/TableHeader';
 
+const getDateParams = (query) => {
+  if (query.startDate && query.endDate) {
+    return {
+      fromDate: query.startDate,
+      toDate: query.endDate,
+      type: '',
+    };
+  }
 
-// ---------------- DEBOUNCE ----------------
-const debounce = (func, delay) => {
-  let timeoutId;
-  return (...args) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
+  if (query.filter_date === 'today') {
+    return {
+      fromDate: '',
+      toDate: '',
+      type: 'today',
+    };
+  }
+
+  if (query.filter_date === 'yesterday') {
+    return {
+      fromDate: '',
+      toDate: '',
+      type: 'yesterday',
+    };
+  }
+
+  return {
+    fromDate: '',
+    toDate: '',
+    type: '',
   };
+};
+
+const getTotalCount = (payload, rows = []) => {
+  return (
+    payload?.pagination?.total ??
+    payload?.pagination?.totalItems ??
+    payload?.count ??
+    rows.length
+  );
 };
 
 const exportToExcel = async (rawData) => {
@@ -44,9 +75,6 @@ const exportToExcel = async (rawData) => {
     { header: "Phone", key: "phone", width: 15 },
     { header: "Income", key: "income", width: 15 },
     { header: "Created At", key: "createdAt", width: 15 },
-    //  { header: "ipAddress", key: "ipAddress", width: 15 },
-    // { header: "creditConsentText", key: "creditConsentText", width: 15 },
-    // { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
@@ -76,9 +104,6 @@ const exportToExcel = async (rawData) => {
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
       income: item.income || item.monthlyIncome || 0,
-      // ipAddress: item.ipAddress,
-      // creditConsentText: item.creditConsentText,
-      // communicationConsentText: item.communicationConsentText,
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
@@ -93,31 +118,23 @@ const exportToExcel = async (rawData) => {
 
   saveAs(blob, "App_Leads_Report.xlsx");
 };
+
 const SignInUsers = () => {
   const navigate = useNavigate();
 
-  // ---------------- STATE ----------------
   const [data, setData] = useState([]);
+  const [rawData, setRawData] = useState([]);
+  const [serverSummary, setServerSummary] = useState(null);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
-  const [rawData, setRawData] = useState([]);
-
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10
+    pageSize: 10,
   });
-
-
-  // const [summaryMetrics, setSummaryMetrics] = useState({
-  //   totalUsers: 0,
-  //   totalLoanAmount: 0,
-  //   totalOffers: 0,
-  //   usersWithOffers: 0
-  // });
 
   const [query, setQuery] = useState({
     page_no: 1,
@@ -135,211 +152,138 @@ const SignInUsers = () => {
     jobType: '',
   });
 
-  // ---------------- FETCH DATA ----------------
-  const fetchBlogs = async () => {
+  const resetToFirstPage = useCallback(() => {
+    setPagination(prev =>
+      prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }
+    );
+  }, []);
+
+  const fetchInAppLeadPage = useCallback((activeQuery) => {
+    const { fromDate, toDate, type } = getDateParams(activeQuery);
+
+    return getInAppLeads(
+      activeQuery.page_no,
+      activeQuery.limit,
+      activeQuery.search,
+      activeQuery.gender,
+      activeQuery.minIncome,
+      activeQuery.maxIncome,
+      fromDate,
+      toDate,
+      activeQuery.minAge,
+      activeQuery.maxAge,
+      activeQuery.jobType,
+      type
+    );
+  }, []);
+
+  const fetchBlogs = useCallback(async (activeQuery) => {
     try {
       setLoading(true);
 
-      const response = await getInAppLeads();
+      const response = await fetchInAppLeadPage(activeQuery);
 
       if (response?.data?.success) {
-        setRawData(response.data.data.rows || []);
+        const payload = response?.data?.data || {};
+        const rows = payload?.rows || [];
 
-        // setSummaryMetrics({
-        //   totalUsers: response?.data?.data?.summary?.totalUsers || 10,
-        //   totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
-        //   totalOffers: response?.data?.data?.summary?.totalOffers,
-        //   usersWithOffers: response?.data?.data?.summary?.usersWithOffers,
-        // });
+        setData(rows);
+        setRawData(rows);
+        setServerSummary(payload?.summary || null);
+        setTotalDataCount(getTotalCount(payload, rows));
       } else {
+        setData([]);
+        setRawData([]);
+        setServerSummary(null);
+        setTotalDataCount(0);
         ToastNotification.error("Failed to fetch leads");
       }
-    } catch (err) {
+    } catch (error) {
       ToastNotification.error("API Error");
     } finally {
       setLoading(false);
     }
-  };
-
-
-
-  const filteredData = useMemo(() => {
-    let rows = [...rawData];
-
-    // 🔍 SEARCH
-    if (query.search) {
-      const term = query.search.toLowerCase();
-      rows = rows.filter(item =>
-        item.firstName?.toLowerCase().includes(term) ||
-        item.lastName?.toLowerCase().includes(term) ||
-        item.emailAddress?.toLowerCase().includes(term) ||
-        item.phoneNumber?.includes(term)
-      );
-    }
-
-    // 👤 GENDER
-    if (query.gender) {
-      rows = rows.filter(r => r.gender?.toLowerCase() === query.gender);
-    }
-
-    // 💰 INCOME
-    if (
-      query.minIncome !== undefined &&
-      query.maxIncome !== undefined
-    ) {
-      rows = rows.filter(item => {
-        const income = Number(
-          String(item.income || item.monthlyIncome || 0).replace(/,/g, '')
-        );
-        return income >= query.minIncome && income <= query.maxIncome;
-      });
-    }
-
-    // 📅 TODAY / YESTERDAY
-    if (query.filter_date) {
-      const today = new Date();
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-
-        if (query.filter_date === 'today') {
-          return created.toDateString() === today.toDateString();
-        }
-
-        if (query.filter_date === 'yesterday') {
-          return created.toDateString() === yesterday.toDateString();
-        }
-
-        return true;
-      });
-    }
-
-    // 📆 CUSTOM RANGE
-    if (query.startDate && query.endDate) {
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-        return (
-          created >= new Date(query.startDate) &&
-          created <= new Date(query.endDate)
-        );
-      });
-    }
-
-    // 🎂 DOB / AGE FILTER
-    if (
-      query.minAge !== undefined &&
-      query.maxAge !== undefined
-    ) {
-      rows = rows.filter(item => {
-        if (!item.dateOfBirth) return false;
-
-        const dob = new Date(item.dateOfBirth);
-        const ageDifMs = Date.now() - dob.getTime();
-        const ageDate = new Date(ageDifMs);
-        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-
-        return age >= query.minAge && age <= query.maxAge;
-      });
-    }
-
-    // 💼 JOB TYPE FILTER
-    if (query.jobType) {
-      rows = rows.filter(item =>
-        item.jobType?.toLowerCase() === query.jobType
-      );
-    }
-
-
-    return rows;
-  }, [rawData, query]);
-
+  }, [fetchInAppLeadPage]);
 
   useEffect(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const end = start + pagination.pageSize;
+    fetchBlogs(query);
+  }, [fetchBlogs, query]);
 
-    setData(filteredData.slice(start, end));
-    setTotalDataCount(filteredData.length);
-  }, [filteredData, pagination]);
-  // ---------------- EDIT ----------------
-  const handleEdit = (row) => {
+  const handleEdit = useCallback((row) => {
     navigate(`/lead-detail/${row?.id}`, {
       state: { lead: row }
     });
-  };
+  }, [navigate]);
 
-  // ---------------- PAGINATION ----------------
   const onPageChange = useCallback((pageInfo) => {
-    setPagination({
-      pageIndex: pageInfo.pageIndex,
-      pageSize: pageInfo.pageSize
-    });
+    setPagination(prev => (
+      prev.pageIndex === pageInfo.pageIndex && prev.pageSize === pageInfo.pageSize
+        ? prev
+        : {
+            pageIndex: pageInfo.pageIndex,
+            pageSize: pageInfo.pageSize,
+          }
+    ));
 
-    setQuery(prev => ({
-      ...prev,
-      page_no: pageInfo.pageIndex + 1,
-      limit: pageInfo.pageSize
-    }));
+    setQuery(prev => (
+      prev.page_no === pageInfo.pageIndex + 1 && prev.limit === pageInfo.pageSize
+        ? prev
+        : {
+            ...prev,
+            page_no: pageInfo.pageIndex + 1,
+            limit: pageInfo.pageSize,
+          }
+    ));
   }, []);
 
-  // ---------------- SEARCH ----------------
   const onSearchHandler = useCallback((term) => {
-    setQuery(prev => ({ ...prev, search: term }));
-    // setPagination(p => ({ ...p, pageIndex: 10 }));
-    setPagination({
-      pageIndex: 0,
-      pageSize: 10
-    });
-  }, []);
+    resetToFirstPage();
 
-  useEffect(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const end = start + pagination.pageSize;
+    setQuery(prev => (
+      prev.search === term && prev.page_no === 1
+        ? prev
+        : {
+            ...prev,
+            search: term,
+            page_no: 1,
+          }
+    ));
+  }, [resetToFirstPage]);
 
-    const slicedData = filteredData.slice(start, end);
+  const onFilterByDate = useCallback((type) => {
+    resetToFirstPage();
 
-    setData(slicedData);
-    setTotalDataCount(filteredData.length);
-  }, [filteredData, pagination]);
-
-  const debouncedSearch = useMemo(
-    () => debounce(onSearchHandler, 300),
-    []
-  );
-
-  // ---------------- DATE FILTER ----------------
-  const onFilterByDate = (type) => {
     setQuery(prev => ({
       ...prev,
       filter_date: prev.filter_date === type ? '' : type,
       startDate: null,
       endDate: null,
-      page_no: 1
+      page_no: 1,
     }));
-  };
+  }, [resetToFirstPage]);
 
-  const onFilterByRange = (range) => {
+  const onFilterByRange = useCallback((range) => {
+    resetToFirstPage();
+
     setQuery(prev => ({
       ...prev,
       startDate: range.startDate,
       endDate: range.endDate,
       filter_date: '',
-      page_no: 1
+      page_no: 1,
     }));
-  };
+  }, [resetToFirstPage]);
 
-  // ---------------- INCOME FILTER ----------------
-  const handleIncomeFilter = (value) => {
+  const handleIncomeFilter = useCallback((value) => {
     setActiveIncomeFilter(value);
+    resetToFirstPage();
 
     if (!value) {
       setQuery(prev => ({
         ...prev,
         minIncome: undefined,
         maxIncome: undefined,
-        page_no: 1
+        page_no: 1,
       }));
       return;
     }
@@ -350,18 +294,52 @@ const SignInUsers = () => {
       ...prev,
       minIncome: Number(min),
       maxIncome: Number(max),
-      page_no: 1
+      page_no: 1,
     }));
-  };
+  }, [resetToFirstPage]);
 
-  // ---------------- GENDER FILTER ----------------
   const handleGenderFilter = useCallback((gender) => {
+    resetToFirstPage();
+
     setQuery(prev => ({
       ...prev,
       gender,
-      page_no: 1
+      page_no: 1,
     }));
-  }, []);
+  }, [resetToFirstPage]);
+
+  const handleDobFilter = useCallback((value) => {
+    resetToFirstPage();
+
+    if (!value) {
+      setQuery(prev => ({
+        ...prev,
+        minAge: undefined,
+        maxAge: undefined,
+        page_no: 1,
+      }));
+      return;
+    }
+
+    const [min, max] = value.split('-');
+
+    setQuery(prev => ({
+      ...prev,
+      minAge: Number(min),
+      maxAge: Number(max),
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
+
+  const handleJobTypeFilter = useCallback((jobType) => {
+    resetToFirstPage();
+
+    setQuery(prev => ({
+      ...prev,
+      jobType,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
 
   const genderOptions = useMemo(() => [
     { label: 'Male', value: 'male' },
@@ -369,13 +347,12 @@ const SignInUsers = () => {
     { label: 'Other', value: 'other' }
   ], []);
 
-  // ---------------- DROPDOWNS ----------------
   const incomeRanges = [
     { label: 'All', value: '' },
-    { label: 'Less than ₹20,000', value: '0-20000' },
-    { label: '₹20,001 - ₹50,000', value: '20001-50000' },
-    { label: '₹50,001 - ₹1,00,000', value: '50001-100000' },
-    { label: 'Above ₹1,00,000', value: '100001-100000000' }
+    { label: 'Less than Rs 20,000', value: '0-20000' },
+    { label: 'Rs 20,001 - Rs 50,000', value: '20001-50000' },
+    { label: 'Rs 50,001 - Rs 1,00,000', value: '50001-100000' },
+    { label: 'Above Rs 1,00,000', value: '100001-100000000' }
   ];
 
   const dobRanges = [
@@ -393,35 +370,6 @@ const SignInUsers = () => {
     { label: 'Freelancer', value: 'freelancer' }
   ], []);
 
-  const handleDobFilter = useCallback((value) => {
-    if (!value) {
-      setQuery(prev => ({
-        ...prev,
-        minAge: undefined,
-        maxAge: undefined,
-        page_no: 1
-      }));
-      return;
-    }
-
-    const [min, max] = value.split('-');
-
-    setQuery(prev => ({
-      ...prev,
-      minAge: Number(min),
-      maxAge: Number(max),
-      page_no: 1
-    }));
-  }, []);
-
-  const handleJobTypeFilter = useCallback((jobType) => {
-    setQuery(prev => ({
-      ...prev,
-      jobType,
-      page_no: 1
-    }));
-  }, []);
-
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -431,7 +379,7 @@ const SignInUsers = () => {
       onChange: handleGenderFilter
     },
     {
-      key: 'jobType',                  // ✅ NEW
+      key: 'jobType',
       label: 'Job Type',
       activeValue: query.jobType,
       options: jobTypeOptions,
@@ -446,57 +394,89 @@ const SignInUsers = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, genderOptions, handleGenderFilter, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
+  ], [
+    dobRanges,
+    genderOptions,
+    handleDobFilter,
+    handleGenderFilter,
+    handleJobTypeFilter,
+    jobTypeOptions,
+    query.gender,
+    query.jobType,
+    query.maxAge,
+    query.minAge,
+  ]);
 
-  // ---------------- AUTO FETCH ----------------
-  useEffect(() => {
-    fetchBlogs();
+  const handleOpenExportModal = useCallback(() => {
+    setIsExportModalOpen(true);
   }, []);
 
-  const handleOpenExportModal = () => {
-    setIsExportModalOpen(true);
-  };
-
-  const handleCloseExportModal = () => {
+  const handleCloseExportModal = useCallback(() => {
     if (!isExporting) {
       setIsExportModalOpen(false);
     }
-  };
+  }, [isExporting]);
 
-  const filterDataByDate = (data, startDate, endDate) => {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+  const handleRefresh = useCallback(() => {
+    fetchBlogs(query);
+  }, [fetchBlogs, query]);
 
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate) => {
+    const exportQuery = {
+      ...query,
+      page_no: 1,
+      limit: 500,
+      filter_date: '',
+      startDate,
+      endDate,
+    };
 
-    return data.filter(item => {
-      if (!item.createdAt) return false;
-      const created = new Date(item.createdAt);
-      return created >= start && created <= end;
-    });
-  };
+    const collectedRows = [];
+    let currentPage = 1;
 
+    while (true) {
+      const response = await fetchInAppLeadPage({
+        ...exportQuery,
+        page_no: currentPage,
+      });
 
-  const handleExport = async ({ startDate, endDate, mode }) => {
+      if (!response?.data?.success) {
+        throw new Error('Failed to fetch export data');
+      }
+
+      const payload = response?.data?.data || {};
+      const rows = payload?.rows || [];
+
+      collectedRows.push(...rows);
+
+      const totalRows = getTotalCount(payload, collectedRows);
+
+      if (!rows.length || collectedRows.length >= totalRows || rows.length < exportQuery.limit) {
+        break;
+      }
+
+      currentPage += 1;
+    }
+
+    return collectedRows;
+  }, [fetchInAppLeadPage, query]);
+
+  const handleExport = async ({ startDate, endDate }) => {
     try {
       setIsExporting(true);
 
-      // 🔥 STEP 1: FILTER FRONTEND DATA
-      const filteredData = filterDataByDate(rawData, startDate, endDate);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate);
 
-      if (!filteredData.length) {
+      if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");
         return;
       }
 
-      // 🔥 STEP 2: EXCEL EXPORT (tumhara existing code)
-      await exportToExcel(filteredData);
+      await exportToExcel(exportRows);
 
       ToastNotification.success("Excel exported successfully");
       setIsExportModalOpen(false);
     } catch (error) {
-      console.error(error);
       ToastNotification.error("Export failed");
     } finally {
       setIsExporting(false);
@@ -504,22 +484,29 @@ const SignInUsers = () => {
   };
 
   const summaryMetrics = useMemo(() => {
-    const totalUsers = filteredData.length;
+    if (serverSummary) {
+      return {
+        totalUsers: Number(serverSummary?.totalUsers ?? totalDataCount) || 0,
+        totalLoanAmount: Number(serverSummary?.totalLoanAmount) || 0,
+        totalOffers: Number(serverSummary?.totalOffers) || 0,
+        usersWithOffers: Number(serverSummary?.usersWithOffers) || 0,
+      };
+    }
 
-    const totalLoanAmount = filteredData.reduce(
+    const totalUsers = totalDataCount || rawData.length;
+
+    const totalLoanAmount = rawData.reduce(
       (sum, item) =>
         sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
       0
     );
 
-    // 🔥 Total offers (jitne lender responses me isOffer = true)
-    const totalOffers = filteredData.reduce((count, item) => {
+    const totalOffers = rawData.reduce((count, item) => {
       const offers = item.lender_responses?.filter(lr => lr.isOffer)?.length || 0;
       return count + offers;
     }, 0);
 
-    // 🔥 Users with at least one offer
-    const usersWithOffers = filteredData.filter(item =>
+    const usersWithOffers = rawData.filter(item =>
       item.lender_responses?.some(lr => lr.isOffer)
     ).length;
 
@@ -529,8 +516,7 @@ const SignInUsers = () => {
       totalOffers,
       usersWithOffers
     };
-  }, [filteredData]);
-
+  }, [rawData, serverSummary, totalDataCount]);
 
   const dynamicMetrics = useMemo(() => [
     {
@@ -562,6 +548,7 @@ const SignInUsers = () => {
       bg: "bg-purple-50"
     }
   ], [summaryMetrics]);
+
   return (
     <>
       <Toaster />
@@ -578,36 +565,26 @@ const SignInUsers = () => {
       <DataTable
         columns={leadsColumn({ handleEdit })}
         title="Sign In Users"
-
         data={data}
         totalDataCount={totalDataCount}
-
         pagination={pagination}
         onPageChange={onPageChange}
         setPagination={setPagination}
-
         loading={loading}
-
-        onSearch={debouncedSearch}
-        onRefresh={fetchBlogs}
-
+        onSearch={onSearchHandler}
+        onRefresh={handleRefresh}
         onFilterByDate={onFilterByDate}
         activeFilter={query.filter_date}
-
         onFilterByRange={onFilterByRange}
         activeDateRange={{
           startDate: query.startDate,
           endDate: query.endDate
         }}
-
         dynamicFilters={dynamicFiltersArray}
-
         onFilterByIncome={handleIncomeFilter}
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
-
         onExport={handleOpenExportModal}
-
         onFilterByDob={handleDobFilter}
         dobRanges={dobRanges}
       />
