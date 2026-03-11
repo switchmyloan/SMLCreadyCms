@@ -1,5 +1,7 @@
 import { Edit2, Image, Trash2, Eye, Trash } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
+import React from 'react';
+import { getLocationFromPostalCode } from '../../utils/location'
 import { FaUserPlus } from "react-icons/fa";
 
 export const blogColumn = ({ handleEdit }) => [
@@ -520,6 +522,30 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
           title={source}
         >
           {source}
+        </div>
+      );
+    }
+  },
+  {
+    header: 'Pincode',
+    accessorKey: 'postalCode',
+    cell: ({ getValue }) => {
+      const postalCode = getValue();
+      const [location, setLocation] = React.useState('');
+
+      React.useEffect(() => {
+        if (postalCode) {
+          getLocationFromPostalCode(postalCode).then(setLocation);
+        }
+      }, [postalCode]);
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '150px' }}
+          title={location}
+        >
+          {location || 'N/A'}
         </div>
       );
     }

@@ -121,6 +121,10 @@ export default function Tabs() {
                                         <p className="text-sm font-medium text-gray-700">Monthly Income:</p>
                                         <p className="text-gray-700 font-medium">₹{Number(lead.monthlyIncome).toLocaleString()}</p>
                                     </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-700">Required Loan:</p>
+                                        <p className="text-gray-700 font-medium">₹{Number(lead?.requiredLoanAmount).toLocaleString()}</p>
+                                    </div>
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Biometric:</p>
