@@ -244,7 +244,6 @@
 //   );
 // }
 
-
 import { Controller } from "react-hook-form";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
@@ -253,11 +252,16 @@ import { useEffect } from "react";
 import TextAlign from "@tiptap/extension-text-align";
 import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
+import Code from "@tiptap/extension-code";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import { createLowlight } from "lowlight";
 import javascript from "highlight.js/lib/languages/javascript";
 import html from "highlight.js/lib/languages/xml";
 import css from "highlight.js/lib/languages/css";
+import { Table } from "@tiptap/extension-table";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableRow } from "@tiptap/extension-table-row";
 
 const lowlight = createLowlight();
 lowlight.register("js", javascript);
@@ -304,7 +308,8 @@ export default function RichTextEditor({ name, control, label, errors }) {
         const editor = useEditor({
           extensions: [
             StarterKit.configure({
-              heading: { levels: [1, 2] },
+              heading: { levels: [1, 2, 3, 4, 5] },
+              codeBlock: false,
             }),
             Link.configure({
               openOnClick: false,
@@ -323,8 +328,16 @@ export default function RichTextEditor({ name, control, label, errors }) {
             CodeBlockLowlight.configure({
               lowlight,
             }),
+            Code.configure(),
+            Table.configure({
+              resizable: true,
+            }),
+            TableRow.configure(),
+            TableHeader.configure(),
+            TableCell.configure(),
           ],
           content: field.value || "",
+          parseOptions: { preserveWhitespace: "full" },
           onUpdate: ({ editor }) => {
             field.onChange(editor.getHTML());
           },
@@ -333,7 +346,9 @@ export default function RichTextEditor({ name, control, label, errors }) {
         // Sync editor when loading edit data
         useEffect(() => {
           if (editor && field.value && editor.getHTML() !== field.value) {
-            editor.commands.setContent(field.value);
+            editor.commands.setContent(field.value, false, {
+              preserveWhitespace: "full", // 👈 add this
+            });
           }
         }, [field.value, editor]);
 
@@ -502,6 +517,13 @@ export default function RichTextEditor({ name, control, label, errors }) {
               </ToolbarButton>
 
               <ToolbarButton
+                onClick={() => editor.chain().focus().toggleCode().run()}
+                active={editor.isActive("code")}
+              >
+                Code
+              </ToolbarButton>
+
+              <ToolbarButton
                 onClick={() => editor.chain().focus().toggleCodeBlock().run()}
                 active={editor.isActive("codeBlock")}
               >
@@ -529,11 +551,61 @@ export default function RichTextEditor({ name, control, label, errors }) {
                 🖼 Image
               </ToolbarButton>
               <ToolbarButton
-  onClick={() => editor.chain().focus().deleteSelection().run()}
-  disabled={!editor.isActive("image")}
->
-  🗑 Remove Image
-</ToolbarButton>
+                onClick={() => editor.chain().focus().deleteSelection().run()}
+                disabled={!editor.isActive("image")}
+              >
+                🗑 Remove Image
+              </ToolbarButton>
+
+              <ToolbarButton
+                onClick={() =>
+                  editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+                }
+              >
+                Insert Table
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()}>
+                Add Column Before
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()}>
+                Add Column After
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()}>
+                Delete Column
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()}>
+                Add Row Before
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()}>
+                Add Row After
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()}>
+                Delete Row
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()}>
+                Delete Table
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().mergeCells().run()}>
+                Merge Cells
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().splitCell().run()}>
+                Split Cell
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderColumn().run()}>
+                Toggle Header Column
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderRow().run()}>
+                Toggle Header Row
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().toggleHeaderCell().run()}>
+                Toggle Header Cell
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().mergeOrSplit().run()}>
+                Merge or Split
+              </ToolbarButton>
+              <ToolbarButton onClick={() => editor.chain().focus().setCellAttribute('colspan', 2).run()}>
+                Set Cell Colspan
+              </ToolbarButton>
             </div>
 
             <div
@@ -544,13 +616,39 @@ export default function RichTextEditor({ name, control, label, errors }) {
               <EditorContent
                 editor={editor}
                 className="focus:outline-none max-w-none
-             [&_a]:text-[#6C47FF]
-             [&_a:hover]:text-[#4b2ecc]
-    [&_ul]:list-disc
-    [&_ul]:pl-6
-    [&_ol]:list-decimal
-    [&_ol]:pl-6
-    [&_li]:mb-1"
+   [&_a]:text-[#6C47FF]
+   [&_a:hover]:text-[#4b2ecc]
+   [&_ul]:list-disc
+   [&_ul]:pl-6
+   [&_ol]:list-decimal
+   [&_ol]:pl-6
+   [&_li]:mb-1
+   [&_pre]:bg-black
+   [&_pre]:text-white
+   [&_pre]:rounded-md
+
+   /* Table styles to match the example */
+   [&_table]:w-full
+   [&_table]:border-collapse
+   [&_table]:border
+   [&_table]:border-gray-400
+   [&_thead_tr]:bg-yellow-500
+   [&_thead_tr]:text-white
+   [&_th]:border
+   [&_th]:border-gray-300
+   [&_th]:p-3
+   [&_th]:font-bold
+   [&_th]:text-left
+   [&_td]:border
+   [&_td]:border-gray-300
+   [&_td]:p-3
+   [&_tbody_tr:nth-child(even)]:bg-yellow-50
+
+   [&_pre]:p-4
+   [&_pre]:overflow-x-auto
+   [&_pre_code]:text-white
+   [&_pre_code]:font-mono
+   [&_pre_code]:text-sm"
               />
             </div>
 

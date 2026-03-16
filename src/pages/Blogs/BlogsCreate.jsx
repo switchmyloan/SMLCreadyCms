@@ -22,6 +22,12 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import RichTextEditor from "../../components/Form/RichTextEditor";
 
+function unescapeHtml(html) {
+  const txt = document.createElement("textarea");
+  txt.innerHTML = html;
+  return txt.value;
+}
+
 
 const LiveBlogPreview = ({ formData }) => {
   const BASE_URL = import.meta.env.VITE_IMAGE_URL;
@@ -53,7 +59,7 @@ const LiveBlogPreview = ({ formData }) => {
             {formData.title || "Your Blog Title Will Appear Here"}
           </h3>
           <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-            {formData.description || "Every year around this time, there is a familiar buzz in the air. News debates, office conversations..."}
+            <div dangerouslySetInnerHTML={{ __html: unescapeHtml(formData.description) }} />
           </p>
           <div className="mt-2 text-gray-400 text-sm font-medium">
             {new Date().toLocaleDateString("en-US")}
@@ -281,6 +287,7 @@ export default function BlogCreate() {
     fetchAuthors();
 
     if (isEdit && id != undefined) {
+        
       console.log("ander aya");
       const fetchBlog = async () => {
         try {
@@ -289,13 +296,13 @@ export default function BlogCreate() {
           if (res?.data?.success) {
             const blog = res?.data?.data;
 
-            let metadata = {};
-            try {
-              metadata = blog.metadata ? JSON.parse(blog.metadata) : {};
-            } catch (err) {
-              console.error("Metadata parse error:", err);
-              metadata = {};
-            }
+            // let metadata = {};
+            // try {
+            //   metadata = blog.metadata ? JSON.parse(blog.metadata) : {};
+            // } catch (err) {
+            //   console.error("Metadata parse error:", err);
+            //   metadata = {};
+            // }
 
             setValue("title", blog.title);
             setValue("metaTitle", blog.metaTitle);
@@ -304,11 +311,11 @@ export default function BlogCreate() {
             setValue("slug", blog.slug);
             setValue("content", blog.content);
             setValue("status", blog.status);
-            setValue("metadata.level", metadata.level || "");
-            setValue("metadata.category", metadata.category || "");
-            setValue("blog_category_xid", blog.categoryId || "");
-            setValue('author_xid', blog.author.id || '')
-            setValue("tags", blog.tags?.map((t) => t.id) || []);
+            // setValue("metadata.level", metadata.level || "");
+            // setValue("metadata.category", metadata.category || "");
+            setValue("blog_category_xid", blog?.categoryId || "");
+            setValue('author_xid', blog?.author?.id || '')
+            // setValue("tags", blog.tags?.map((t) => t.id) || []);
             const keywordArray = blog.metaKeywords
               ? blog.metaKeywords
                 .split(",")
@@ -319,7 +326,7 @@ export default function BlogCreate() {
               shouldValidate: true,
             });
 
-            if (blog.metaImage) {
+            if (blog.metaImage) { 
               const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
               console.log(fullImageUrl, "fullImageUrl");
               setValue("metaImage", fullImageUrl); // Set as string URL

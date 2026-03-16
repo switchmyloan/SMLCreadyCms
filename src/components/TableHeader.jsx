@@ -1,5 +1,7 @@
 import { Edit2, Image, Trash2, Eye, Trash, Smartphone } from 'lucide-react';
 const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
+import React from 'react';
+import { getLocationFromPostalCode } from '../../utils/location'
 import { FaUserPlus } from "react-icons/fa";
 
 export const blogColumn = ({ handleEdit }) => [
@@ -506,7 +508,7 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     header: 'PlatForm',
     accessorKey: 'DeviceAndBioMetric',
     cell: info => {
-      const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'N/A'; // optional chaining + fallback
+      const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'WEB'; // optional chaining + fallback
       return (
         <div
           className="truncate"
@@ -519,22 +521,25 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     }
   },
   {
-    header: 'Device',
-    accessorKey: 'deviceModel',
-    cell: info => {
-      const deviceModel = info.row.original?.DeviceAndBioMetric?.[0]?.deviceModel || null;
+    header: 'Pincode',
+    accessorKey: 'postalCode',
+    cell: ({ getValue }) => {
+      const postalCode = getValue();
+      const [location, setLocation] = React.useState('');
+
+      React.useEffect(() => {
+        if (postalCode) {
+          getLocationFromPostalCode(postalCode).then(setLocation);
+        }
+      }, [postalCode]);
+
       return (
-        <div className="flex items-center gap-1.5">
-          {deviceModel ? (
-            <>
-              <Smartphone size={12} className="text-gray-400" />
-              <span className="text-gray-600 text-sm truncate" style={{ maxWidth: '120px' }} title={deviceModel}>
-                {deviceModel}
-              </span>
-            </>
-          ) : (
-            <span className="text-gray-400 text-sm">-</span>
-          )}
+        <div
+          className="truncate"
+          style={{ maxWidth: '150px' }}
+          title={location}
+        >
+          {location || 'N/A'}
         </div>
       );
     }

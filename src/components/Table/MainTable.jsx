@@ -87,18 +87,32 @@ function DataTable({
   activeIncomeFilter,
   incomeRanges,
   onFilterByIncome,
-
-  // Server-side pagination props
-  pagination: externalPagination,
+  pagination: controlledPagination,
+  setPagination: setControlledPagination,
+  externalPagination
 }) {
   const [sorting, setSorting] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
-  const [pagination, setPagination] = React.useState(
-    externalPagination || { pageIndex: 0, pageSize: 10 }
+  const [internalPagination, setInternalPagination] = React.useState(
+    controlledPagination || { pageIndex: 0, pageSize: 10 }
   );
-  const [selectedGoTo, setSelectedGoTo] = React.useState(pagination.pageIndex + 1);
   const dropdownRef = useRef(null);
   const [showDateRangeInputs, setShowDateRangeInputs] = React.useState(false);
+  const isPaginationControlled = controlledPagination !== undefined;
+  const pagination = isPaginationControlled ? controlledPagination : internalPagination;
+  const [selectedGoTo, setSelectedGoTo] = React.useState(pagination.pageIndex + 1);
+
+  const updatePagination = React.useCallback((updater) => {
+    if (isPaginationControlled) {
+      const nextPagination =
+        typeof updater === 'function' ? updater(controlledPagination) : updater;
+
+      setControlledPagination?.(nextPagination);
+      return;
+    }
+
+    setInternalPagination(updater);
+  }, [controlledPagination, isPaginationControlled, setControlledPagination]);
 
   const formatDateForInput = (date) => {
     if (!date) return '';
@@ -148,12 +162,12 @@ function DataTable({
     },
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
-    onPaginationChange: setPagination,
+    onPaginationChange: updatePagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     manualPagination: true,
-    pageCount: Math.ceil(totalDataCount / pagination.pageSize),
+    pageCount: Math.max(1, Math.ceil((totalDataCount || 0) / pagination.pageSize)),
     manualFiltering: true,
   });
 
@@ -183,20 +197,8 @@ function DataTable({
   }, [externalPagination?.pageIndex, externalPagination?.pageSize]);
 
   useEffect(() => {
-    setPagination(prev => ({
-      ...prev,
-      totalDataCount: totalDataCount || 0
-    }));
-  }, [totalDataCount]);
-
-  // Handler for user-initiated page changes
-  const handlePaginationChange = React.useCallback((newPagination) => {
-    setPagination(newPagination);
-    // Only call onPageChange for user-initiated changes
-    if (onPageChange && !isExternalSyncRef.current) {
-      onPageChange(newPagination);
-    }
-  }, [onPageChange]);
+    onPageChange?.(pagination);
+  }, [pagination, onPageChange])
 
   useEffect(() => {
     if (onSearch) {
@@ -210,8 +212,7 @@ function DataTable({
   const handleGoToChange = (e) => {
     const page = Number(e.target.value);
     setSelectedGoTo(page);
-    const newPagination = { ...pagination, pageIndex: page - 1 };
-    handlePaginationChange(newPagination);
+    updatePagination((prev) => ({ ...prev, pageIndex: page - 1 }));
   };
 
   // const handleDateRangeApply = () => {
@@ -573,7 +574,7 @@ function DataTable({
           {/* Pagination buttons */}
           <div className="flex items-center gap-1">
             <button
-              onClick={() => handlePaginationChange({ ...pagination, pageIndex: 0 })}
+              onClick={() => updatePagination((prev) => ({ ...prev, pageIndex: 0 }))}
               disabled={!table.getCanPreviousPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
              bg-white hover:bg-purple-50 hover:text-purple-700 
@@ -583,7 +584,7 @@ function DataTable({
               <ChevronsLeft size={16} />
             </button>
             <button
-              onClick={() => handlePaginationChange({ ...pagination, pageIndex: pagination.pageIndex - 1 })}
+              onClick={() => updatePagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
               disabled={!table.getCanPreviousPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg 
              bg-white hover:bg-purple-50 hover:text-purple-700 
@@ -594,14 +595,14 @@ function DataTable({
             </button>
             <span className="text-gray-700 text-sm px-2">{pagination.pageIndex + 1} of {table.getPageCount()}</span>
             <button
-              onClick={() => handlePaginationChange({ ...pagination, pageIndex: pagination.pageIndex + 1 })}
+              onClick={() => updatePagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
               disabled={!table.getCanNextPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
               <ChevronRight size={16} />
             </button>
             <button
-              onClick={() => handlePaginationChange({ ...pagination, pageIndex: table.getPageCount() - 1 })}
+              onClick={() => updatePagination((prev) => ({ ...prev, pageIndex: table.getPageCount() - 1 }))}
               disabled={!table.getCanNextPage()}
               className="flex items-center justify-center p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
