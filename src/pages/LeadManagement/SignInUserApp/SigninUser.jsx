@@ -19,6 +19,8 @@ const getDateParams = (query) => {
     };
   }
 
+  
+
   if (query.filter_date === 'today') {
     return {
       fromDate: '',
