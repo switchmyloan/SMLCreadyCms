@@ -4,7 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { getLeads, getPartnerLeads } from '../../../api-services/Modules/Leads';
-import { leadsColumn } from '../../../components/TableHeader';
+import { partnerLeadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
@@ -540,7 +540,7 @@ const Leads = () => {
 
       <DataTable
         title="Leads"
-        columns={leadsColumn({ handleEdit })}
+        columns={partnerLeadsColumn({ handleEdit })}
         data={data}
         totalDataCount={totalDataCount}
         loading={loading}

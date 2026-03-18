@@ -499,141 +499,122 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
   },
 
 
-  // {
-  //   header: 'Pan Card',
-  //   accessorKey: 'panCard',
-  //   cell: ({ getValue }) => getValue() || 'N/A',
-  // },
-  // {
-  //   header: 'PlatForm',
-  //   accessorKey: 'DeviceAndBioMetric',
-  //   cell: info => {
-  //     const source = info.row.original?.DeviceAndBioMetric && info.row.original?.DeviceAndBioMetric[0]?.deviceType || 'WEB'; // optional chaining + fallback
-  //     return (
-  //       <div
-  //         className="truncate"
-  //         style={{ maxWidth: '150px' }}
-  //         title={source}
-  //       >
-  //         {source}
-  //       </div>
-  //     );
-  //   }
-  // },
-  // {
-  //   header: 'Pincode',
-  //   accessorKey: 'pincode',
-  //   cell: ({ getValue }) => {
-  //     const postalCode = getValue();
-  //     const [location, setLocation] = React.useState('');
-
-  //     React.useEffect(() => {
-  //       if (postalCode) {
-  //         getLocationFromPostalCode(postalCode).then(setLocation);
-  //       }
-  //     }, [postalCode]);
-
-  //     return (
-  //       <div
-  //         className="truncate"
-  //         style={{ maxWidth: '150px' }}
-  //         title={location}
-  //       >
-  //         {location || 'N/A'}
-  //       </div>
-  //     );
-  //   }
-  // },
   {
-    header: 'utm source',
-    id: 'utm_source',
-    cell: ({ row }) => row.original?.utm_header?.utm_source || 'N/A',
+    header: 'Pan Card',
+    accessorKey: 'panNumber',
+    cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
-    header: 'utm medium',
-    id: 'utm_medium',
-    cell: ({ row }) => row.original?.utm_header?.utm_medium || 'N/A',
+    header: 'PlatForm',
+    accessorKey: 'DeviceAndBioMetric',
+    cell: info => {
+      const source = info.row.original?.DeviceAndBioMetric?.[0]?.deviceType || 'WEB';
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '150px' }}
+          title={source}
+        >
+          {source}
+        </div>
+      );
+    }
   },
   {
-    header: 'utm campaign',
-    id: 'utm_campaign',
-    cell: ({ row }) => row.original?.utm_header?.utm_campaign || 'N/A',
+    header: 'Pincode',
+    accessorKey: 'postalCode',
+    cell: ({ getValue }) => {
+      const postalCode = getValue();
+      const [location, setLocation] = React.useState('');
+
+      React.useEffect(() => {
+        if (postalCode) {
+          getLocationFromPostalCode(postalCode).then(setLocation);
+        }
+      }, [postalCode]);
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '150px' }}
+          title={location}
+        >
+          {location || 'N/A'}
+        </div>
+      );
+    }
   },
-  // {
-  //   header: 'Job Type',
-  //   accessorKey: 'jobType',
-  //   cell: ({ getValue }) => {
-  //     const jobType = getValue();
+  {
+    header: 'Job Type',
+    accessorKey: 'jobType',
+    cell: ({ getValue }) => {
+      const jobType = getValue();
 
-  //     // Function to convert to Title Case
-  //     const toTitleCase = (str) => {
-  //       if (!str) return 'N/A';
-  //       return str
-  //         .toLowerCase()
-  //         .split(' ')
-  //         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-  //         .join(' ');
-  //     };
+      const toTitleCase = (str) => {
+        if (!str) return 'N/A';
+        return str
+          .toLowerCase()
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      };
 
-  //     const formattedJobType = toTitleCase(jobType);
+      const formattedJobType = toTitleCase(jobType);
+      const badgeStyles = {
+        'Salaried': 'bg-blue-100 text-blue-800',
+        'Self-Employed': 'bg-green-100 text-green-800',
+        'Self-employed': 'bg-green-100 text-green-800',
+        'Business Owner': 'bg-purple-100 text-purple-800',
+        'Freelancer': 'bg-yellow-100 text-yellow-800',
+        'Student': 'bg-indigo-100 text-indigo-800',
+        'Other': 'bg-gray-100 text-gray-800',
+      };
 
-  //     // Define a mapping of job types to badge styles
-  //     const badgeStyles = {
-  //       'Salaried': 'bg-blue-100 text-blue-800',
-  //       'Self-Employed': 'bg-green-100 text-green-800',
-  //       'Self-employed': 'bg-green-100 text-green-800',
-  //       'Business Owner': 'bg-purple-100 text-purple-800',
-  //       'Freelancer': 'bg-yellow-100 text-yellow-800',
-  //       'Student': 'bg-indigo-100 text-indigo-800',
-  //       'Other': 'bg-gray-100 text-gray-800',
-  //     };
+      const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
 
-  //     // Get the style for the formatted job type, defaulting to 'Other'
-  //     const style = badgeStyles[formattedJobType] || badgeStyles['Other'];
+      return (
+        <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
+          {formattedJobType}
+        </span>
+      );
+    },
+  },
+  {
+    header: 'Income',
+    accessorKey: 'monthlyIncome',
+    cell: ({ getValue }) => {
+      const income = getValue();
 
-  //     return (
-  //       <span className={`px-2 py-1 rounded-md text-xs font-medium ${style}`}>
-  //         {formattedJobType}
-  //       </span>
-  //     );
-  //   },
-  // },
-  // {
-  //   header: 'Income',
-  //   accessorKey: 'monthlyIncome',
-  //   cell: ({ getValue }) => {
-  //     const income = getValue();
+      if (income === null || income === undefined || isNaN(income)) {
+        return 'N/A';
+      }
 
-  //     if (income === null || income === undefined || isNaN(income)) {
-  //       return 'N/A';
-  //     }
+      const formattedIncome = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(income);
 
-  //     const formattedIncome = new Intl.NumberFormat('en-IN', {
-  //       style: 'currency',
-  //       currency: 'INR',
-  //       maximumFractionDigits: 0,
-  //     }).format(income);
+      return formattedIncome;
+    },
+  },
+  {
+    header: 'DOB',
+    accessorKey: 'dateOfBirth',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
 
-  //     return formattedIncome;
-  //   },
-  // },
-  // {
-  //   header: 'DOB',
-  //   accessorKey: 'dateOfBirth',
-  //   cell: ({ getValue }) => {
-  //     const dateStr = getValue();
-  //     if (!dateStr) {
-  //       return 'N/A';
-  //     }
+      const date = new Date(dateStr);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
 
-  //     const date = new Date(dateStr);
-  //     const day = String(date.getDate()).padStart(2, '0');
-  //     const month = String(date.getMonth() + 1).padStart(2, '0');
-  //     const year = date.getFullYear();
-
-  //     return `${day}/${month}/${year}`;
-  //   },
-  // },
+      return `${day}/${month}/${year}`;
+    },
+  },
   {
     header: 'Created At',
     accessorKey: 'createdAt',
@@ -654,6 +635,98 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
       const formatter = new Intl.DateTimeFormat('en-IN', options);
 
       // Format the date and replace the space with a forward slash
+      const formattedDate = formatter.format(date).replace(/ /g, ' ');
+
+      return (
+        <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200 text-gray-800">
+          {formattedDate}
+        </span>
+      );
+    },
+  },
+  {
+    header: 'Actions',
+    accessorKey: 'actions',
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="p-2 rounded-lg hover:bg-blue-100 text-blue-600 transition"
+          >
+            <Eye size={20} />
+          </button>
+        </div>
+      );
+    },
+  },
+];
+
+export const partnerLeadsColumn = ({ handleEdit }) => [
+  {
+    header: 'SN',
+    id: 'sn',
+    enableSorting: false,
+    maxSize: 50,
+    cell: ({ row, table }) => {
+      const { pageIndex, pageSize } = table.getState().pagination;
+      return (pageIndex * pageSize) + row.index + 1;
+    },
+  },
+  {
+    header: 'Name',
+    accessorKey: 'name',
+    size: 120,
+    minSize: 120,
+    maxSize: 120,
+    cell: ({ row }) => {
+      const firstName = row.original.firstName || '';
+      const lastName = row.original.lastName || '';
+      const fullName = `${firstName} ${lastName}`.trim() || 'N/A';
+
+      return (
+        <div
+          className="truncate"
+          style={{ maxWidth: '120px' }}
+          title={fullName}
+        >
+          {fullName}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'UTM Source',
+    id: 'utm_source',
+    cell: ({ row }) => row.original?.utm_header?.utm_source || 'N/A',
+  },
+  {
+    header: 'UTM Medium',
+    id: 'utm_medium',
+    cell: ({ row }) => row.original?.utm_header?.utm_medium || 'N/A',
+  },
+  {
+    header: 'UTM Campaign',
+    id: 'utm_campaign',
+    cell: ({ row }) => row.original?.utm_header?.utm_campaign || 'N/A',
+  },
+  {
+    header: 'Created At',
+    accessorKey: 'createdAt',
+    cell: ({ getValue }) => {
+      const dateStr = getValue();
+      if (!dateStr) {
+        return 'N/A';
+      }
+
+      const date = new Date(dateStr);
+      const options = {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      };
+
+      const formatter = new Intl.DateTimeFormat('en-IN', options);
       const formattedDate = formatter.format(date).replace(/ /g, ' ');
 
       return (
