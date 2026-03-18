@@ -103,16 +103,26 @@ function DataTable({
   const [selectedGoTo, setSelectedGoTo] = React.useState(pagination.pageIndex + 1);
 
   const updatePagination = React.useCallback((updater) => {
+    const currentPagination = isPaginationControlled
+      ? controlledPagination
+      : internalPagination;
     if (isPaginationControlled) {
       const nextPagination =
-        typeof updater === 'function' ? updater(controlledPagination) : updater;
+        typeof updater === 'function' ? updater(currentPagination) : updater;
 
       setControlledPagination?.(nextPagination);
+      onPageChange?.(nextPagination);
       return;
     }
 
     setInternalPagination(updater);
-  }, [controlledPagination, isPaginationControlled, setControlledPagination]);
+  }, [
+    controlledPagination,
+    internalPagination,
+    isPaginationControlled,
+    onPageChange,
+    setControlledPagination,
+  ]);
 
   const formatDateForInput = (date) => {
     if (!date) return '';
@@ -179,7 +189,11 @@ function DataTable({
     if (externalPagination) {
       // Mark that we're syncing from external to avoid triggering onPageChange
       isExternalSyncRef.current = true;
-      setPagination(prev => {
+      const syncPagination = isPaginationControlled
+        ? setControlledPagination
+        : setInternalPagination;
+
+      syncPagination?.(prev => {
         if (prev.pageIndex !== externalPagination.pageIndex ||
             prev.pageSize !== externalPagination.pageSize) {
           return {
@@ -194,11 +208,17 @@ function DataTable({
         isExternalSyncRef.current = false;
       }, 0);
     }
-  }, [externalPagination?.pageIndex, externalPagination?.pageSize]);
+  }, [
+    externalPagination?.pageIndex,
+    externalPagination?.pageSize,
+    isPaginationControlled,
+    setControlledPagination,
+  ]);
 
   useEffect(() => {
+    if (isPaginationControlled) return;
     onPageChange?.(pagination);
-  }, [pagination, onPageChange])
+  }, [isPaginationControlled, pagination, onPageChange])
 
   useEffect(() => {
     if (onSearch) {

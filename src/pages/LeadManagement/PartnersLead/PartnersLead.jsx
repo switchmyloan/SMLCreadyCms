@@ -107,6 +107,12 @@ const Leads = () => {
     pageSize: 10,
   });
 
+  const resetToFirstPage = useCallback(() => {
+    setPagination(prev =>
+      prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }
+    );
+  }, []);
+
   const [query, setQuery] = useState({
     search: '',
     filter_date: '',
@@ -151,6 +157,8 @@ const Leads = () => {
   ];
 
   const handleDobFilter = useCallback((value) => {
+    resetToFirstPage();
+
     if (!value) {
       setQuery(prev => ({
         ...prev,
@@ -170,16 +178,18 @@ const Leads = () => {
       maxAge: Number(max),
       page_no: 1
     }));
-  }, []);
+  }, [resetToFirstPage]);
 
 
   const handleJobTypeFilter = useCallback((jobType) => {
+    resetToFirstPage();
+
     setQuery(prev => ({
       ...prev,
       jobType,
       page_no: 1
     }));
-  }, []);
+  }, [resetToFirstPage]);
 
   /* ========================= FETCH ========================= */
 
@@ -339,6 +349,17 @@ const Leads = () => {
     setTotalDataCount(filteredData.length);
   }, [filteredData, pagination]);
 
+  useEffect(() => {
+    const totalPages = Math.max(1, Math.ceil(filteredData.length / pagination.pageSize));
+
+    if (pagination.pageIndex > totalPages - 1) {
+      setPagination(prev => ({
+        ...prev,
+        pageIndex: Math.max(totalPages - 1, 0),
+      }));
+    }
+  }, [filteredData.length, pagination.pageIndex, pagination.pageSize]);
+
   /* ========================= HANDLERS ========================= */
 
   const handleEdit = (row) => {
@@ -346,45 +367,46 @@ const Leads = () => {
   };
 
   const onPageChange = useCallback((pageInfo) => {
-    setPagination(pageInfo);
+    setPagination(prev => (
+      prev.pageIndex === pageInfo.pageIndex && prev.pageSize === pageInfo.pageSize
+        ? prev
+        : pageInfo
+    ));
   }, []);
 
   const onSearchHandler = useCallback((term) => {
+    resetToFirstPage();
     setQuery(prev => ({ ...prev, search: term }));
-    // setPagination(p => ({ ...p, pageIndex: 10 }));
-    setPagination({
-      pageIndex: 0,
-      pageSize: 10
-    });
-  }, []);
+  }, [resetToFirstPage]);
 
   const handleGenderFilter = useCallback((value) => {
+    resetToFirstPage();
     setQuery(prev => ({ ...prev, gender: value }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+  }, [resetToFirstPage]);
 
   const onFilterByDate = useCallback((type) => {
+    resetToFirstPage();
     setQuery(prev => ({
       ...prev,
       filter_date: prev.filter_date === type ? '' : type,
       startDate: null,
       endDate: null,
     }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+  }, [resetToFirstPage]);
 
   const onFilterByRange = useCallback((range) => {
+    resetToFirstPage();
     setQuery(prev => ({
       ...prev,
       startDate: range.startDate,
       endDate: range.endDate,
       filter_date: '',
     }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+  }, [resetToFirstPage]);
 
   const handleIncomeFilter = (value) => {
     setActiveIncomeFilter(value);
+    resetToFirstPage();
 
     if (!value) {
       setQuery(prev => ({ ...prev, minIncome: undefined, maxIncome: undefined }));
@@ -393,7 +415,6 @@ const Leads = () => {
 
     const [min, max] = value.split('-').map(Number);
     setQuery(prev => ({ ...prev, minIncome: min, maxIncome: max }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
   };
 
   const dynamicFiltersArray = useMemo(() => [
@@ -420,7 +441,7 @@ const Leads = () => {
       options: dobRanges,
       onChange: handleDobFilter
     }
-  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
+  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, handleDobFilter]);
 
   const filterDataByDate = (data, startDate, endDate) => {
     const start = new Date(startDate);
