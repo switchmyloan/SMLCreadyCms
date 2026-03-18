@@ -4,6 +4,20 @@ import React from 'react';
 import { getLocationFromPostalCode } from '../../utils/location'
 import { FaUserPlus } from "react-icons/fa";
 
+const parseBooleanLike = (value) => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') {
+    if (value === 1) return true;
+    if (value === 0) return false;
+  }
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+    if (normalizedValue === 'true' || normalizedValue === '1' || normalizedValue === 'active') return true;
+    if (normalizedValue === 'false' || normalizedValue === '0' || normalizedValue === 'inactive') return false;
+  }
+  return undefined;
+};
+
 export const blogColumn = ({ handleEdit }) => [
   {
     header: 'Title',
@@ -349,7 +363,7 @@ export const bannerColumn = ({ handleEdit, handleDelete }) => [
     },
   },
 ];
-export const lenderColumn = ({ handleEdit, handleDelete }) => [
+export const lenderColumn = ({ handleEdit, handleDelete, handleToggleStatus, togglingLenderIds = [] }) => [
   {
     header: 'SN', // Serial Number
     id: 'sn',
@@ -427,17 +441,25 @@ export const lenderColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Status',
     accessorKey: 'isActive',
-    cell: ({ getValue }) => {
-      const isActive = getValue(); // This returns a boolean: true or false
-
-      // Determine the text and badge color based on the boolean value
+    cell: ({ row }) => {
+      const isActive = parseBooleanLike(row.original?.isActive)
+        ?? parseBooleanLike(row.original?.status)
+        ?? false;
+      const lenderId = row.original?.id;
+      const isToggling = togglingLenderIds.includes(lenderId);
       const statusText = isActive ? 'Active' : 'Inactive';
       const badgeColorClass = isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
 
       return (
-        <span className={`px-2 py-1 rounded-md text-xs font-medium ${badgeColorClass}`}>
-          {statusText}
-        </span>
+        <button
+          type="button"
+          onClick={() => handleToggleStatus?.(row.original)}
+          disabled={!handleToggleStatus || isToggling}
+          className={`px-2 py-1 rounded-md text-xs font-medium transition ${badgeColorClass} ${handleToggleStatus ? 'hover:opacity-80' : ''} ${isToggling ? 'opacity-60 cursor-not-allowed' : ''}`}
+          title={handleToggleStatus ? 'Click to change status' : statusText}
+        >
+          {isToggling ? 'Updating...' : statusText}
+        </button>
       );
     },
   },
