@@ -98,7 +98,6 @@ const AllLeads = () => {
   const navigate = useNavigate();
 
   const [rawData, setRawData] = useState([]);      // 🔥 full data
-  const [data, setData] = useState([]);            // 🔥 paginated data
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
@@ -118,6 +117,8 @@ const AllLeads = () => {
   });
 
   const [query, setQuery] = useState({
+    page_no: 1,
+    limit: 10,
     search: '',
     filter_date: '',
     startDate: null,
@@ -125,7 +126,9 @@ const AllLeads = () => {
     gender: '',
     minIncome: undefined,
     maxIncome: undefined,
-        jobType: '',
+    minAge: undefined,
+    maxAge: undefined,
+    jobType: '',
   });
 
   /* ========================= OPTIONS ========================= */
@@ -198,7 +201,6 @@ const AllLeads = () => {
       if (response?.data?.success) {
         const responseData = response.data.data;
         setRawData(responseData.rows || []);
-        setData(responseData.rows || []);
 
         // Set total from pagination response
         setTotalDataCount(responseData.pagination?.total || 0);
@@ -209,14 +211,9 @@ const AllLeads = () => {
           todayLeads: responseData.summary?.todayLeads || 0,
           dedupe: responseData.summary?.dedupe || 0,
         });
-
-        // Update pagination state with server response
-        setPagination(prev => ({
-          ...prev,
-          pageIndex: (responseData.pagination?.currentPage || 1) - 1,
-          pageSize: responseData.pagination?.perPage || limit,
-        }));
       } else {
+        setRawData([]);
+        setTotalDataCount(0);
         ToastNotification.error("Failed to fetch leads");
       }
     } catch (err) {
@@ -228,8 +225,8 @@ const AllLeads = () => {
   }, []);
 
   useEffect(() => {
-    fetchLeads(1, pagination.pageSize);
-  }, []);
+    fetchLeads(query.page_no, query.limit);
+  }, [fetchLeads, query.limit, query.page_no]);
 
   /* ========================= FILTERING ========================= */
 
@@ -324,71 +321,109 @@ const AllLeads = () => {
     return rows;
   }, [rawData, query]);
 
-  /* ========================= PAGINATION ========================= */
-
-  // Apply local filters to fetched data (for current page filtering)
-  useEffect(() => {
-    setData(filteredData);
-  }, [filteredData]);
-
   /* ========================= HANDLERS ========================= */
 
-  const handleEdit = (row) => {
+  const resetToFirstPage = useCallback(() => {
+    setPagination(prev => (
+      prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }
+    ));
+  }, []);
+
+  const handleEdit = useCallback((row) => {
     navigate(`/lead-detail/${row.id}`, { state: { lead: row } });
-  };
+  }, [navigate]);
 
   const onPageChange = useCallback((pageInfo) => {
-    setPagination(pageInfo);
-    // Fetch new page from server (pageIndex is 0-based, API expects 1-based)
-    fetchLeads(pageInfo.pageIndex + 1, pageInfo.pageSize);
-  }, [fetchLeads]);
+    setPagination(prev => (
+      prev.pageIndex === pageInfo.pageIndex && prev.pageSize === pageInfo.pageSize
+        ? prev
+        : {
+            pageIndex: pageInfo.pageIndex,
+            pageSize: pageInfo.pageSize,
+          }
+    ));
+
+    setQuery(prev => (
+      prev.page_no === pageInfo.pageIndex + 1 && prev.limit === pageInfo.pageSize
+        ? prev
+        : {
+            ...prev,
+            page_no: pageInfo.pageIndex + 1,
+            limit: pageInfo.pageSize,
+          }
+    ));
+  }, []);
 
   const onSearchHandler = useCallback((term) => {
-    setQuery(prev => ({ ...prev, search: term }));
-    // setPagination(p => ({ ...p, pageIndex: 10 }));
-    setPagination({
-      pageIndex: 0,
-      pageSize: 10
-    });
-  }, []);
+    resetToFirstPage();
+
+    setQuery(prev => (
+      prev.search === term && prev.page_no === 1
+        ? prev
+        : {
+            ...prev,
+            search: term,
+            page_no: 1,
+          }
+    ));
+  }, [resetToFirstPage]);
 
   const handleGenderFilter = useCallback((value) => {
-    setQuery(prev => ({ ...prev, gender: value }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+    resetToFirstPage();
+
+    setQuery(prev => ({
+      ...prev,
+      gender: value,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
 
   const onFilterByDate = useCallback((type) => {
+    resetToFirstPage();
+
     setQuery(prev => ({
       ...prev,
       filter_date: prev.filter_date === type ? '' : type,
       startDate: null,
       endDate: null,
+      page_no: 1,
     }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+  }, [resetToFirstPage]);
 
   const onFilterByRange = useCallback((range) => {
+    resetToFirstPage();
+
     setQuery(prev => ({
       ...prev,
       startDate: range.startDate,
       endDate: range.endDate,
       filter_date: '',
+      page_no: 1,
     }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  }, []);
+  }, [resetToFirstPage]);
 
-  const handleIncomeFilter = (value) => {
+  const handleIncomeFilter = useCallback((value) => {
     setActiveIncomeFilter(value);
+    resetToFirstPage();
 
     if (!value) {
-      setQuery(prev => ({ ...prev, minIncome: undefined, maxIncome: undefined }));
+      setQuery(prev => ({
+        ...prev,
+        minIncome: undefined,
+        maxIncome: undefined,
+        page_no: 1,
+      }));
       return;
     }
 
     const [min, max] = value.split('-').map(Number);
-    setQuery(prev => ({ ...prev, minIncome: min, maxIncome: max }));
-    setPagination(p => ({ ...p, pageIndex: 0 }));
-  };
+    setQuery(prev => ({
+      ...prev,
+      minIncome: min,
+      maxIncome: max,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
 
   const dynamicFiltersArray = useMemo(() => [
     {
@@ -487,16 +522,19 @@ const AllLeads = () => {
     }
   ], [summaryMetrics]);
 
-   const handleOpenExportModal = () => {
+  const handleOpenExportModal = useCallback(() => {
     setIsExportModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseExportModal = () => {
+  const handleCloseExportModal = useCallback(() => {
     if (!isExporting) {
       setIsExportModalOpen(false);
     }
-  };
+  }, [isExporting]);
 
+  const handleRefresh = useCallback(() => {
+    fetchLeads(query.page_no, query.limit);
+  }, [fetchLeads, query.limit, query.page_no]);
 
 
   return (
@@ -516,15 +554,16 @@ const AllLeads = () => {
       <DataTable
         title="All Leads"
         columns={leadsColumn({ handleEdit })}
-        data={data}
+        data={filteredData}
         totalDataCount={totalDataCount}
         loading={loading}
 
         pagination={pagination}
         onPageChange={onPageChange}
+        setPagination={setPagination}
 
         onSearch={onSearchHandler}
-        onRefresh={() => fetchLeads(pagination.pageIndex + 1, pagination.pageSize)}
+        onRefresh={handleRefresh}
 
         onFilterByDate={onFilterByDate}
         activeFilter={query.filter_date}
