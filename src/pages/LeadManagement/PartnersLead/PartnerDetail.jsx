@@ -66,7 +66,7 @@ export default function Tabs() {
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Email:</p>
-                                        <p className="text-gray-700 font-medium">{lead.emailAddress ?? "Not Provided"}</p>
+                                        <p className="text-gray-700 font-medium">{lead.email ?? "Not Provided"}</p>
                                     </div>
 
                                     <div>
