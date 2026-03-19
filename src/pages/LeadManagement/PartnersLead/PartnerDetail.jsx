@@ -111,7 +111,7 @@ export default function Tabs() {
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">PAN Number:</p>
-                                        <p className="text-gray-700 font-medium">{lead.panNumber}</p>
+                                        <p className="text-gray-700 font-medium">{lead.panCard}</p>
                                     </div>
 
                                     <div>

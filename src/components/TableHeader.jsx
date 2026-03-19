@@ -717,6 +717,11 @@ export const partnerLeadsColumn = ({ handleEdit }) => [
       );
     },
   },
+   {
+    header: 'Phone number ',
+    accessorKey: 'phoneNumber',
+    cell: ({ getValue }) => getValue() || 'N/A',
+  },
   {
     header: 'UTM Source',
     id: 'utm_source',
@@ -822,7 +827,7 @@ export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
 
   {
     header: 'Number',
-    accessorKey: 'phone_number',
+    accessorKey: 'phoneNumber',
     cell: ({ getValue }) => getValue() || 'N/A',
   },
   {
