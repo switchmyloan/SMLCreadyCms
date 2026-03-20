@@ -44,8 +44,21 @@ const exportToExcel = async (rawData) => {
   ).filter(Boolean);
 
   worksheet.columns = [
-    { header: "Name", key: "name", width: 15 },
-    { header: "Phone Number", key: "phoneNumber", width: 25 },
+    { header: "First Name", key: "firstName", width: 15 },
+    { header: "Last Name", key: "lastName", width: 15 },
+    { header: "Email", key: "email", width: 25 },
+    { header: "Phone Number", key: "phoneNumber", width: 15 },
+    { header: "Gender", key: "gender", width: 10 },
+    { header: "Date of Birth", key: "dateOfBirth", width: 15 },
+    { header: "Pincode", key: "pincode", width: 10 },
+    { header: "PAN Card", key: "panCard", width: 15 },
+    { header: "IP Address", key: "ipAddress", width: 18 },
+    { header: "Job Type", key: "jobType", width: 15 },
+    { header: "Postal Code", key: "postalCode", width: 12 },
+    { header: "Monthly Income", key: "monthlyIncome", width: 15 },
+    { header: "Looking For", key: "lookingFor", width: 15 },
+    { header: "Consent Communication", key: "consentCommunication", width: 60 },
+    { header: "Consent Credit Access", key: "consentCreditAccess", width: 60 },
     { header: "UTM Source", key: "utm_source", width: 15 },
     { header: "UTM Medium", key: "utm_medium", width: 15 },
     { header: "UTM Campaign", key: "utm_campaign", width: 15 },
@@ -75,8 +88,23 @@ const exportToExcel = async (rawData) => {
     });
 
     worksheet.addRow({
-      name: `${item.firstName || ''} ${item.lastName || ''}`.trim() || "N/A",
+      firstName: item.firstName || "N/A",
+      lastName: item.lastName || "N/A",
+      email: item.email || "N/A",
       phoneNumber: item.phoneNumber || "N/A",
+      gender: item.gender || "N/A",
+      dateOfBirth: item.dateOfBirth
+        ? new Date(item.dateOfBirth).toLocaleDateString("en-IN")
+        : "N/A",
+      pincode: item.pincode || "N/A",
+      panCard: item.panCard || "N/A",
+      ipAddress: item.ipAddress || "N/A",
+      jobType: item.jobType || "N/A",
+      postalCode: item.postalCode || "N/A",
+      monthlyIncome: item.monthlyIncome || "N/A",
+      lookingFor: item.lookingFor || "N/A",
+      consentCommunication: item.consentCommunication || "N/A",
+      consentCreditAccess: item.consentCreditAccess || "N/A",
       utm_source: item.utm_header?.utm_source || "N/A",
       utm_medium: item.utm_header?.utm_medium || "N/A",
       utm_campaign: item.utm_header?.utm_campaign || "N/A",
