@@ -11,6 +11,21 @@ import SummaryCards from '../../../components/SummaryCards';
 import ExportModal from '../../../components/ExportModal';
 
 
+const parseLenderResponses = (responses) => {
+  if (!responses) return [];
+  if (Array.isArray(responses)) return responses;
+  if (typeof responses === 'string') {
+    try {
+      const parsed = JSON.parse(responses);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error("Failed to parse lender_responses:", e);
+      return [];
+    }
+  }
+  return [];
+};
+
 const exportToExcel = async (rawData) => {
   if (!rawData || rawData.length === 0) {
     ToastNotification.error("No data to export");
@@ -23,21 +38,17 @@ const exportToExcel = async (rawData) => {
   const allLenders = Array.from(
     new Set(
       rawData.flatMap(item =>
-        item.lender_responses?.map(lr => lr?.lender?.name)
+        parseLenderResponses(item.lender_responses).map(lr => lr?.lender?.name)
       )
     )
   ).filter(Boolean);
 
   worksheet.columns = [
-    { header: "First Name", key: "firstName", width: 15 },
-    { header: "Last Name", key: "lastName", width: 15 },
-    { header: "Email", key: "email", width: 25 },
-    { header: "Phone", key: "phone", width: 15 },
-    { header: "Income", key: "income", width: 15 },
-    { header: "Created At", key: "createdAt", width: 15 },
-    //  { header: "ipAddress", key: "ipAddress", width: 15 },
-    // { header: "creditConsentText", key: "creditConsentText", width: 15 },
-    // { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
+    { header: "Name", key: "name", width: 15 },
+    { header: "Phone Number", key: "phoneNumber", width: 25 },
+    { header: "UTM Source", key: "utm_source", width: 15 },
+    { header: "UTM Medium", key: "utm_medium", width: 15 },
+    { header: "UTM Campaign", key: "utm_campaign", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
@@ -54,6 +65,7 @@ const exportToExcel = async (rawData) => {
       lenderStatusMap[lender] = "No";
     });
 
+    item.lender_responses = parseLenderResponses(item.lender_responses);
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
       if (lenderName && lr.isOffer) {
@@ -62,14 +74,11 @@ const exportToExcel = async (rawData) => {
     });
 
     worksheet.addRow({
-      firstName: item.firstName || "N/A",
-      lastName: item.lastName || "N/A",
-      email: item.emailAddress || "N/A",
-      phone: item.phoneNumber || "N/A",
-      income: item.income || item.monthlyIncome || 0,
-      //  ipAddress: item.ipAddress,
-      // creditConsentText: item.creditConsentText,
-      // communicationConsentText: item.communicationConsentText,
+      Name: item.name || "N/A",
+      phoneNumber: item.phoneNumber || "N/A",
+      utm_source: item.utm_source || "N/A",
+      utm_medium: item.utm_medium || "N/A",
+      utm_campaign: item.utm_campaign || "N/A",
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
@@ -84,23 +93,17 @@ const exportToExcel = async (rawData) => {
 
   saveAs(blob, "Leads_Report.xlsx");
 };
+
 const Leads = () => {
   const navigate = useNavigate();
 
-  const [rawData, setRawData] = useState([]);      // 🔥 full data
-  const [data, setData] = useState([]);            // 🔥 paginated data
+  const [rawData, setRawData] = useState([]);
+  const [data, setData] = useState([]);
   const [totalDataCount, setTotalDataCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [activeIncomeFilter, setActiveIncomeFilter] = useState('');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-
-  // const [summaryMetrics, setSummaryMetrics] = useState({
-  //   totalLeads: 0,
-  //   totalLoanAmount: 0,
-  //   todayLeads: 0,
-  //   dedupe: 0
-  // });
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -147,7 +150,6 @@ const Leads = () => {
     { label: 'Freelancer', value: 'freelancer' }
   ], []);
 
-
   const dobRanges = [
     { label: 'All', value: '' },
     { label: '18 - 25', value: '18-25' },
@@ -158,37 +160,17 @@ const Leads = () => {
 
   const handleDobFilter = useCallback((value) => {
     resetToFirstPage();
-
     if (!value) {
-      setQuery(prev => ({
-        ...prev,
-        minAge: undefined,
-        maxAge: undefined,
-        page_no: 1
-      }));
+      setQuery(prev => ({ ...prev, minAge: undefined, maxAge: undefined, page_no: 1 }));
       return;
     }
-
-
     const [min, max] = value.split('-');
-
-    setQuery(prev => ({
-      ...prev,
-      minAge: Number(min),
-      maxAge: Number(max),
-      page_no: 1
-    }));
+    setQuery(prev => ({ ...prev, minAge: Number(min), maxAge: Number(max), page_no: 1 }));
   }, [resetToFirstPage]);
-
 
   const handleJobTypeFilter = useCallback((jobType) => {
     resetToFirstPage();
-
-    setQuery(prev => ({
-      ...prev,
-      jobType,
-      page_no: 1
-    }));
+    setQuery(prev => ({ ...prev, jobType, page_no: 1 }));
   }, [resetToFirstPage]);
 
   /* ========================= FETCH ========================= */
@@ -197,16 +179,8 @@ const Leads = () => {
     try {
       setLoading(true);
       const response = await getPartnerLeads();
-
       if (response?.data?.success) {
         setRawData(response.data.data.rows || []);
-
-        // setSummaryMetrics({
-        //   totalLeads: response?.data?.data?.summary?.totalLeads || 10,
-        //   totalLoanAmount: response?.data?.data?.summary?.totalLoanAmount,
-        //   todayLeads: response?.data?.data?.summary?.todayLeads,
-        //   dedupe: response?.data?.data?.summary?.dedupe,
-        // });
       } else {
         ToastNotification.error("Failed to fetch leads");
       }
@@ -222,12 +196,10 @@ const Leads = () => {
   }, []);
 
   /* ========================= FILTERING ========================= */
-  
 
-    const filteredData = useMemo(() => {
+  const filteredData = useMemo(() => {
     let rows = [...rawData];
 
-    // 🔍 SEARCH
     if (query.search) {
       const term = query.search.toLowerCase();
       rows = rows.filter(item =>
@@ -238,76 +210,47 @@ const Leads = () => {
       );
     }
 
-    // 👤 GENDER
     if (query.gender) {
       rows = rows.filter(r => r.gender?.toLowerCase() === query.gender);
     }
 
-    // 💰 INCOME
-    if (
-      query.minIncome !== undefined &&
-      query.maxIncome !== undefined
-    ) {
+    if (query.minIncome !== undefined && query.maxIncome !== undefined) {
       rows = rows.filter(item => {
-        const income = Number(
-          String(item.income || item.monthlyIncome || 0).replace(/,/g, '')
-        );
+        const income = Number(String(item.income || item.monthlyIncome || 0).replace(/,/g, ''));
         return income >= query.minIncome && income <= query.maxIncome;
       });
     }
 
-    // 📅 TODAY / YESTERDAY
     if (query.filter_date) {
       const today = new Date();
       const yesterday = new Date();
       yesterday.setDate(today.getDate() - 1);
-
       rows = rows.filter(item => {
         const created = new Date(item.createdAt);
-
-        if (query.filter_date === 'today') {
-          return created.toDateString() === today.toDateString();
-        }
-
-        if (query.filter_date === 'yesterday') {
-          return created.toDateString() === yesterday.toDateString();
-        }
-
+        if (query.filter_date === 'today') return created.toDateString() === today.toDateString();
+        if (query.filter_date === 'yesterday') return created.toDateString() === yesterday.toDateString();
         return true;
       });
     }
 
-    // 📆 CUSTOM RANGE
     if (query.startDate && query.endDate) {
       rows = rows.filter(item => {
         const created = new Date(item.createdAt);
-        return (
-          created >= new Date(query.startDate) &&
-          created <= new Date(query.endDate)
-        );
+        return created >= new Date(query.startDate) && created <= new Date(query.endDate);
       });
     }
 
-    // 🎂 DOB / AGE FILTER
-    if (
-      query.minAge !== undefined &&
-      query.maxAge !== undefined
-    ) {
+    if (query.minAge !== undefined && query.maxAge !== undefined) {
       rows = rows.filter(item => {
         if (!item.dateOfBirth) return false;
-
         const dob = new Date(item.dateOfBirth);
-        const ageDifMs = Date.now() - dob.getTime();
-        const ageDate = new Date(ageDifMs);
-        const age = Math.abs(ageDate.getUTCFullYear() - 1970);
-
+        const age = Math.abs(new Date(Date.now() - dob.getTime()).getUTCFullYear() - 1970);
         return age >= query.minAge && age <= query.maxAge;
       });
     }
+
     if (query.jobType) {
-      rows = rows.filter(item =>
-        item.jobType?.toLowerCase() === query.jobType
-      );
+      rows = rows.filter(item => item.jobType?.toLowerCase() === query.jobType);
     }
 
     return rows;
@@ -315,28 +258,13 @@ const Leads = () => {
 
   const summaryMetrics = useMemo(() => {
     const totalLeads = filteredData.length;
-
     const totalLoanAmount = filteredData.reduce(
-      (sum, item) =>
-        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
-      0
+      (sum, item) => sum + Number(item.requiredLoanAmount || item.loanAmount || 0), 0
     );
-
     const today = new Date().toDateString();
-    const todayLeads = filteredData.filter(
-      item => new Date(item.createdAt).toDateString() === today
-    ).length;
-
-    const dedupe = filteredData.filter(
-      item => item.isDuplicate === true
-    ).length;
-
-    return {
-      totalLeads,
-      totalLoanAmount,
-      todayLeads,
-      dedupe
-    };
+    const todayLeads = filteredData.filter(item => new Date(item.createdAt).toDateString() === today).length;
+    const dedupe = filteredData.filter(item => item.isDuplicate === true).length;
+    return { totalLeads, totalLoanAmount, todayLeads, dedupe };
   }, [filteredData]);
 
   /* ========================= PAGINATION ========================= */
@@ -344,19 +272,14 @@ const Leads = () => {
   useEffect(() => {
     const start = pagination.pageIndex * pagination.pageSize;
     const end = start + pagination.pageSize;
-
     setData(filteredData.slice(start, end));
     setTotalDataCount(filteredData.length);
   }, [filteredData, pagination]);
 
   useEffect(() => {
     const totalPages = Math.max(1, Math.ceil(filteredData.length / pagination.pageSize));
-
     if (pagination.pageIndex > totalPages - 1) {
-      setPagination(prev => ({
-        ...prev,
-        pageIndex: Math.max(totalPages - 1, 0),
-      }));
+      setPagination(prev => ({ ...prev, pageIndex: Math.max(totalPages - 1, 0) }));
     }
   }, [filteredData.length, pagination.pageIndex, pagination.pageSize]);
 
@@ -367,11 +290,9 @@ const Leads = () => {
   };
 
   const onPageChange = useCallback((pageInfo) => {
-    setPagination(prev => (
-      prev.pageIndex === pageInfo.pageIndex && prev.pageSize === pageInfo.pageSize
-        ? prev
-        : pageInfo
-    ));
+    setPagination(prev =>
+      prev.pageIndex === pageInfo.pageIndex && prev.pageSize === pageInfo.pageSize ? prev : pageInfo
+    );
   }, []);
 
   const onSearchHandler = useCallback((term) => {
@@ -396,132 +317,114 @@ const Leads = () => {
 
   const onFilterByRange = useCallback((range) => {
     resetToFirstPage();
-    setQuery(prev => ({
-      ...prev,
-      startDate: range.startDate,
-      endDate: range.endDate,
-      filter_date: '',
-    }));
+    setQuery(prev => ({ ...prev, startDate: range.startDate, endDate: range.endDate, filter_date: '' }));
   }, [resetToFirstPage]);
 
   const handleIncomeFilter = (value) => {
     setActiveIncomeFilter(value);
     resetToFirstPage();
-
     if (!value) {
       setQuery(prev => ({ ...prev, minIncome: undefined, maxIncome: undefined }));
       return;
     }
-
     const [min, max] = value.split('-').map(Number);
     setQuery(prev => ({ ...prev, minIncome: min, maxIncome: max }));
   };
 
   const dynamicFiltersArray = useMemo(() => [
-    {
-      key: 'gender',
-      label: 'Gender',
-      activeValue: query.gender,
-      options: genderOptions,
-      onChange: handleGenderFilter,
-    },
-    {
-      key: 'jobType',                  // ✅ NEW
-      label: 'Job Type',
-      activeValue: query.jobType,
-      options: jobTypeOptions,
-      onChange: handleJobTypeFilter
-    },
-    {
-      key: 'dob',
-      label: 'Age',
-      activeValue: query.minAge
-        ? `${query.minAge}-${query.maxAge}`
-        : '',
-      options: dobRanges,
-      onChange: handleDobFilter
-    }
+    { key: 'gender', label: 'Gender', activeValue: query.gender, options: genderOptions, onChange: handleGenderFilter },
+    { key: 'jobType', label: 'Job Type', activeValue: query.jobType, options: jobTypeOptions, onChange: handleJobTypeFilter },
+    { key: 'dob', label: 'Age', activeValue: query.minAge ? `${query.minAge}-${query.maxAge}` : '', options: dobRanges, onChange: handleDobFilter }
   ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, handleDobFilter]);
 
-  const filterDataByDate = (data, startDate, endDate) => {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+  /* ========================= EXPORT ========================= */
 
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    return data.filter(item => {
-      if (!item.createdAt) return false;
-      const created = new Date(item.createdAt);
-      return created >= start && created <= end;
-    });
-  };
   const handleExport = async ({ startDate, endDate, mode }) => {
     try {
       setIsExporting(true);
 
-      // 🔥 STEP 1: FILTER FRONTEND DATA
-      const filteredData = filterDataByDate(rawData, startDate, endDate);
+      // 🔍 DEBUG — check browser console to see exactly what ExportModal is sending
+      console.log("📦 Export triggered with:", { mode, startDate, endDate });
+      console.log("📊 rawData length at export time:", rawData.length);
 
-      if (!filteredData.length) {
+      // 🔧 Normalize mode to lowercase to handle any casing from ExportModal
+      // e.g. "Today", "TODAY", "today", "yesterday", "dateRange", "date_range", "custom" all handled
+      const normalizedMode = String(mode || '').toLowerCase().trim();
+
+      const isToday     = normalizedMode.includes('today');
+      const isYesterday = normalizedMode.includes('yesterday');
+      const isRange     = normalizedMode.includes('range') ||
+                          normalizedMode.includes('custom') ||
+                          normalizedMode.includes('date');
+
+      const now = new Date();
+      let start, end;
+
+      if (isToday) {
+        start = new Date(now); start.setHours(0, 0, 0, 0);
+        end   = new Date(now); end.setHours(23, 59, 59, 999);
+
+      } else if (isYesterday) {
+        const y = new Date(now);
+        y.setDate(now.getDate() - 1);
+        start = new Date(y); start.setHours(0, 0, 0, 0);
+        end   = new Date(y); end.setHours(23, 59, 59, 999);
+
+      } else if (isRange && startDate && endDate) {
+        start = new Date(startDate); start.setHours(0, 0, 0, 0);
+        end   = new Date(endDate);   end.setHours(23, 59, 59, 999);
+
+      } else if (startDate && endDate) {
+        // 🔧 Fallback: unrecognized mode but dates exist — still export
+        console.warn("⚠️ Unrecognized mode, falling back to dates. mode was:", normalizedMode);
+        start = new Date(startDate); start.setHours(0, 0, 0, 0);
+        end   = new Date(endDate);   end.setHours(23, 59, 59, 999);
+
+      } else {
+        console.error("❌ Cannot resolve range. mode:", normalizedMode, "| startDate:", startDate, "| endDate:", endDate);
+        ToastNotification.error("Please select a valid date range");
+        return;
+      }
+
+      console.log("📅 Resolved range:", { start: start.toISOString(), end: end.toISOString() });
+
+      const exportData = rawData.filter(item => {
+        if (!item.createdAt) return false;
+        const created = new Date(item.createdAt);
+        return created >= start && created <= end;
+      });
+
+      console.log("✅ Rows matched for export:", exportData.length);
+
+      if (!exportData.length) {
         ToastNotification.error("No data found for selected date range");
         return;
       }
 
-      // 🔥 STEP 2: EXCEL EXPORT (tumhara existing code)
-      await exportToExcel(filteredData);
-
+      await exportToExcel(exportData);
       ToastNotification.success("Excel exported successfully");
       setIsExportModalOpen(false);
+
     } catch (error) {
-      console.error(error);
-      ToastNotification.error("Export failed");
+      console.error("❌ Export error:", error);
+      ToastNotification.error(`Export failed: ${error.message}`);
     } finally {
       setIsExporting(false);
     }
   };
 
-  const handleOpenExportModal = () => {
-    setIsExportModalOpen(true);
-  };
+  const handleOpenExportModal = () => setIsExportModalOpen(true);
 
   const handleCloseExportModal = () => {
-    if (!isExporting) {
-      setIsExportModalOpen(false);
-    }
+    if (!isExporting) setIsExportModalOpen(false);
   };
+
   const dynamicMetrics = useMemo(() => [
-    {
-      title: "Total Leads",
-      value: Number(summaryMetrics.totalLeads) || 0,
-      icon: "Users",
-      color: "text-blue-600",
-      bg: "bg-blue-50"
-    },
-    {
-      title: "Loan Amount",
-      value: Number(summaryMetrics.totalLoanAmount) || 0,
-      icon: "CheckCircle",
-      color: "text-green-600",
-      bg: "bg-green-50"
-    },
-    {
-      title: "Today Leads",
-      value: Number(summaryMetrics.todayLeads) || 0,
-      icon: "XCircle",
-      color: "text-red-600",
-      bg: "bg-red-50"
-    },
-    {
-      title: "Duplicate",
-      value: Number(summaryMetrics.dedupe) || 0,
-      icon: "TriangleAlert",
-      color: "text-yellow-600",
-      bg: "bg-yellow-50"
-    }
+    { title: "Total Leads", value: Number(summaryMetrics.totalLeads) || 0, icon: "Users", color: "text-blue-600", bg: "bg-blue-50" },
+    { title: "Loan Amount", value: Number(summaryMetrics.totalLoanAmount) || 0, icon: "CheckCircle", color: "text-green-600", bg: "bg-green-50" },
+    { title: "Today Leads", value: Number(summaryMetrics.todayLeads) || 0, icon: "XCircle", color: "text-red-600", bg: "bg-red-50" },
+    { title: "Duplicate", value: Number(summaryMetrics.dedupe) || 0, icon: "TriangleAlert", color: "text-yellow-600", bg: "bg-yellow-50" }
   ], [summaryMetrics]);
-
-
 
   return (
     <>
@@ -533,10 +436,7 @@ const Leads = () => {
         isSubmitting={isExporting}
       />
 
-      <SummaryCards
-        metrics={dynamicMetrics}
-        loading={loading}
-      />
+      <SummaryCards metrics={dynamicMetrics} loading={loading} />
 
       <DataTable
         title="Leads"
@@ -544,25 +444,18 @@ const Leads = () => {
         data={data}
         totalDataCount={totalDataCount}
         loading={loading}
-
         pagination={pagination}
         onPageChange={onPageChange}
-
         onSearch={onSearchHandler}
         onRefresh={fetchLeads}
-
         onFilterByDate={onFilterByDate}
         activeFilter={query.filter_date}
-
         onFilterByRange={onFilterByRange}
         activeDateRange={{ startDate: query.startDate, endDate: query.endDate }}
-
         dynamicFilters={dynamicFiltersArray}
-
         onFilterByIncome={handleIncomeFilter}
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
-
         onExport={handleOpenExportModal}
       />
     </>
