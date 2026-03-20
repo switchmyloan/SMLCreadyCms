@@ -49,6 +49,7 @@ const exportToExcel = async (rawData) => {
     { header: "UTM Source", key: "utm_source", width: 15 },
     { header: "UTM Medium", key: "utm_medium", width: 15 },
     { header: "UTM Campaign", key: "utm_campaign", width: 15 },
+    { header: "Created At", key: "createdAt", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
@@ -74,11 +75,11 @@ const exportToExcel = async (rawData) => {
     });
 
     worksheet.addRow({
-      Name: item.name || "N/A",
+      name: `${item.firstName || ''} ${item.lastName || ''}`.trim() || "N/A",
       phoneNumber: item.phoneNumber || "N/A",
-      utm_source: item.utm_source || "N/A",
-      utm_medium: item.utm_medium || "N/A",
-      utm_campaign: item.utm_campaign || "N/A",
+      utm_source: item.utm_header?.utm_source || "N/A",
+      utm_medium: item.utm_header?.utm_medium || "N/A",
+      utm_campaign: item.utm_header?.utm_campaign || "N/A",
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
