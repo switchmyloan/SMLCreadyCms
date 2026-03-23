@@ -13,19 +13,23 @@ import {
 } from '../../../api-services/Modules/AdminRoleApi';
 import toast, { Toaster } from 'react-hot-toast';
 
-// Permission modules for grouping
+// Permission modules for grouping (keys must match backend PermissionModule enum)
 const PERMISSION_MODULES = [
-  { key: 'CAMPAIGNS', label: 'Campaigns', icon: '📢' },
-  { key: 'SEGMENTS', label: 'Segments', icon: '👥' },
-  { key: 'ANALYTICS', label: 'Analytics', icon: '📊' },
-  { key: 'USERS', label: 'Users', icon: '👤' },
-  { key: 'LEADS', label: 'Leads', icon: '📋' },
-  { key: 'LENDERS', label: 'Lenders', icon: '🏦' },
-  { key: 'PUSH_NOTIFICATIONS', label: 'Push Notifications', icon: '🔔' },
-  { key: 'CMS', label: 'CMS Content', icon: '📝' },
-  { key: 'SETTINGS', label: 'Settings', icon: '⚙️' },
-  { key: 'ROLES', label: 'Roles', icon: '🛡️' },
   { key: 'ACTIVE_USERS', label: 'Active Users', icon: '🟢' },
+  { key: 'EXECUTIVE_DASHBOARD', label: 'Executive Dashboard', icon: '📈' },
+  { key: 'LEAD_MANAGEMENT', label: 'Lead Management', icon: '📋' },
+  { key: 'APP_STATISTICS', label: 'App Statistics', icon: '📱' },
+  { key: 'ANALYTICS', label: 'Analytics', icon: '📊' },
+  { key: 'INTERNAL_MUTUAL_FUNDS', label: 'Internal Mutual Funds', icon: '💰' },
+  { key: 'MUTUAL_FUNDS', label: 'Mutual Funds', icon: '📦' },
+  { key: 'LENDER_MANAGEMENT', label: 'Lender Management', icon: '🏦' },
+  { key: 'BLOGS', label: 'Blogs', icon: '📝' },
+  { key: 'PUSH_NOTIFICATION', label: 'Push Notifications', icon: '🔔' },
+  { key: 'UTM', label: 'UTM', icon: '🔗' },
+  { key: 'FAQ', label: 'FAQ', icon: '❓' },
+  { key: 'MIS_RAW', label: 'MIS Raw', icon: '📑' },
+  { key: 'CMS_MANAGEMENT', label: 'CMS Management', icon: '🖥️' },
+  { key: 'ADMIN_MANAGEMENT', label: 'Admin Management', icon: '🛡️' },
 ];
 
 const RoleCreate = () => {
