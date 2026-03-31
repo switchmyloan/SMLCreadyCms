@@ -21,6 +21,7 @@ import {
   CheckCircle,
   ChevronRight,
   X,
+  Smartphone,
 } from "lucide-react";
 
 // System groups with icons and colors
@@ -28,6 +29,7 @@ const SYSTEM_GROUPS = [
   { label: "All Users", type: "all-users", groupName: "All Users", icon: Users, color: "blue", description: "All registered users" },
   { label: "Active Users", type: "active-users", groupName: "Active Users", icon: Activity, color: "green", description: "Users active in last 30 days" },
   { label: "Live Users", type: "live-users", groupName: "Live Users", icon: Zap, color: "yellow", description: "Currently online users" },
+  { label: "Mobile Registered", type: "mobile-registered", groupName: "Mobile Registered", icon: Smartphone, color: "teal", description: "Users who completed mobile registration" },
 ];
 
 const LOAN_GROUPS = [
@@ -47,6 +49,7 @@ const COLOR_CLASSES = {
   cyan: { bg: "bg-cyan-50", icon: "bg-cyan-100 text-cyan-600", border: "border-cyan-200", text: "text-cyan-700" },
   orange: { bg: "bg-orange-50", icon: "bg-orange-100 text-orange-600", border: "border-orange-200", text: "text-orange-700" },
   red: { bg: "bg-red-50", icon: "bg-red-100 text-red-600", border: "border-red-200", text: "text-red-700" },
+  teal: { bg: "bg-teal-50", icon: "bg-teal-100 text-teal-600", border: "border-teal-200", text: "text-teal-700" },
 };
 
 export default function GroupList() {
@@ -216,6 +219,7 @@ export default function GroupList() {
   const totalUsers = getGroupCount("All Users");
   const activeUsers = getGroupCount("Active Users");
   const liveUsers = getGroupCount("Live Users");
+  const mobileRegistered = getGroupCount("Mobile Registered");
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -307,7 +311,7 @@ export default function GroupList() {
       {/* System Groups */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-3">System Groups</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {SYSTEM_GROUPS.map((group) => {
             const Icon = group.icon;
             const colors = COLOR_CLASSES[group.color];
