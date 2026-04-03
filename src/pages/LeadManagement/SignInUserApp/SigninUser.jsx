@@ -78,10 +78,10 @@ const exportToExcel = async (rawData) => {
     { header: "Date Of Birth", key: "dateOfBirth", width: 25 },
     { header: "Phone", key: "phone", width: 15 },
     { header: "Income", key: "income", width: 15 },
-    { header: "Job Type", key: "jobType", width: 15 },
-    { header: "Pan Number", key: "panNumber", width: 15 },
-    { header: "Required Loan Amountr", key: "requiredLoanAmount", width: 15 },
-    { header: "Postal Code", key: "postalCode", width: 15 },
+    { header: "JobType", key: "jobType", width: 15 },
+    { header: "PanNumber", key: "panNumber", width: 15 },
+    { header: "RequiredLoanAmount", key: "requiredLoanAmount", width: 15 },
+    { header: "PostalCode", key: "postalCode", width: 15 },
     { header: "Created At", key: "createdAt", width: 15 },
     ...allLenders.map(lender => ({
       header: lender,
@@ -111,7 +111,13 @@ const exportToExcel = async (rawData) => {
       lastName: item.lastName || "N/A",
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
+      Gender : item.gender || "NA",
+      DOB : item.dateOfBirth || "NA",
       income: item.income || item.monthlyIncome || 0,
+      JobType: item.jobType || 'NA',
+      PanNumber: item.panNumber || "NA",
+      RequiredLoanAmount: item.requiredLoanAmount || "NA",
+      PostalCode: item.postalCode || "NA",
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
