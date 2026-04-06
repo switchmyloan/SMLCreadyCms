@@ -106,9 +106,8 @@ const AllLeads = () => {
 
   const [summaryMetrics, setSummaryMetrics] = useState({
     totalLeads: 0,
-    totalLoanAmount: 0,
+    profileCompleted: 0,
     todayLeads: 0,
-    dedupe: 0
   });
 
   const [pagination, setPagination] = useState({
@@ -193,10 +192,20 @@ const AllLeads = () => {
 
   /* ========================= FETCH ========================= */
 
-  const fetchLeads = useCallback(async (page = 1, limit = 10) => {
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getAllLeads(page, limit);
+
+      const filters = {};
+      if (query.filter_date) filters.type = query.filter_date;
+      if (query.search) filters.search = query.search;
+      if (query.gender) filters.gender = query.gender;
+      if (query.minIncome !== undefined) filters.minIncome = query.minIncome;
+      if (query.maxIncome !== undefined) filters.maxIncome = query.maxIncome;
+      if (query.startDate) filters.fromDate = query.startDate;
+      if (query.endDate) filters.toDate = query.endDate;
+
+      const response = await getAllLeads(query.page_no, query.limit, filters);
 
       if (response?.data?.success) {
         const responseData = response.data.data;
@@ -206,10 +215,9 @@ const AllLeads = () => {
         setTotalDataCount(responseData.pagination?.total || 0);
 
         setSummaryMetrics({
-          totalLeads: responseData.pagination?.total || responseData.summary?.totalLeads || 0,
-          totalLoanAmount: responseData.summary?.totalLoanAmount || 0,
+          totalLeads: responseData.summary?.totalLeads || responseData.pagination?.total || 0,
+          profileCompleted: responseData.summary?.profileCompleted || 0,
           todayLeads: responseData.summary?.todayLeads || 0,
-          dedupe: responseData.summary?.dedupe || 0,
         });
       } else {
         setRawData([]);
@@ -222,79 +230,18 @@ const AllLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [query.page_no, query.limit, query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate]);
 
   useEffect(() => {
-    fetchLeads(query.page_no, query.limit);
-  }, [fetchLeads, query.limit, query.page_no]);
+    fetchLeads();
+  }, [fetchLeads]);
 
   /* ========================= FILTERING ========================= */
 
   const filteredData = useMemo(() => {
     let rows = [...rawData];
 
-    // 🔍 SEARCH
-    if (query.search) {
-      const term = query.search.toLowerCase();
-      rows = rows.filter(item =>
-        item.firstName?.toLowerCase().includes(term) ||
-        item.lastName?.toLowerCase().includes(term) ||
-        item.emailAddress?.toLowerCase().includes(term) ||
-        item.phoneNumber?.includes(term)
-      );
-    }
-
-    // 👤 GENDER
-    if (query.gender) {
-      rows = rows.filter(r => r.gender?.toLowerCase() === query.gender);
-    }
-
-    // 💰 INCOME
-    if (
-      query.minIncome !== undefined &&
-      query.maxIncome !== undefined
-    ) {
-      rows = rows.filter(item => {
-        const income = Number(
-          String(item.income || item.monthlyIncome || 0).replace(/,/g, '')
-        );
-        return income >= query.minIncome && income <= query.maxIncome;
-      });
-    }
-
-    // 📅 TODAY / YESTERDAY
-    if (query.filter_date) {
-      const today = new Date();
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-
-        if (query.filter_date === 'today') {
-          return created.toDateString() === today.toDateString();
-        }
-
-        if (query.filter_date === 'yesterday') {
-          return created.toDateString() === yesterday.toDateString();
-        }
-
-        return true;
-      });
-    }
-
-    // 📆 CUSTOM RANGE
-    if (query.startDate && query.endDate) {
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-        return (
-          created >= new Date(query.startDate) &&
-          created <= new Date(query.endDate)
-        );
-      });
-    }
-
-    // 🎂 DOB / AGE FILTER
+    // 🎂 DOB / AGE FILTER (client-side only)
     if (
       query.minAge !== undefined &&
       query.maxAge !== undefined
@@ -311,15 +258,15 @@ const AllLeads = () => {
       });
     }
 
-      if (query.jobType) {
+    // Job Type (client-side only)
+    if (query.jobType) {
       rows = rows.filter(item =>
         item.jobType?.toLowerCase() === query.jobType
       );
     }
 
-
     return rows;
-  }, [rawData, query]);
+  }, [rawData, query.minAge, query.maxAge, query.jobType]);
 
   /* ========================= HANDLERS ========================= */
 
@@ -500,8 +447,8 @@ const AllLeads = () => {
       bg: "bg-blue-50"
     },
     {
-      title: "Loan Amount",
-      value: Number(summaryMetrics.totalLoanAmount) || 0,
+      title: "Profile Completed",
+      value: Number(summaryMetrics.profileCompleted) || 0,
       icon: "CheckCircle",
       color: "text-green-600",
       bg: "bg-green-50"
@@ -513,13 +460,6 @@ const AllLeads = () => {
       color: "text-red-600",
       bg: "bg-red-50"
     },
-    {
-      title: "Duplicate",
-      value: Number(summaryMetrics.dedupe) || 0,
-      icon: "TriangleAlert",
-      color: "text-yellow-600",
-      bg: "bg-yellow-50"
-    }
   ], [summaryMetrics]);
 
   const handleOpenExportModal = useCallback(() => {
@@ -533,8 +473,8 @@ const AllLeads = () => {
   }, [isExporting]);
 
   const handleRefresh = useCallback(() => {
-    fetchLeads(query.page_no, query.limit);
-  }, [fetchLeads, query.limit, query.page_no]);
+    fetchLeads();
+  }, [fetchLeads]);
 
 
   return (

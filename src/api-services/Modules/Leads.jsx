@@ -56,10 +56,18 @@ export const getPartnerLeads = async () => {
         }
     )
 };
-export const getAllLeads = async (pageNo = 1, limit = 10) => {
+export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
     const params = new URLSearchParams();
     params.append('currentPage', pageNo);
     params.append('perPage', limit);
+
+    if (filters.type) params.append('type', filters.type);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.minIncome !== undefined) params.append('minIncome', filters.minIncome);
+    if (filters.maxIncome !== undefined) params.append('maxIncome', filters.maxIncome);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
 
     return Api().get(`/leads/admin/all-leads?${params.toString()}`,
         {
