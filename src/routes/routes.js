@@ -158,6 +158,17 @@ export const routes = [
     permission: "lead_management.view",
   },
   {
+    path: "/gold-loan-leads",
+    label: "Gold Loan Leads",
+    icon: "BadgePercent",
+    showInSidebar: true,
+    group: "Lead Management",
+    groupIcon: "Users",
+    groupOrder: 1,
+    order: 5,
+    permission: "lead_management.view",
+  },
+  {
     path: "/archive-users",
     label: "Archived",
     icon: "Archive",
