@@ -433,6 +433,18 @@ export const routes = [
     permission: "cms_management.edit",
   },
 
+  {
+    path: "/credit-cards",
+    label: "Credit Cards",
+    icon: "CreditCard",
+    showInSidebar: true,
+    group: "CMS Management",
+    groupIcon: "Settings",
+    groupOrder: 12,
+    order: 5,
+    permission: "cms_management.view",
+  },
+
   // --- Admin Management ---
   {
     path: "/admin/roles",

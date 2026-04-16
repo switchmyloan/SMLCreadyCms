@@ -18,6 +18,7 @@ import OnBoardLender from "@pages/LenderManagement/OnBoardLender/OnBoardLender"
 import ListOfLender from "@pages/LenderManagement/ListOfLenders/ListOfLenders"
 import SocialIcons from "@pages/CMSManagement/Social/SocialIcons"
 import Offers from "@pages/CMSManagement/Offers/Offers"
+import CreditCards from "@pages/CMSManagement/CreditCards/CreditCards"
 import Banner from "@pages/CMSManagement/Banners/Banner"
 import TermsAndConditions from '@pages/CMSManagement/T&C/TermsAndConditions';
 import NotFound from '@pages/NotFound';
@@ -156,6 +157,7 @@ function App() {
             <Route path="privacy-policy" element={<PermissionGuard permission="cms_management.view"><PrivacyPolicy /></PermissionGuard>} />
             <Route path="social-icons" element={<PermissionGuard permission="cms_management.view"><SocialIcons /></PermissionGuard>} />
             <Route path="offer" element={<PermissionGuard permission="cms_management.view"><Offers /></PermissionGuard>} />
+            <Route path="credit-cards" element={<PermissionGuard permission="cms_management.view"><CreditCards /></PermissionGuard>} />
 
             {/* Admin Management */}
             <Route path="roles" element={<PermissionGuard permission="admin_management.view"><Roles /></PermissionGuard>} />
