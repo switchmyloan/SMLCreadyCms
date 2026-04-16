@@ -7,6 +7,7 @@ import {
   XCircle,
   MousePointerClick,
   Clock,
+  TrendingUp,
 } from 'lucide-react';
 import DataTable from '@components/Table/MainTable';
 import ToastNotification from '@components/Notification/ToastNotification';
@@ -22,34 +23,42 @@ const FUNNEL_STAGES = [
     icon: Send,
     color: 'text-blue-600',
     bg: 'bg-blue-50',
-    ring: 'ring-blue-300',
+    border: 'border-blue-200',
+    ring: 'ring-blue-400',
+    barColor: 'bg-blue-500',
   },
   {
     key: 'offer',
     label: 'Offer Received',
     field: 'offer',
     icon: BadgeCheck,
-    color: 'text-green-600',
-    bg: 'bg-green-50',
-    ring: 'ring-green-300',
+    color: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    ring: 'ring-emerald-400',
+    barColor: 'bg-emerald-500',
   },
   {
     key: 'no_offer',
     label: 'No Offer',
     field: 'noOffer',
     icon: XCircle,
-    color: 'text-red-600',
-    bg: 'bg-red-50',
-    ring: 'ring-red-300',
+    color: 'text-rose-600',
+    bg: 'bg-rose-50',
+    border: 'border-rose-200',
+    ring: 'ring-rose-400',
+    barColor: 'bg-rose-500',
   },
   {
     key: 'clicked',
     label: 'Offer Clicked',
     field: 'clicked',
     icon: MousePointerClick,
-    color: 'text-indigo-600',
-    bg: 'bg-indigo-50',
-    ring: 'ring-indigo-300',
+    color: 'text-violet-600',
+    bg: 'bg-violet-50',
+    border: 'border-violet-200',
+    ring: 'ring-violet-400',
+    barColor: 'bg-violet-500',
   },
   {
     key: 'expired',
@@ -58,7 +67,9 @@ const FUNNEL_STAGES = [
     icon: Clock,
     color: 'text-amber-600',
     bg: 'bg-amber-50',
-    ring: 'ring-amber-300',
+    border: 'border-amber-200',
+    ring: 'ring-amber-400',
+    barColor: 'bg-amber-500',
   },
 ];
 
@@ -72,11 +83,11 @@ const FunnelCards = ({ funnel, activeStage, onStageClick, loading }) => {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 animate-pulse h-[92px]"
+            className="p-5 bg-white rounded-xl border border-gray-100 animate-pulse h-[110px]"
           />
         ))}
       </div>
@@ -84,27 +95,32 @@ const FunnelCards = ({ funnel, activeStage, onStageClick, loading }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
-      {/* Total Leads (view all) */}
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      {/* Total Leads card */}
       <button
         type="button"
         onClick={() => onStageClick('')}
-        className={`text-left p-4 bg-white rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md ${
-          activeStage === '' ? 'ring-2 ring-gray-400' : ''
+        className={`group text-left p-5 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
+          activeStage === ''
+            ? 'ring-2 ring-gray-400 border-gray-300 shadow-md'
+            : 'border-gray-100 shadow-sm'
         }`}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-gray-500">Total Leads</p>
-            <p className="mt-1 text-2xl font-bold text-gray-900">
+        <div className="flex items-start justify-between">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              Total Leads
+            </p>
+            <p className="mt-2 text-3xl font-bold text-gray-900 tabular-nums">
               {submitted.toLocaleString()}
             </p>
-            <p className="text-[11px] text-gray-400 mt-0.5">
+            <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+              <TrendingUp size={12} />
               Today: {(funnel?.todaySubmitted || 0).toLocaleString()}
             </p>
           </div>
-          <div className="p-2 rounded-full bg-gray-50">
-            <Users className="text-gray-600" size={20} />
+          <div className="p-2.5 rounded-xl bg-gray-50 group-hover:bg-gray-100 transition-colors shrink-0">
+            <Users className="text-gray-500" size={20} />
           </div>
         </div>
       </button>
@@ -113,27 +129,45 @@ const FunnelCards = ({ funnel, activeStage, onStageClick, loading }) => {
         const Icon = s.icon;
         const val = funnel?.[s.field] || 0;
         const isActive = activeStage === s.key;
+        const percentage = pct(val);
         return (
           <button
             key={s.key}
             type="button"
             onClick={() => onStageClick(isActive ? '' : s.key)}
-            className={`text-left p-4 bg-white rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md ${
-              isActive ? `ring-2 ${s.ring}` : ''
+            className={`group text-left p-5 bg-white rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
+              isActive
+                ? `ring-2 ${s.ring} ${s.border} shadow-md`
+                : 'border-gray-100 shadow-sm'
             }`}
           >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500">{s.label}</p>
-                <p className="mt-1 text-2xl font-bold text-gray-900">
+            <div className="flex items-start justify-between">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {s.label}
+                </p>
+                <p className="mt-2 text-3xl font-bold text-gray-900 tabular-nums">
                   {val.toLocaleString()}
                 </p>
-                <p className={`text-[11px] mt-0.5 ${s.color}`}>
-                  {pct(val)}% of submitted
-                </p>
               </div>
-              <div className={`p-2 rounded-full ${s.bg}`}>
+              <div
+                className={`p-2.5 rounded-xl ${s.bg} group-hover:scale-110 transition-transform shrink-0`}
+              >
                 <Icon className={s.color} size={20} />
+              </div>
+            </div>
+            {/* Mini progress bar */}
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-1">
+                <span className={`text-[11px] font-medium ${s.color}`}>
+                  {percentage}%
+                </span>
+              </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${s.barColor} rounded-full transition-all duration-500`}
+                  style={{ width: `${percentage}%` }}
+                />
               </div>
             </div>
           </button>
@@ -371,15 +405,25 @@ const GoldLoanLeads = () => {
   }, [fetchLeads]);
 
   return (
-    <>
+    <div className="space-y-6">
       <Toaster />
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Gold Loan Leads · Muthoot Finance
-        </h2>
-        <p className="text-sm text-gray-500">
-          Full funnel view of gold loan leads submitted to Muthoot Finance.
-        </p>
+
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900">
+            Gold Loan Leads
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Funnel overview of gold loan leads submitted to Muthoot Finance
+          </p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-lg">
+          <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+          <span className="text-xs font-medium text-amber-700">
+            Partner: Muthoot Finance
+          </span>
+        </div>
       </div>
 
       <FunnelCards
@@ -409,7 +453,7 @@ const GoldLoanLeads = () => {
         incomeRanges={incomeRanges}
         activeIncomeFilter={activeIncomeFilter}
       />
-    </>
+    </div>
   );
 };
 
