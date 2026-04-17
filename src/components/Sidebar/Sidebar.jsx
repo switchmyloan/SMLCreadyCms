@@ -363,6 +363,7 @@ import {
   Shield,
   UserCog,
   MessageCircle,
+  MousePointerClick,
 } from "lucide-react";
 
 const ICONS = {
@@ -375,7 +376,7 @@ const ICONS = {
   // New icons
   Zap, Globe, Link, Archive, BarChart2, Wallet, DollarSign, CreditCard,
   PenTool, Bell, Send, Link2, Database, Quote, Image, Shield, UserCog,
-  MessageCircle,
+  MessageCircle, MousePointerClick,
 };
 
 

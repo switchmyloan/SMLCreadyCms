@@ -444,6 +444,17 @@ export const routes = [
     order: 5,
     permission: "cms_management.view",
   },
+  {
+    path: "/credit-card-clicks",
+    label: "Card Clicks",
+    icon: "MousePointerClick",
+    showInSidebar: true,
+    group: "CMS Management",
+    groupIcon: "Settings",
+    groupOrder: 12,
+    order: 6,
+    permission: "cms_management.view",
+  },
 
   // --- Admin Management ---
   {
