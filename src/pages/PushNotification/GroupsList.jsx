@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   RefreshCw,
@@ -204,7 +204,10 @@ export default function GroupList() {
     setCreating(false);
   };
 
+  const didFetchRef = useRef(false);
   useEffect(() => {
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
     fetchGroups();
   }, []);
 
