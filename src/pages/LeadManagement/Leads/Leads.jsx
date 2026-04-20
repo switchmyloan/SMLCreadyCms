@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { getLeads } from '../../../api-services/Modules/Leads';
+import { getLender } from '../../../api-services/Modules/LenderApi';
 import { leadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -71,7 +72,7 @@ const getVisiblePageRows = (payload, rows = [], activeQuery) => {
   return rows.slice(0, perPage);
 };
 
-const exportToExcel = async (rawData) => {
+const exportToExcel = async (rawData, lenderNames = []) => {
   if (!rawData || rawData.length === 0) {
     ToastNotification.error("No data to export");
     return;
@@ -80,12 +81,12 @@ const exportToExcel = async (rawData) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Leads Lender Offers");
 
+  const lendersFromRows = rawData.flatMap(item =>
+    item.lender_responses?.map(lr => lr?.lender?.name) || []
+  );
+
   const allLenders = Array.from(
-    new Set(
-      rawData.flatMap(item =>
-        item.lender_responses?.map(lr => lr?.lender?.name)
-      )
-    )
+    new Set([...lenderNames, ...lendersFromRows])
   ).filter(Boolean);
 
   worksheet.columns = [
@@ -108,13 +109,13 @@ const exportToExcel = async (rawData) => {
     const lenderStatusMap = {};
 
     allLenders.forEach(lender => {
-      lenderStatusMap[lender] = "No";
+      lenderStatusMap[lender] = "N";
     });
 
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
       if (lenderName && lr.isOffer) {
-        lenderStatusMap[lenderName] = "Yes";
+        lenderStatusMap[lenderName] = "Y";
       }
     });
 
@@ -440,44 +441,37 @@ const Leads = () => {
   }, [fetchLeads, query]);
 
   const fetchAllLeadsForExport = useCallback(async (startDate, endDate) => {
-    const exportQuery = {
+    const response = await fetchWebLeadPage({
       ...query,
       page_no: 1,
-      limit: 500,
+      limit: 10000,
       filter_date: '',
       startDate,
       endDate,
-    };
+    });
 
-    const collectedRows = [];
-    let currentPage = 1;
-
-    while (true) {
-      const response = await fetchWebLeadPage({
-        ...exportQuery,
-        page_no: currentPage,
-      });
-
-      if (!response?.data?.success) {
-        throw new Error('Failed to fetch export data');
-      }
-
-      const payload = response?.data?.data || {};
-      const rows = payload?.rows || [];
-
-      collectedRows.push(...rows);
-
-      const totalRows = getTotalCount(payload, collectedRows);
-
-      if (!rows.length || collectedRows.length >= totalRows || rows.length < exportQuery.limit) {
-        break;
-      }
-
-      currentPage += 1;
+    if (!response?.data?.success) {
+      throw new Error('Failed to fetch export data');
     }
 
-    return collectedRows;
+    return response?.data?.data?.rows || [];
   }, [fetchWebLeadPage, query]);
+
+  const fetchAllLenderNames = useCallback(async () => {
+    try {
+      const response = await getLender(1, 10000, '');
+
+      if (!response?.data?.success) {
+        return [];
+      }
+
+      const rows = response?.data?.data?.rows || [];
+      return rows.map(row => row?.name).filter(Boolean);
+    } catch (err) {
+      console.error('fetchAllLenderNames failed', err);
+      return [];
+    }
+  }, []);
 
   const handleExport = async ({ startDate, endDate }) => {
     try {
@@ -490,11 +484,14 @@ const Leads = () => {
         return;
       }
 
-      await exportToExcel(exportRows);
+      const lenderNames = await fetchAllLenderNames();
+
+      await exportToExcel(exportRows, lenderNames);
 
       ToastNotification.success("Excel exported successfully");
       setIsExportModalOpen(false);
     } catch (error) {
+      console.error('Export failed', error);
       ToastNotification.error("Export failed");
     } finally {
       setIsExporting(false);
