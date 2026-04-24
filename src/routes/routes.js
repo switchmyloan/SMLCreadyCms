@@ -190,6 +190,17 @@ export const routes = [
     order: 6,
     permission: "lead_management.view",
   },
+  {
+    path: "/credit-card-clicks",
+    label: "Card Clicks",
+    icon: "MousePointerClick",
+    showInSidebar: true,
+    group: "Lead Management",
+    groupIcon: "Settings",
+    groupOrder: 1,
+    order: 7,
+    permission: "lead_management.view",
+  },
 
   // --- App Statistics ---
   {
@@ -444,17 +455,7 @@ export const routes = [
     order: 5,
     permission: "cms_management.view",
   },
-  {
-    path: "/credit-card-clicks",
-    label: "Card Clicks",
-    icon: "MousePointerClick",
-    showInSidebar: true,
-    group: "CMS Management",
-    groupIcon: "Settings",
-    groupOrder: 12,
-    order: 6,
-    permission: "cms_management.view",
-  },
+
 
   // --- Admin Management ---
   {
