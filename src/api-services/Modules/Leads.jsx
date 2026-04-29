@@ -118,6 +118,45 @@ export const getGoldLoanLeads = async (pageNo = 1, limit = 10, filters = {}) => 
     )
 };
 
+const buildLeadTrackerParams = (pageNo = 1, limit = 10, filters = {}) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', pageNo);
+    params.append('perPage', limit);
+    if (filters.type) params.append('type', filters.type);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.minIncome !== undefined && filters.minIncome !== null) params.append('minIncome', filters.minIncome);
+    if (filters.maxIncome !== undefined && filters.maxIncome !== null) params.append('maxIncome', filters.maxIncome);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+    if (filters.stage) params.append('stage', filters.stage);
+    return params.toString();
+};
+
+export const getAppLeadTracker = async (pageNo = 1, limit = 10, filters = {}) => {
+    return Api().get(`/leads/admin/app-lead-tracker?${buildLeadTrackerParams(pageNo, limit, filters)}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const getAllAppLeadTracker = async (filters = {}) => {
+    return Api().get(`/leads/admin/app-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const getWebLeadTracker = async (pageNo = 1, limit = 10, filters = {}) => {
+    return Api().get(`/leads/admin/web-lead-tracker?${buildLeadTrackerParams(pageNo, limit, filters)}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const getAllWebLeadTracker = async (filters = {}) => {
+    return Api().get(`/leads/admin/web-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
+        { skipAdminAppend: true }
+    );
+};
+
 export const getInAppLeads = async (
     pageNo,
     limit,
