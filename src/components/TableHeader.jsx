@@ -487,14 +487,21 @@ export const lenderColumn = ({ handleEdit, handleDelete, handleToggleStatus, tog
   },
 ];
 export const leadsColumn = ({ handleEdit, handleDelete }) => [
+
   {
-    header: 'SN',
-    id: 'sn',
-    enableSorting: false,
-    maxSize: 50,
-    cell: ({ row, table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      return (pageIndex * pageSize) + row.index + 1;
+    header: 'MRN',
+    accessorKey: 'mrn',
+    size: 110,
+    cell: ({ getValue }) => {
+      const mrn = getValue();
+      return (
+        <span
+          className="px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700"
+          title={mrn || 'N/A'}
+        >
+          {mrn || 'N/A'}
+        </span>
+      );
     },
   },
   {
@@ -519,8 +526,44 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
       );
     },
   },
+  {
+    header: 'Lender Lead IDs',
+    accessorKey: 'lender_responses',
+    size: 260,
+    cell: ({ row }) => {
+      const responses = row.original?.lender_responses || [];
+      const offers = responses.filter(
+        (lr) => lr?.isOffer && lr?.leadId
+      );
 
+      if (!offers.length) {
+        return <span className="text-gray-400 text-xs">N/A</span>;
+      }
 
+      const tooltip = offers
+        .map((lr) => `${lr?.lender?.name || 'Unknown'}: ${lr.leadId}`)
+        .join('\n');
+
+      return (
+        <div
+          className="flex flex-col gap-1 max-w-[260px]"
+          title={tooltip}
+        >
+          {offers.map((lr) => (
+            <div
+              key={lr.id}
+              className="text-xs truncate flex gap-1"
+            >
+              <span className="font-semibold text-gray-700">
+                {lr?.lender?.name || 'Unknown'}:
+              </span>
+              <span className="text-blue-700 truncate">{lr.leadId}</span>
+            </div>
+          ))}
+        </div>
+      );
+    },
+  },
   {
     header: 'Pan Card',
     accessorKey: 'panNumber',
@@ -621,23 +664,6 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     },
   },
   {
-    header: 'DOB',
-    accessorKey: 'dateOfBirth',
-    cell: ({ getValue }) => {
-      const dateStr = getValue();
-      if (!dateStr) {
-        return 'N/A';
-      }
-
-      const date = new Date(dateStr);
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-
-      return `${day}/${month}/${year}`;
-    },
-  },
-  {
     header: 'Created At',
     accessorKey: 'createdAt',
     cell: ({ getValue }) => {
@@ -696,6 +722,22 @@ export const partnerLeadsColumn = ({ handleEdit }) => [
     },
   },
   {
+    header: 'MRN',
+    accessorKey: 'mrn',
+    size: 110,
+    cell: ({ getValue }) => {
+      const mrn = getValue();
+      return (
+        <span
+          className="px-2 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700"
+          title={mrn || 'N/A'}
+        >
+          {mrn || 'N/A'}
+        </span>
+      );
+    },
+  },
+  {
     header: 'Name',
     accessorKey: 'name',
     size: 120,
@@ -713,6 +755,49 @@ export const partnerLeadsColumn = ({ handleEdit }) => [
           title={fullName}
         >
           {fullName}
+        </div>
+      );
+    },
+  },
+  {
+    header: 'Lender Lead IDs',
+    id: 'lender_lead_ids',
+    size: 260,
+    cell: ({ row }) => {
+      const raw = row.original?.lender_responses;
+      const responses = Array.isArray(raw)
+        ? raw
+        : raw && typeof raw === 'object'
+          ? Object.values(raw)
+          : [];
+      const offers = responses.filter(
+        (lr) => lr?.isOffer && lr?.leadId
+      );
+
+      if (!offers.length) {
+        return <span className="text-gray-400 text-xs">N/A</span>;
+      }
+
+      const tooltip = offers
+        .map((lr) => `${lr?.lender?.name || 'Unknown'}: ${lr.leadId}`)
+        .join('\n');
+
+      return (
+        <div
+          className="flex flex-col gap-1 max-w-[260px]"
+          title={tooltip}
+        >
+          {offers.map((lr, idx) => (
+            <div
+              key={idx}
+              className="text-xs truncate flex gap-1"
+            >
+              <span className="font-semibold text-gray-700">
+                {lr?.lender?.name || 'Unknown'}:
+              </span>
+              <span className="text-blue-700 truncate">{lr.leadId}</span>
+            </div>
+          ))}
         </div>
       );
     },

@@ -39,6 +39,8 @@ const exportToExcel = async (rawData) => {
   ).filter(Boolean);
 
   worksheet.columns = [
+    { header: "Lead ID", key: "leadId", width: 10 },
+    { header: "MRN", key: "mrn", width: 20 },
     { header: "First Name", key: "firstName", width: 15 },
     { header: "Last Name", key: "lastName", width: 15 },
     { header: "Email", key: "email", width: 25 },
@@ -51,7 +53,7 @@ const exportToExcel = async (rawData) => {
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
-      width: 15,
+      width: 20,
     })),
   ];
 
@@ -66,20 +68,20 @@ const exportToExcel = async (rawData) => {
 
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
-      if (lenderName && lr.isOffer) {
-        lenderStatusMap[lenderName] = "Yes";
+      if (!lenderName) return;
+      if (lr.isOffer) {
+        lenderStatusMap[lenderName] = lr?.leadId || "Yes";
       }
     });
 
     worksheet.addRow({
+      leadId: item.id || "N/A",
+      mrn: item.mrn || "N/A",
       firstName: item.firstName || "N/A",
       lastName: item.lastName || "N/A",
       email: item.emailAddress || "N/A",
       phone: item.phoneNumber || "N/A",
       income: item.income || item.monthlyIncome || 0,
-      //  ipAddress: item.ipAddress,
-      // creditConsentText: item.creditConsentText,
-      // communicationConsentText: item.communicationConsentText,
       createdAt: item.createdAt
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",

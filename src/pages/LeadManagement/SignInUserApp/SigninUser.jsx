@@ -52,6 +52,8 @@ const getTotalCount = (payload, rows = []) => {
   );
 };
 
+
+
 const exportToExcel = async (rawData, lenderNames = []) => {
   if (!rawData || rawData.length === 0) {
     ToastNotification.error("No data to export");
@@ -70,6 +72,8 @@ const exportToExcel = async (rawData, lenderNames = []) => {
   ).filter(Boolean);
 
   worksheet.columns = [
+    { header: "Lead ID", key: "leadId", width: 10 },
+    { header: "MRN", key: "mrn", width: 20 },
     { header: "First Name", key: "firstName", width: 15 },
     { header: "Last Name", key: "lastName", width: 15 },
     { header: "Email", key: "email", width: 25 },
@@ -100,12 +104,15 @@ const exportToExcel = async (rawData, lenderNames = []) => {
 
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
-      if (lenderName && lr.isOffer) {
-        lenderStatusMap[lenderName] = "Y";
+      if (!lenderName) return;
+      if (lr.isOffer) {
+        lenderStatusMap[lenderName] = lr?.leadId || "Y";
       }
     });
 
     worksheet.addRow({
+      leadId: item.id || "N/A",
+      mrn: item.mrn || "N/A",
       firstName: item.firstName || "N/A",
       lastName: item.lastName || "N/A",
       email: item.emailAddress || "N/A",
@@ -481,7 +488,16 @@ const SignInUsers = () => {
       }
 
       const lenderNames = await fetchAllLenderNames();
-
+      console.log(exportRows, "exportRows");
+      const sampleWithOffer = exportRows.find(r =>
+        r.lender_responses?.some(lr => lr.isOffer)
+      );
+      if (sampleWithOffer) {
+        console.log(
+          "SAMPLE lender_responses (one user with offer):",
+          sampleWithOffer.lender_responses
+        );
+      }
       await exportToExcel(exportRows, lenderNames);
 
       ToastNotification.success("Excel exported successfully");
