@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
+import { maskPhone } from "../../../utils/maskPhone";
 
 export default function Tabs() {
     const location = useLocation();
@@ -59,7 +60,7 @@ export default function Tabs() {
 
                                     <div>
                                         <p className="text-sm font-medium text-gray-700">Phone Number:</p>
-                                        <p className="text-gray-700 font-medium">{lead.phoneNumber}</p>
+                                        <p className="text-gray-700 font-medium">{maskPhone(lead.phoneNumber)}</p>
                                     </div>
 
                                     <div>

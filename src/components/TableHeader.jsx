@@ -3,6 +3,7 @@ const S3_IMAGE_PATH = import.meta.env.VITE_IMAGE_URL
 import React from 'react';
 import { getLocationFromPostalCode } from '../../utils/location'
 import { FaUserPlus } from "react-icons/fa";
+import { maskPhone } from '../utils/maskPhone';
 
 const parseBooleanLike = (value) => {
   if (typeof value === 'boolean') return value;
@@ -805,7 +806,7 @@ export const partnerLeadsColumn = ({ handleEdit }) => [
    {
     header: 'Phone number ',
     accessorKey: 'phoneNumber',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => maskPhone(getValue()) || 'N/A',
   },
   {
     header: 'UTM Source',
@@ -913,7 +914,7 @@ export const MFAllUsersColumn = ({ handleEdit, handleDelete }) => [
   {
     header: 'Number',
     accessorKey: 'phoneNumber',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => maskPhone(getValue()) || 'N/A',
   },
   {
     header: 'Email',
@@ -1063,15 +1064,16 @@ export const MFAllInternalUsersColumn = ({ handleEdit, handleDelete }) => [
     header: 'Number',
     accessorKey: 'phoneNumber',
     cell: ({ row }) => {
-      const loan_id = row.original?.user?.phoneNumber || 'N/A';
+      const phone = row.original?.user?.phoneNumber;
+      const display = phone ? maskPhone(phone) : 'N/A';
 
       return (
         <div
           className="truncate"
           style={{ maxWidth: '120px' }}
-          title={loan_id} // Tooltip shows full name on hover
+          title={display}
         >
-          {loan_id}
+          {display}
         </div>
       );
     },
@@ -1233,7 +1235,7 @@ export const signInColumns = ({ handleEdit, handleDelete }) => [
   {
     header: 'Number',
     accessorKey: 'phoneNumber',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => maskPhone(getValue()) || 'N/A',
   },
   {
     header: 'Gender',
@@ -1400,7 +1402,7 @@ export const archiveColumns = ({ handleEdit, handleDelete }) => [
   {
     header: 'phoneNumber',
     accessorKey: 'phoneNumber',
-    cell: ({ getValue }) => getValue() || 'N/A',
+    cell: ({ getValue }) => maskPhone(getValue()) || 'N/A',
   },
   {
     header: 'BioMetric',

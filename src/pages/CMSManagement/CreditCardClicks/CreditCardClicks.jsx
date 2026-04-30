@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "@components/Notification/ToastNotification";
+import { maskPhone } from "../../../utils/maskPhone";
 import {
   getCreditCardClicks,
   getAllCreditCardClicks,
@@ -460,7 +461,7 @@ const CreditCardClicks = () => {
                             )}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-600">
-                            {row.principal?.phoneNumber || <span className="text-gray-300">-</span>}
+                            {row.principal?.phoneNumber ? maskPhone(row.principal.phoneNumber) : <span className="text-gray-300">-</span>}
                           </td>
                           <td className="px-4 py-3">
                             <code className="text-xs bg-gray-50 text-gray-500 px-1.5 py-0.5 rounded font-mono">{row.ipAddress || "-"}</code>
@@ -627,7 +628,7 @@ const CreditCardClicks = () => {
                           </p>
                           {user.principal?.phoneNumber && (
                             <p className="text-xs text-gray-400 truncate">
-                              {user.principal.phoneNumber}
+                              {maskPhone(user.principal.phoneNumber)}
                             </p>
                           )}
                         </div>

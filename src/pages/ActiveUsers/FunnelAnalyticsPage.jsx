@@ -20,6 +20,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { getUserFunnelAnalytics, getUserJourney } from '../../api-services/Modules/ActiveUsersApi';
+import { maskPhone } from '../../utils/maskPhone';
 
 // Predefined funnel templates
 const FUNNEL_TEMPLATES = {
@@ -108,7 +109,7 @@ const UserFunnelDetailModal = ({ user, funnelPages, onClose }) => {
                 <div className="flex items-center gap-4 mt-1 text-white/80 text-sm">
                   <span className="flex items-center gap-1">
                     <Phone size={14} />
-                    {user.phoneNumber || '-'}
+                    {maskPhone(user.phoneNumber) || '-'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar size={14} />
@@ -754,7 +755,7 @@ const FunnelAnalyticsPage = () => {
                               )}
                               <div>
                                 <p className="font-medium text-gray-800 text-sm">{user.fullName || 'Unknown'}</p>
-                                <p className="text-xs text-gray-500">{user.phoneNumber}</p>
+                                <p className="text-xs text-gray-500">{maskPhone(user.phoneNumber)}</p>
                               </div>
                             </div>
                           </td>

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { getActiveUsers, getLendersForFilter } from '../../api-services/Modules/ActiveUsersApi';
 import { Link, useNavigate } from 'react-router-dom';
+import { maskPhone } from '../../utils/maskPhone';
 
 const ActiveUsersList = () => {
   const navigate = useNavigate();
@@ -224,7 +225,7 @@ const ActiveUsersList = () => {
         accessorKey: 'phoneNumber',
         header: 'Phone',
         cell: ({ row }) => (
-          <span className="text-gray-600 text-sm">{row.original.phoneNumber}</span>
+          <span className="text-gray-600 text-sm">{maskPhone(row.original.phoneNumber)}</span>
         ),
         size: 140,
       },

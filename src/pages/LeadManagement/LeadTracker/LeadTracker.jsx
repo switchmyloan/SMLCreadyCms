@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { maskPhone } from '../../../utils/maskPhone';
 import {
   Users,
   UserPlus,
@@ -767,7 +768,7 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 text-sm truncate">{fullName || 'N/A'}</p>
-                            {row.phone && <p className="text-xs text-gray-500">{row.phone}</p>}
+                            {row.phone && <p className="text-xs text-gray-500">{maskPhone(row.phone)}</p>}
                             {row.email && <p className="text-xs text-gray-400 truncate max-w-[180px]">{row.email}</p>}
                           </div>
                         </div>

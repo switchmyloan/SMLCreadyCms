@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { maskPhone } from '../../utils/maskPhone';
 import {
   ArrowLeft,
   User,
@@ -141,7 +142,7 @@ const ActiveUserDetail = () => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {user.fullName?.trim() || user.firstName || user.phoneNumber || `User #${user.id}`}
+              {user.fullName?.trim() || user.firstName || maskPhone(user.phoneNumber) || `User #${user.id}`}
             </h1>
             <p className="text-gray-500 text-sm flex items-center gap-2">
               User ID: <span className="text-indigo-600 font-semibold">#{user.id}</span>
@@ -193,10 +194,10 @@ const ActiveUserDetail = () => {
                 </div>
               )}
               <h2 className="text-lg font-bold text-gray-900">
-                {user.fullName?.trim() || user.firstName || user.phoneNumber || `User #${user.id}`}
+                {user.fullName?.trim() || user.firstName || maskPhone(user.phoneNumber) || `User #${user.id}`}
               </h2>
               <p className="text-gray-500 text-sm">{user.emailAddress || 'No email'}</p>
-              <p className="text-gray-400 text-sm">{user.phoneNumber || 'No phone'}</p>
+              <p className="text-gray-400 text-sm">{maskPhone(user.phoneNumber) || 'No phone'}</p>
             </div>
 
             <div className="mt-6 pt-6 border-t border-gray-100 space-y-4">
@@ -273,7 +274,7 @@ const ActiveUserDetail = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <DetailItem icon={User} label="Full Name" value={user.fullName} />
                     <DetailItem icon={Mail} label="Email Address" value={user.emailAddress} />
-                    <DetailItem icon={Phone} label="Phone Number" value={user.phoneNumber} />
+                    <DetailItem icon={Phone} label="Phone Number" value={maskPhone(user.phoneNumber)} />
                     <DetailItem icon={User} label="Gender" value={user.gender} className="capitalize" />
                     <DetailItem icon={Calendar} label="Date of Birth" value={formatDate(user.dateOfBirth)} />
                     <DetailItem icon={Globe} label="IP Address" value={user.ipAddress} />

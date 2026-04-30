@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import ToastNotification from '@components/Notification/ToastNotification';
 import { getGoldLoanLeads, getAllGoldLoanLeads } from '../../../api-services/Modules/Leads';
+import { maskPhone } from '../../../utils/maskPhone';
 
 /* ============== Helpers ============== */
 const formatDate = (val) => {
@@ -483,7 +484,7 @@ const GoldLoanLeads = () => {
                           </div>
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 text-sm truncate">{fullName || 'N/A'}</p>
-                            {lead.phoneNumber && <p className="text-xs text-gray-500">{lead.phoneNumber}</p>}
+                            {lead.phoneNumber && <p className="text-xs text-gray-500">{maskPhone(lead.phoneNumber)}</p>}
                             {lead.emailAddress && <p className="text-xs text-gray-400 truncate max-w-[180px]">{lead.emailAddress}</p>}
                           </div>
                         </div>

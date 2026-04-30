@@ -489,15 +489,33 @@ const Leads = () => {
     fetchLeads(query);
   }, [fetchLeads, query]);
 
-  const fetchAllLeadsForExport = useCallback(async (startDate, endDate) => {
-    const response = await fetchWebLeadPage({
+  // mode: 'today' | 'yesterday' | 'range' | 'custom' (any string)
+  // For today/yesterday we send `filter_date` (which the backend resolves
+  // via CURRENT_DATE — timezone-safe). For an explicit range we send
+  // startDate / endDate. This matches how the table view filters by date
+  // and avoids YYYY-MM-DD strings being parsed as midnight UTC, which
+  // dropped today's IST-early-morning records from the export.
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode) => {
+    const normalizedMode = String(mode || '').toLowerCase().trim();
+    const isToday = normalizedMode.includes('today');
+    const isYesterday = normalizedMode.includes('yesterday');
+
+    const baseQuery = {
       ...query,
       page_no: 1,
       limit: 10000,
       filter_date: '',
-      startDate,
-      endDate,
-    });
+      startDate: null,
+      endDate: null,
+    };
+
+    const exportQuery = isToday
+      ? { ...baseQuery, filter_date: 'today' }
+      : isYesterday
+      ? { ...baseQuery, filter_date: 'yesterday' }
+      : { ...baseQuery, startDate, endDate };
+
+    const response = await fetchWebLeadPage(exportQuery);
 
     if (!response?.data?.success) {
       throw new Error('Failed to fetch export data');
@@ -522,11 +540,11 @@ const Leads = () => {
     }
   }, []);
 
-  const handleExport = async ({ startDate, endDate }) => {
+  const handleExport = async ({ startDate, endDate, mode }) => {
     try {
       setIsExporting(true);
 
-      const exportRows = await fetchAllLeadsForExport(startDate, endDate);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode);
 
       if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");

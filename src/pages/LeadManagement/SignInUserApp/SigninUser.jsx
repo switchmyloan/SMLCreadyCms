@@ -488,15 +488,31 @@ const SignInUsers = () => {
     fetchBlogs(query);
   }, [fetchBlogs, query]);
 
-  const fetchAllLeadsForExport = useCallback(async (startDate, endDate) => {
-    const response = await fetchInAppLeadPage({
+  // mode: 'today' | 'yesterday' | 'range' | etc.
+  // For today/yesterday we send filter_date so the backend resolves via
+  // CURRENT_DATE (timezone-safe). YYYY-MM-DD strings get parsed as
+  // midnight UTC otherwise, which silently drops IST early-morning rows.
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode) => {
+    const normalizedMode = String(mode || '').toLowerCase().trim();
+    const isToday = normalizedMode.includes('today');
+    const isYesterday = normalizedMode.includes('yesterday');
+
+    const baseQuery = {
       ...query,
       page_no: 1,
       limit: 10000,
       filter_date: '',
-      startDate,
-      endDate,
-    });
+      startDate: null,
+      endDate: null,
+    };
+
+    const exportQuery = isToday
+      ? { ...baseQuery, filter_date: 'today' }
+      : isYesterday
+      ? { ...baseQuery, filter_date: 'yesterday' }
+      : { ...baseQuery, startDate, endDate };
+
+    const response = await fetchInAppLeadPage(exportQuery);
 
     if (!response?.data?.success) {
       throw new Error('Failed to fetch export data');
@@ -521,11 +537,11 @@ const SignInUsers = () => {
     }
   }, []);
 
-  const handleExport = async ({ startDate, endDate }) => {
+  const handleExport = async ({ startDate, endDate, mode }) => {
     try {
       setIsExporting(true);
 
-      const exportRows = await fetchAllLeadsForExport(startDate, endDate);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode);
 
       if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");

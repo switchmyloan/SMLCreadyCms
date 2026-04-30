@@ -173,6 +173,7 @@
 
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { maskPhone } from '../../utils/maskPhone';
 import { 
   ArrowLeft, User, Mail, Phone, Calendar, 
   ShieldCheck, Wallet, Receipt, Percent, 
@@ -233,7 +234,7 @@ const AllUserDetail = () => {
           <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
             <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-6">Contact & Verification</h3>
             <div className="space-y-5">
-              <DetailItem icon={Phone} label="Phone Number" value={userInfo?.phoneNumber} />
+              <DetailItem icon={Phone} label="Phone Number" value={maskPhone(userInfo?.phoneNumber)} />
               <DetailItem icon={Mail} label="Email Address" value={userInfo?.emailAddress} />
               <div className="pt-4 border-t border-slate-50 grid grid-cols-2 gap-4">
                 <div>

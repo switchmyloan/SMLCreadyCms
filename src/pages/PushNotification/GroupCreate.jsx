@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import SelectableDataTable from "../../components/Table/SelectableDataTable";
 import { addGroupUsers, getAppLeadTracker } from "../../api-services/Modules/Leads";
 import { Calendar, ChevronDown, DollarSign, Filter, RotateCcw, Search, CheckSquare, Users, Copy, Check } from "lucide-react";
+import { maskPhone } from "../../utils/maskPhone";
 
 // --- Helpers ---
 const normalizeGender = (gender) => {
@@ -70,7 +71,11 @@ export default function GroupCreate() {
     });
 
     const columns = [
-        { accessorKey: 'phoneNumber', header: 'Number' },
+        {
+            accessorKey: 'phoneNumber',
+            header: 'Number',
+            cell: ({ getValue }) => maskPhone(getValue()) || 'N/A',
+        },
         { accessorKey: 'firstName', header: 'Name' },
         { accessorKey: 'emailAddress', header: 'Email' },
         { accessorKey: 'gender', header: 'Gender' },

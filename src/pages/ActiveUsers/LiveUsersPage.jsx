@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getLiveUsers, getUserJourney } from '../../api-services/Modules/ActiveUsersApi';
 import { Link } from 'react-router-dom';
+import { maskPhone } from '../../utils/maskPhone';
 
 const LiveUsersPage = () => {
   const [liveUsers, setLiveUsers] = useState([]);
@@ -177,7 +178,7 @@ const LiveUsersPage = () => {
                           <p className="font-medium text-gray-800">
                             {user.fullName || `User #${user.userId}`}
                           </p>
-                          <p className="text-xs text-gray-500">{user.phoneNumber}</p>
+                          <p className="text-xs text-gray-500">{maskPhone(user.phoneNumber)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -251,7 +252,7 @@ const LiveUsersPage = () => {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-700">
-                            {user.fullName || user.phoneNumber}
+                            {user.fullName || maskPhone(user.phoneNumber)}
                           </p>
                           <p className="text-xs text-gray-400">
                             Last on: {user.currentPage}
@@ -304,7 +305,7 @@ const LiveUsersPage = () => {
                     </div>
                     <div>
                       <p className="font-medium text-gray-800">{userJourney.fullName}</p>
-                      <p className="text-xs text-gray-500">{userJourney.phoneNumber}</p>
+                      <p className="text-xs text-gray-500">{maskPhone(userJourney.phoneNumber)}</p>
                     </div>
                   </div>
 
