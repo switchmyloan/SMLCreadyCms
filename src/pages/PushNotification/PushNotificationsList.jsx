@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { sendPushNotification } from "../../api-services/Modules/Leads";
+import {
+  sendPushNotification,
+  schedulePushNotification,
+} from "../../api-services/Modules/Leads";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "../../components/Notification/ToastNotification";
 import {
@@ -16,6 +19,8 @@ import {
   Image,
   MessageSquare,
   AlertCircle,
+  Clock,
+  Calendar,
 } from "lucide-react";
 
 export default function PushNotificationList() {
@@ -27,6 +32,11 @@ export default function PushNotificationList() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [lastSendResult, setLastSendResult] = useState(null);
+
+  // Send mode in the confirm modal
+  const [sendMode, setSendMode] = useState("now"); // 'now' | 'schedule'
+  const [scheduleAt, setScheduleAt] = useState(""); // datetime-local string
+  const [scheduling, setScheduling] = useState(false);
 
   async function fetchTemplates() {
     setLoading(true);
@@ -49,6 +59,15 @@ export default function PushNotificationList() {
     setSelectedTemplate(template);
     setShowConfirm(true);
     setLastSendResult(null);
+    setSendMode("now");
+    // Default schedule = +15 mins from now, formatted for datetime-local input
+    const d = new Date(Date.now() + 15 * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, "0");
+    setScheduleAt(
+      `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+        d.getHours()
+      )}:${pad(d.getMinutes())}`
+    );
   };
 
   async function sendNotification() {
@@ -91,6 +110,52 @@ export default function PushNotificationList() {
 
     setSendingId(null);
     setSelectedTemplate(null);
+  }
+
+  async function scheduleNotification() {
+    if (!selectedTemplate) return;
+    if (!scheduleAt) {
+      ToastNotification.error("Please pick a date & time");
+      return;
+    }
+    const when = new Date(scheduleAt);
+    if (Number.isNaN(when.getTime())) {
+      ToastNotification.error("Invalid date/time");
+      return;
+    }
+    if (when.getTime() <= Date.now()) {
+      ToastNotification.error("Schedule time must be in the future");
+      return;
+    }
+
+    setScheduling(true);
+    try {
+      const response = await schedulePushNotification({
+        templateId: selectedTemplate.id,
+        scheduledAt: when.toISOString(),
+      });
+      if (response?.data?.success) {
+        ToastNotification.success(
+          `Scheduled for ${when.toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
+          })}`
+        );
+        setShowConfirm(false);
+        setSelectedTemplate(null);
+      } else {
+        ToastNotification.error(
+          response?.data?.message || "Failed to schedule notification"
+        );
+      }
+    } catch (error) {
+      ToastNotification.error(
+        error?.response?.data?.message || "Failed to schedule notification"
+      );
+    }
+    setScheduling(false);
   }
 
   const handleEdit = (template) => {
@@ -348,10 +413,59 @@ export default function PushNotificationList() {
               </div>
             </div>
 
-            <p className="text-sm text-gray-500 mb-4">
-              This will send a push notification to all users in the selected
-              group. This action cannot be undone.
-            </p>
+            {/* Send Now / Schedule toggle */}
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <button
+                type="button"
+                onClick={() => setSendMode("now")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                  sendMode === "now"
+                    ? "bg-green-50 border-green-300 text-green-700"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <Send className="w-4 h-4" />
+                Send Now
+              </button>
+              <button
+                type="button"
+                onClick={() => setSendMode("schedule")}
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg border text-sm font-semibold transition-colors ${
+                  sendMode === "schedule"
+                    ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                    : "bg-white border-gray-200 text-gray-500 hover:bg-gray-50"
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                Schedule
+              </button>
+            </div>
+
+            {sendMode === "schedule" ? (
+              <div className="mb-4">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Send at
+                </label>
+                <input
+                  type="datetime-local"
+                  value={scheduleAt}
+                  onChange={(e) => setScheduleAt(e.target.value)}
+                  min={new Date(Date.now() + 60 * 1000)
+                    .toISOString()
+                    .slice(0, 16)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 text-sm"
+                />
+                <p className="text-xs text-gray-400 mt-1.5">
+                  Notification will be sent automatically at this time.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 mb-4">
+                This will send a push notification to all users in the selected
+                group. This action cannot be undone.
+              </p>
+            )}
 
             <div className="flex gap-3">
               <button
@@ -359,17 +473,33 @@ export default function PushNotificationList() {
                   setShowConfirm(false);
                   setSelectedTemplate(null);
                 }}
-                className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={scheduling}
+                className="flex-1 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
-              <button
-                onClick={sendNotification}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                Send Now
-              </button>
+              {sendMode === "now" ? (
+                <button
+                  onClick={sendNotification}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  Send Now
+                </button>
+              ) : (
+                <button
+                  onClick={scheduleNotification}
+                  disabled={scheduling || !scheduleAt}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {scheduling ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Clock className="w-4 h-4" />
+                  )}
+                  {scheduling ? "Scheduling..." : "Schedule"}
+                </button>
+              )}
             </div>
           </div>
         </div>

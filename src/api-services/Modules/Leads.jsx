@@ -49,12 +49,47 @@ export const getRawMisZypeData = async (pageNo, limit) => {
         }
     )
 };
-export const getPartnerLeads = async () => {
-    return Api().get(`/leads/admin/partner-leads`,
-        {
-            skipAdminAppend: true,
-        }
-    )
+export const getPartnerLeads = async (pageNo = 1, limit = 10, filters = {}) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', pageNo);
+    params.append('perPage', limit);
+
+    if (filters.type) params.append('type', filters.type);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.jobType) params.append('jobType', filters.jobType);
+    if (filters.minIncome !== undefined && filters.minIncome !== null) params.append('minIncome', filters.minIncome);
+    if (filters.maxIncome !== undefined && filters.maxIncome !== null) params.append('maxIncome', filters.maxIncome);
+    if (filters.minAge !== undefined && filters.minAge !== null) params.append('minAge', filters.minAge);
+    if (filters.maxAge !== undefined && filters.maxAge !== null) params.append('maxAge', filters.maxAge);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+
+    return Api().get(`/leads/admin/partner-leads?${params.toString()}`,
+        { skipAdminAppend: true }
+    );
+};
+
+// All rows for export (no pagination, applies same filters)
+export const getAllPartnerLeads = async (filters = {}) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', 1);
+    params.append('perPage', 100000);
+
+    if (filters.type) params.append('type', filters.type);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.jobType) params.append('jobType', filters.jobType);
+    if (filters.minIncome !== undefined && filters.minIncome !== null) params.append('minIncome', filters.minIncome);
+    if (filters.maxIncome !== undefined && filters.maxIncome !== null) params.append('maxIncome', filters.maxIncome);
+    if (filters.minAge !== undefined && filters.minAge !== null) params.append('minAge', filters.minAge);
+    if (filters.maxAge !== undefined && filters.maxAge !== null) params.append('maxAge', filters.maxAge);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+
+    return Api().get(`/leads/admin/partner-leads?${params.toString()}`,
+        { skipAdminAppend: true }
+    );
 };
 export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
     const params = new URLSearchParams();
@@ -242,6 +277,28 @@ export const sendPushNotification = async (payload) => {
             skipAdminAppend: true,
         }
     )
+};
+
+export const schedulePushNotification = async (payload) => {
+    return Api().post(`/push-notification/admin/schedule`, payload,
+        { skipAdminAppend: true }
+    );
+};
+
+export const listPushSchedules = async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.status) params.append('status', filters.status);
+    if (filters.templateId) params.append('templateId', filters.templateId);
+    const qs = params.toString();
+    return Api().get(`/push-notification/admin/schedules${qs ? `?${qs}` : ''}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const cancelPushSchedule = async (id) => {
+    return Api().delete(`/push-notification/admin/schedules/${id}`,
+        { skipAdminAppend: true }
+    );
 };
 
 export const AddLender = async (formData) => {

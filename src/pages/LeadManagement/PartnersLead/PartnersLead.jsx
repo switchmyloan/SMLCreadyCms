@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { getLeads, getPartnerLeads } from '../../../api-services/Modules/Leads';
+import { getPartnerLeads, getAllPartnerLeads } from '../../../api-services/Modules/Leads';
 import { partnerLeadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -209,113 +209,74 @@ const Leads = () => {
 
   /* ========================= FETCH ========================= */
 
-  const fetchLeads = async () => {
+  // StrictMode double-fire guard
+  const fetchSeqRef = useRef(0);
+
+  const buildApiFilters = useCallback(() => {
+    const f = {};
+    if (query.filter_date) f.type = query.filter_date;
+    if (query.search) f.search = query.search;
+    if (query.gender) f.gender = query.gender;
+    if (query.jobType) f.jobType = query.jobType;
+    if (query.minIncome !== undefined) f.minIncome = query.minIncome;
+    if (query.maxIncome !== undefined) f.maxIncome = query.maxIncome;
+    if (query.minAge !== undefined) f.minAge = query.minAge;
+    if (query.maxAge !== undefined) f.maxAge = query.maxAge;
+    if (query.startDate) f.fromDate = query.startDate;
+    if (query.endDate) f.toDate = query.endDate;
+    return f;
+  }, [
+    query.filter_date, query.search, query.gender, query.jobType,
+    query.minIncome, query.maxIncome, query.minAge, query.maxAge,
+    query.startDate, query.endDate,
+  ]);
+
+  const fetchLeads = useCallback(async () => {
+    const seq = ++fetchSeqRef.current;
     try {
       setLoading(true);
-      const response = await getPartnerLeads();
+      const response = await getPartnerLeads(
+        pagination.pageIndex + 1,
+        pagination.pageSize,
+        buildApiFilters()
+      );
+      if (seq !== fetchSeqRef.current) return; // stale
+
       if (response?.data?.success) {
-        setRawData(response.data.data.rows || []);
+        const rows = response.data.data.rows || [];
+        const total = response.data.data.pagination?.total || 0;
+        setRawData(rows);
+        setData(rows);
+        setTotalDataCount(total);
       } else {
+        setRawData([]);
+        setData([]);
+        setTotalDataCount(0);
         ToastNotification.error("Failed to fetch leads");
       }
     } catch (err) {
-      ToastNotification.error("API Error");
+      console.error(err);
+      if (seq === fetchSeqRef.current) ToastNotification.error("API Error");
     } finally {
-      setLoading(false);
+      if (seq === fetchSeqRef.current) setLoading(false);
     }
-  };
+  }, [pagination.pageIndex, pagination.pageSize, buildApiFilters]);
 
-  useEffect(() => {
-    fetchLeads();
-  }, []);
+  useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
-  /* ========================= FILTERING ========================= */
-
-  const filteredData = useMemo(() => {
-    let rows = [...rawData];
-
-    if (query.search) {
-      const term = query.search.toLowerCase();
-      rows = rows.filter(item =>
-        item.firstName?.toLowerCase().includes(term) ||
-        item.lastName?.toLowerCase().includes(term) ||
-        item.emailAddress?.toLowerCase().includes(term) ||
-        item.phoneNumber?.includes(term)
-      );
-    }
-
-    if (query.gender) {
-      rows = rows.filter(r => r.gender?.toLowerCase() === query.gender);
-    }
-
-    if (query.minIncome !== undefined && query.maxIncome !== undefined) {
-      rows = rows.filter(item => {
-        const income = Number(String(item.income || item.monthlyIncome || 0).replace(/,/g, ''));
-        return income >= query.minIncome && income <= query.maxIncome;
-      });
-    }
-
-    if (query.filter_date) {
-      const today = new Date();
-      const yesterday = new Date();
-      yesterday.setDate(today.getDate() - 1);
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-        if (query.filter_date === 'today') return created.toDateString() === today.toDateString();
-        if (query.filter_date === 'yesterday') return created.toDateString() === yesterday.toDateString();
-        return true;
-      });
-    }
-
-    if (query.startDate && query.endDate) {
-      rows = rows.filter(item => {
-        const created = new Date(item.createdAt);
-        return created >= new Date(query.startDate) && created <= new Date(query.endDate);
-      });
-    }
-
-    if (query.minAge !== undefined && query.maxAge !== undefined) {
-      rows = rows.filter(item => {
-        if (!item.dateOfBirth) return false;
-        const dob = new Date(item.dateOfBirth);
-        const age = Math.abs(new Date(Date.now() - dob.getTime()).getUTCFullYear() - 1970);
-        return age >= query.minAge && age <= query.maxAge;
-      });
-    }
-
-    if (query.jobType) {
-      rows = rows.filter(item => item.jobType?.toLowerCase() === query.jobType);
-    }
-
-    return rows;
-  }, [rawData, query]);
-
+  /* ========================= SUMMARY ========================= */
+  // Page-level summary built off the current page's rows. Total comes from server.
   const summaryMetrics = useMemo(() => {
-    const totalLeads = filteredData.length;
-    const totalLoanAmount = filteredData.reduce(
+    const totalLoanAmount = rawData.reduce(
       (sum, item) => sum + Number(item.requiredLoanAmount || item.loanAmount || 0), 0
     );
     const today = new Date().toDateString();
-    const todayLeads = filteredData.filter(item => new Date(item.createdAt).toDateString() === today).length;
-    const dedupe = filteredData.filter(item => item.isDuplicate === true).length;
-    return { totalLeads, totalLoanAmount, todayLeads, dedupe };
-  }, [filteredData]);
-
-  /* ========================= PAGINATION ========================= */
-
-  useEffect(() => {
-    const start = pagination.pageIndex * pagination.pageSize;
-    const end = start + pagination.pageSize;
-    setData(filteredData.slice(start, end));
-    setTotalDataCount(filteredData.length);
-  }, [filteredData, pagination]);
-
-  useEffect(() => {
-    const totalPages = Math.max(1, Math.ceil(filteredData.length / pagination.pageSize));
-    if (pagination.pageIndex > totalPages - 1) {
-      setPagination(prev => ({ ...prev, pageIndex: Math.max(totalPages - 1, 0) }));
-    }
-  }, [filteredData.length, pagination.pageIndex, pagination.pageSize]);
+    const todayLeads = rawData.filter(
+      item => new Date(item.createdAt).toDateString() === today
+    ).length;
+    const dedupe = rawData.filter(item => item.isDuplicate === true).length;
+    return { totalLeads: totalDataCount, totalLoanAmount, todayLeads, dedupe };
+  }, [rawData, totalDataCount]);
 
   /* ========================= HANDLERS ========================= */
 
@@ -377,58 +338,37 @@ const Leads = () => {
     try {
       setIsExporting(true);
 
-      // 🔍 DEBUG — check browser console to see exactly what ExportModal is sending
-      console.log("📦 Export triggered with:", { mode, startDate, endDate });
-      console.log("📊 rawData length at export time:", rawData.length);
-
-      // 🔧 Normalize mode to lowercase to handle any casing from ExportModal
-      // e.g. "Today", "TODAY", "today", "yesterday", "dateRange", "date_range", "custom" all handled
       const normalizedMode = String(mode || '').toLowerCase().trim();
-
       const isToday     = normalizedMode.includes('today');
       const isYesterday = normalizedMode.includes('yesterday');
       const isRange     = normalizedMode.includes('range') ||
                           normalizedMode.includes('custom') ||
                           normalizedMode.includes('date');
 
-      const now = new Date();
-      let start, end;
+      // Build server filters: include current UI filters + override date based on export mode
+      const exportFilters = { ...buildApiFilters() };
+      delete exportFilters.type;
+      delete exportFilters.fromDate;
+      delete exportFilters.toDate;
 
       if (isToday) {
-        start = new Date(now); start.setHours(0, 0, 0, 0);
-        end   = new Date(now); end.setHours(23, 59, 59, 999);
-
+        exportFilters.type = 'today';
       } else if (isYesterday) {
-        const y = new Date(now);
-        y.setDate(now.getDate() - 1);
-        start = new Date(y); start.setHours(0, 0, 0, 0);
-        end   = new Date(y); end.setHours(23, 59, 59, 999);
-
-      } else if (isRange && startDate && endDate) {
-        start = new Date(startDate); start.setHours(0, 0, 0, 0);
-        end   = new Date(endDate);   end.setHours(23, 59, 59, 999);
-
-      } else if (startDate && endDate) {
-        // 🔧 Fallback: unrecognized mode but dates exist — still export
-        console.warn("⚠️ Unrecognized mode, falling back to dates. mode was:", normalizedMode);
-        start = new Date(startDate); start.setHours(0, 0, 0, 0);
-        end   = new Date(endDate);   end.setHours(23, 59, 59, 999);
-
+        exportFilters.type = 'yesterday';
+      } else if ((isRange || (startDate && endDate)) && startDate && endDate) {
+        exportFilters.fromDate = startDate;
+        exportFilters.toDate = endDate;
       } else {
-        console.error("❌ Cannot resolve range. mode:", normalizedMode, "| startDate:", startDate, "| endDate:", endDate);
         ToastNotification.error("Please select a valid date range");
         return;
       }
 
-      console.log("📅 Resolved range:", { start: start.toISOString(), end: end.toISOString() });
-
-      const exportData = rawData.filter(item => {
-        if (!item.createdAt) return false;
-        const created = new Date(item.createdAt);
-        return created >= start && created <= end;
-      });
-
-      console.log("✅ Rows matched for export:", exportData.length);
+      const response = await getAllPartnerLeads(exportFilters);
+      if (!response?.data?.success) {
+        ToastNotification.error("Failed to fetch data for export");
+        return;
+      }
+      const exportData = response.data.data.rows || [];
 
       if (!exportData.length) {
         ToastNotification.error("No data found for selected date range");
@@ -438,9 +378,8 @@ const Leads = () => {
       await exportToExcel(exportData);
       ToastNotification.success("Excel exported successfully");
       setIsExportModalOpen(false);
-
     } catch (error) {
-      console.error("❌ Export error:", error);
+      console.error("Export error:", error);
       ToastNotification.error(`Export failed: ${error.message}`);
     } finally {
       setIsExporting(false);
