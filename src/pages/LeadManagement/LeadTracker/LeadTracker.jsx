@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Toaster } from 'react-hot-toast';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
   UserPlus,
@@ -26,6 +28,155 @@ import {
   getWebLeadTracker,
   getAllWebLeadTracker,
 } from '../../../api-services/Modules/Leads';
+
+/* ============== Animation variants ============== */
+const containerStagger = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05, delayChildren: 0.05 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 280, damping: 22 },
+  },
+};
+
+const cardPop = {
+  hidden: { opacity: 0, y: 16, scale: 0.96 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 260, damping: 20 },
+  },
+};
+
+const rowSlide = {
+  hidden: { opacity: 0, x: -8 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.18 } },
+};
+
+/* ============== Skeleton primitives ============== */
+const Shimmer = ({ className = '' }) => (
+  <div className={`relative overflow-hidden bg-gray-100 rounded ${className}`}>
+    <motion.div
+      className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent"
+      animate={{ x: ['-100%', '100%'] }}
+      transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+    />
+  </div>
+);
+
+const FunnelSkeleton = () => (
+  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+    {[...Array(7)].map((_, i) => (
+      <div
+        key={i}
+        className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm"
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1 space-y-2">
+            <Shimmer className="h-3 w-16" />
+            <Shimmer className="h-7 w-20" />
+            {i === 0 && <Shimmer className="h-2.5 w-14" />}
+          </div>
+          <Shimmer className="w-9 h-9 rounded-lg shrink-0" />
+        </div>
+        {i !== 0 && (
+          <div className="mt-3 space-y-1.5">
+            <Shimmer className="h-2.5 w-10" />
+            <Shimmer className="h-1 w-full" />
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+);
+
+const TableSkeleton = ({ rows = 8 }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full min-w-[1100px]">
+      <thead>
+        <tr className="bg-gray-50/80">
+          {[...Array(13)].map((_, i) => (
+            <th key={i} className="px-4 py-2.5">
+              <Shimmer className="h-3 w-16" />
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-50">
+        {[...Array(rows)].map((_, r) => (
+          <tr key={r}>
+            <td className="px-4 py-3">
+              <Shimmer className="h-3 w-6" />
+            </td>
+            <td className="px-4 py-3">
+              <div className="flex items-center gap-2.5">
+                <Shimmer className="w-8 h-8 rounded-full shrink-0" />
+                <div className="space-y-1.5 flex-1">
+                  <Shimmer className="h-3 w-28" />
+                  <Shimmer className="h-2.5 w-20" />
+                </div>
+              </div>
+            </td>
+            {[...Array(3)].map((_, c) => (
+              <td key={c} className="px-4 py-3">
+                <Shimmer className="h-3 w-14" />
+              </td>
+            ))}
+            {[...Array(6)].map((_, c) => (
+              <td key={`b-${c}`} className="px-4 py-3 text-center">
+                <Shimmer className="h-5 w-12 mx-auto rounded-full" />
+              </td>
+            ))}
+            <td className="px-4 py-3">
+              <Shimmer className="h-3 w-20" />
+            </td>
+            <td className="px-4 py-3">
+              <Shimmer className="h-3 w-20" />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+/* ============== Animated count up ============== */
+const AnimatedCount = ({ value }) => {
+  const [display, setDisplay] = useState(0);
+  const fromRef = useRef(0);
+  useEffect(() => {
+    const target = Number(value) || 0;
+    const start = fromRef.current;
+    const duration = 600;
+    const startTs = performance.now();
+    let frameId = 0;
+    const tick = (now) => {
+      const elapsed = now - startTs;
+      const t = Math.min(1, elapsed / duration);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      const current = Math.round(start + (target - start) * eased);
+      setDisplay(current);
+      if (t < 1) {
+        frameId = requestAnimationFrame(tick);
+      } else {
+        fromRef.current = target;
+      }
+    };
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [value]);
+  return <>{display.toLocaleString()}</>;
+};
 
 /* ============== Helpers ============== */
 const formatDate = (val) => {
@@ -58,38 +209,42 @@ const FunnelCards = ({ summary, activeStage, onStageClick, loading }) => {
   const pct = (val) => (!total ? 0 : Math.round((val / total) * 100));
 
   if (loading) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-        {[...Array(7)].map((_, i) => (
-          <div key={i} className="p-4 bg-white rounded-xl border border-gray-100 animate-pulse h-[100px]" />
-        ))}
-      </div>
-    );
+    return <FunnelSkeleton />;
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+    <motion.div
+      className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3"
+      variants={containerStagger}
+      initial="hidden"
+      animate="show"
+    >
       {/* Total */}
-      <button
+      <motion.button
+        variants={cardPop}
+        whileHover={{ y: -3, scale: 1.015 }}
+        whileTap={{ scale: 0.985 }}
         type="button"
         onClick={() => onStageClick('')}
-        className={`group text-left p-4 bg-white rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${
+        className={`group text-left p-4 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-md ${
           activeStage === '' ? 'ring-2 ring-gray-300 border-gray-200 shadow-md' : 'border-gray-100 shadow-sm'
         }`}
       >
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total</p>
-            <p className="mt-1.5 text-2xl font-bold text-gray-900 tabular-nums">{total.toLocaleString()}</p>
+            <p className="mt-1.5 text-2xl font-bold text-gray-900 tabular-nums">
+              <AnimatedCount value={total} />
+            </p>
             <p className="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
-              <TrendingUp size={11} /> Today: {(summary?.today || 0).toLocaleString()}
+              <TrendingUp size={11} /> Today: <AnimatedCount value={summary?.today || 0} />
             </p>
           </div>
           <div className="p-2 rounded-lg bg-gray-50 group-hover:bg-gray-100 transition-colors shrink-0">
             <Users className="text-gray-500" size={18} />
           </div>
         </div>
-      </button>
+      </motion.button>
 
       {FUNNEL_STAGES.map((s) => {
         const Icon = s.icon;
@@ -97,33 +252,47 @@ const FunnelCards = ({ summary, activeStage, onStageClick, loading }) => {
         const isActive = activeStage === s.key;
         const percentage = pct(val);
         return (
-          <button
+          <motion.button
             key={s.key}
+            variants={cardPop}
+            whileHover={{ y: -3, scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
             type="button"
             onClick={() => onStageClick(isActive ? '' : s.key)}
-            className={`group text-left p-4 bg-white rounded-xl border transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${
+            className={`group text-left p-4 bg-white rounded-xl border transition-shadow duration-200 hover:shadow-md ${
               isActive ? `ring-2 ${s.ring} ${s.border} shadow-md` : 'border-gray-100 shadow-sm'
             }`}
           >
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{s.label}</p>
-                <p className="mt-1.5 text-2xl font-bold text-gray-900 tabular-nums">{val.toLocaleString()}</p>
+                <p className="mt-1.5 text-2xl font-bold text-gray-900 tabular-nums">
+                  <AnimatedCount value={val} />
+                </p>
               </div>
-              <div className={`p-2 rounded-lg ${s.iconBg} group-hover:scale-110 transition-transform shrink-0`}>
+              <motion.div
+                whileHover={{ rotate: [0, -6, 6, 0] }}
+                transition={{ duration: 0.4 }}
+                className={`p-2 rounded-lg ${s.iconBg} shrink-0`}
+              >
                 <Icon className={s.color} size={18} />
-              </div>
+              </motion.div>
             </div>
             <div className="mt-2.5">
               <span className={`text-[11px] font-semibold ${s.color}`}>{percentage}%</span>
               <div className="h-1 bg-gray-100 rounded-full overflow-hidden mt-1">
-                <div className={`h-full ${s.barColor} rounded-full transition-all duration-500`} style={{ width: `${percentage}%` }} />
+                <motion.div
+                  className={`h-full ${s.barColor} rounded-full`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percentage}%` }}
+                  transition={{ duration: 0.7, ease: 'easeOut' }}
+                />
               </div>
             </div>
-          </button>
+          </motion.button>
         );
       })}
-    </div>
+    </motion.div>
   );
 };
 
@@ -314,20 +483,37 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
   };
 
   return (
-    <div className="space-y-5">
+    <motion.div
+      className="space-y-5"
+      variants={containerStagger}
+      initial="hidden"
+      animate="show"
+    >
       <Toaster />
 
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <motion.div
+        variants={fadeUp}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+      >
         <div>
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             {subtitle}
             <span className="ml-1 text-xs font-medium">
               · Showing{' '}
-              <span className={query.mode === 'completed' ? 'text-emerald-700' : 'text-rose-700'}>
-                {query.mode === 'completed' ? 'users who completed each step' : 'users who haven’t completed each step yet'}
-              </span>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.span
+                  key={query.mode}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.18 }}
+                  className={query.mode === 'completed' ? 'text-emerald-700' : 'text-rose-700'}
+                >
+                  {query.mode === 'completed' ? 'users who completed each step' : 'users who haven’t completed each step yet'}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </p>
         </div>
@@ -340,48 +526,69 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
           )}
 
           {/* Pending / Completed toggle */}
-          <div className="inline-flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-200">
-            <button
-              type="button"
-              onClick={() => updateQuery({ mode: 'pending', stage: '' })}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                query.mode === 'pending'
-                  ? 'bg-white text-rose-700 shadow-sm border border-rose-200'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              title="Users who have NOT completed this step"
-            >
-              Pending
-            </button>
-            <button
-              type="button"
-              onClick={() => updateQuery({ mode: 'completed', stage: '' })}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
-                query.mode === 'completed'
-                  ? 'bg-white text-emerald-700 shadow-sm border border-emerald-200'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              title="Users who HAVE completed this step"
-            >
-              Completed
-            </button>
+          <div className="relative inline-flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+            {['pending', 'completed'].map((m) => (
+              <motion.button
+                key={m}
+                type="button"
+                onClick={() => updateQuery({ mode: m, stage: '' })}
+                whileTap={{ scale: 0.96 }}
+                className={`relative px-3 py-1.5 text-xs font-semibold rounded-md transition-colors z-10 ${
+                  query.mode === m
+                    ? m === 'pending'
+                      ? 'text-rose-700'
+                      : 'text-emerald-700'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+                title={m === 'pending' ? 'Users who have NOT completed this step' : 'Users who HAVE completed this step'}
+              >
+                {query.mode === m && (
+                  <motion.span
+                    layoutId="modePill"
+                    className={`absolute inset-0 rounded-md shadow-sm border ${
+                      m === 'pending' ? 'bg-white border-rose-200' : 'bg-white border-emerald-200'
+                    }`}
+                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                  />
+                )}
+                <span className="relative">{m === 'pending' ? 'Pending' : 'Completed'}</span>
+              </motion.button>
+            ))}
           </div>
 
-          <button onClick={fetchLeads} disabled={loading} className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
-            <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
-          </button>
-          <button onClick={handleExport} disabled={loading} className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={fetchLeads}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+          >
+            <motion.span
+              animate={loading ? { rotate: 360 } : { rotate: 0 }}
+              transition={loading ? { duration: 1, repeat: Infinity, ease: 'linear' } : { duration: 0.3 }}
+              className="inline-flex"
+            >
+              <RefreshCcw size={14} />
+            </motion.span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleExport}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+          >
             <Download size={14} />
             Export
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Funnel Cards */}
       <FunnelCards summary={summary} activeStage={query.stage} onStageClick={(stage) => updateQuery({ stage })} loading={loading && !rawData.length} />
 
       {/* Table Card */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <motion.div variants={fadeUp} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         {/* Toolbar */}
         <div className="px-4 py-3 border-b border-gray-100">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -502,12 +709,14 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
 
         {/* Table */}
         {loading && !rawData.length ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-10 h-10 border-[3px] border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-            <p className="text-gray-400 text-sm mt-3">Loading leads...</p>
-          </div>
+          <TableSkeleton rows={query.limit || 8} />
         ) : rawData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
             <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center mb-3">
               <Users size={20} className="text-gray-300" />
             </div>
@@ -515,7 +724,7 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
             {hasActiveFilters && (
               <button onClick={clearAllFilters} className="mt-2 text-xs text-indigo-600 hover:text-indigo-800 font-medium">Clear filters</button>
             )}
-          </div>
+          </motion.div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1100px]">
@@ -536,11 +745,20 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
                   <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500">Last Activity</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <motion.tbody
+                className="divide-y divide-gray-50"
+                variants={containerStagger}
+                initial="hidden"
+                animate="show"
+                key={`${query.page_no}-${query.mode}-${query.stage}-${query.search}-${query.filter_date}-${query.startDate}-${query.endDate}`}
+              >
                 {rawData.map((row, index) => {
                   const fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim();
                   return (
-                    <tr key={row.id || index} className="hover:bg-gray-50/50 transition-colors">
+                    <motion.tr
+                      key={row.id || index}
+                      variants={rowSlide}
+                      className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3 text-xs text-gray-400 font-mono">{(query.page_no - 1) * query.limit + index + 1}</td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
@@ -577,10 +795,10 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
                       </td>
                       <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{formatDate(row.created_at) || <span className="text-gray-300">-</span>}</td>
                       <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">{formatDate(row.updated_at) || <span className="text-gray-300">-</span>}</td>
-                    </tr>
+                    </motion.tr>
                   );
                 })}
-              </tbody>
+              </motion.tbody>
             </table>
           </div>
         )}
@@ -617,8 +835,8 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
             </div>
           </div>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

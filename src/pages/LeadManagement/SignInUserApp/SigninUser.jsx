@@ -54,6 +54,51 @@ const getTotalCount = (payload, rows = []) => {
 
 
 
+// ----------------------------------------------------------------------
+// Per-lender leadId extractor.
+// Different lender APIs return their lead/application id at different
+// paths inside lender_responses. Add a new entry here when a lender's
+// path differs from the default `lr.leadId`.
+//
+// `lr` is one entry of item.lender_responses[].
+// ----------------------------------------------------------------------
+// Extract a query-param value from any URL string. Returns null if the
+// URL is missing/invalid or the param isn't present.
+const queryParamFromUrl = (url, param) => {
+  if (!url || typeof url !== 'string') return null;
+  try {
+    return new URL(url).searchParams.get(param);
+  } catch {
+    // Fallback for non-absolute URLs or weird strings
+    const match = url.match(new RegExp(`[?&]${param}=([^&#]+)`));
+    return match ? decodeURIComponent(match[1]) : null;
+  }
+};
+
+// NOTE: Backend already extracts the right leadId per lender (see
+// LenderResponseDTO.LENDER_LEAD_ID_EXTRACTORS / LENDER_LEAD_ID_PATHS) and
+// puts it on `lr.leadId`. These overrides only run if the backend hasn't
+// populated it for some reason — keep them as a safety net.
+const LENDER_LEAD_ID_PATHS = {
+  smartcoin: (lr) => lr?.metadata?.data?.response?.leadId,
+  lendingplate: (lr) => lr?.metadata?.data?.ref_id,
+  vivifi: (lr) =>
+    queryParamFromUrl(lr?.metadata?.data?.redirectUrl, 'leadReferenceId'),
+};
+
+const extractLenderLeadId = (lr) => {
+  // Prefer backend-populated leadId
+  if (lr?.leadId !== undefined && lr?.leadId !== null && lr?.leadId !== '') {
+    return lr.leadId;
+  }
+  // Fallback: derive from metadata using lender-specific path
+  const name = (lr?.lender?.name || '').toLowerCase().replace(/\s+/g, '');
+  const customPath = LENDER_LEAD_ID_PATHS[name];
+  if (!customPath) return null;
+  const value = customPath(lr);
+  return value !== undefined && value !== null && value !== '' ? value : null;
+};
+
 const exportToExcel = async (rawData, lenderNames = []) => {
   if (!rawData || rawData.length === 0) {
     ToastNotification.error("No data to export");
@@ -106,7 +151,7 @@ const exportToExcel = async (rawData, lenderNames = []) => {
       const lenderName = lr?.lender?.name;
       if (!lenderName) return;
       if (lr.isOffer) {
-        lenderStatusMap[lenderName] = lr?.leadId || "Y";
+        lenderStatusMap[lenderName] = extractLenderLeadId(lr) ?? "Y";
       }
     });
 

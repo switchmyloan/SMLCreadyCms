@@ -163,7 +163,7 @@ function App() {
             <Route path="social-icons" element={<PermissionGuard permission="cms_management.view"><SocialIcons /></PermissionGuard>} />
             <Route path="offer" element={<PermissionGuard permission="cms_management.view"><Offers /></PermissionGuard>} />
             <Route path="credit-cards" element={<PermissionGuard permission="cms_management.view"><CreditCards /></PermissionGuard>} />
-            <Route path="credit-card-clicks" element={<PermissionGuard permission="cms_management.view"><CreditCardClicks /></PermissionGuard>} />
+            <Route path="credit-card-clicks" element={<PermissionGuard permission="lead_management.view"><CreditCardClicks /></PermissionGuard>} />
 
             {/* Admin Management */}
             <Route path="roles" element={<PermissionGuard permission="admin_management.view"><Roles /></PermissionGuard>} />
