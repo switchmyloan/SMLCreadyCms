@@ -185,7 +185,7 @@ const ActiveUsersList = () => {
         header: 'User',
         cell: ({ row }) => {
           const user = row.original;
-          const displayName = user.fullName?.trim() || user.firstName || user.phoneNumber || `User #${user.id}`;
+          const displayName = user.fullName?.trim() || user.firstName || maskPhone(user.phoneNumber) || `User #${user.id}`;
           const initials = user.firstName?.[0] || user.phoneNumber?.[0] || 'U';
           const secondInitial = user.lastName?.[0] || '';
           return (

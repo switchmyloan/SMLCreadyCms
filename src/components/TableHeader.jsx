@@ -1578,7 +1578,7 @@ export const contactUsColumns = ({ sendNotification }) => [
   {
     header: "Mobile",
     accessorKey: "mobile",
-    cell: ({ getValue }) => getValue() || "N/A",
+    cell: ({ getValue }) => maskPhone(getValue()) || "N/A",
   },
   {
     header: "Email",
