@@ -177,6 +177,7 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     page_no: 1, limit: 10,
     search: '', filter_date: '', startDate: null, endDate: null,
     gender: '', minIncome: undefined, maxIncome: undefined, stage: '',
+    mode: 'pending', // 'pending' = haven't done | 'completed' = have done
   });
 
   // Date range picker
@@ -199,8 +200,9 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     if (query.startDate) filters.fromDate = query.startDate;
     if (query.endDate) filters.toDate = query.endDate;
     if (query.stage) filters.stage = query.stage;
+    if (query.mode) filters.mode = query.mode;
     return filters;
-  }, [query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate, query.stage]);
+  }, [query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate, query.stage, query.mode]);
 
   const fetchLeads = useCallback(async () => {
     const seq = ++fetchSeqRef.current;
@@ -299,7 +301,7 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
   const hasActiveFilters = query.search || query.gender || query.stage || query.filter_date || query.startDate || (query.minIncome !== undefined);
 
   const clearAllFilters = () => {
-    setQuery({ page_no: 1, limit: 10, search: '', filter_date: '', startDate: null, endDate: null, gender: '', minIncome: undefined, maxIncome: undefined, stage: '' });
+    setQuery((p) => ({ page_no: 1, limit: 10, search: '', filter_date: '', startDate: null, endDate: null, gender: '', minIncome: undefined, maxIncome: undefined, stage: '', mode: p.mode }));
     setDateRange({ startDate: '', endDate: '' });
   };
 
@@ -319,7 +321,15 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h2 className="text-xl font-bold text-gray-900">{title}</h2>
-          <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {subtitle}
+            <span className="ml-1 text-xs font-medium">
+              · Showing{' '}
+              <span className={query.mode === 'completed' ? 'text-emerald-700' : 'text-rose-700'}>
+                {query.mode === 'completed' ? 'users who completed each step' : 'users who haven’t completed each step yet'}
+              </span>
+            </span>
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {partnerLabel && (
@@ -328,6 +338,35 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
               <span className="text-[11px] font-medium text-indigo-700">{partnerLabel}</span>
             </div>
           )}
+
+          {/* Pending / Completed toggle */}
+          <div className="inline-flex items-center bg-gray-100 rounded-lg p-0.5 border border-gray-200">
+            <button
+              type="button"
+              onClick={() => updateQuery({ mode: 'pending', stage: '' })}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                query.mode === 'pending'
+                  ? 'bg-white text-rose-700 shadow-sm border border-rose-200'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+              title="Users who have NOT completed this step"
+            >
+              Pending
+            </button>
+            <button
+              type="button"
+              onClick={() => updateQuery({ mode: 'completed', stage: '' })}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+                query.mode === 'completed'
+                  ? 'bg-white text-emerald-700 shadow-sm border border-emerald-200'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+              title="Users who HAVE completed this step"
+            >
+              Completed
+            </button>
+          </div>
+
           <button onClick={fetchLeads} disabled={loading} className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50">
             <RefreshCcw size={14} className={loading ? 'animate-spin' : ''} />
           </button>

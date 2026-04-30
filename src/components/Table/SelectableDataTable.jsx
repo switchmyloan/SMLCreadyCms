@@ -27,11 +27,21 @@ function SelectableDataTable({
     onRowSelect,
     rowSelection,
     setRowSelection,
-    filtersComponent
+    filtersComponent,
+    hideSearch = false,
+    externalSearch,
+    onExternalSearchChange,
 }) {
 
     const [sorting, setSorting] = React.useState([]);
-    const [globalFilter, setGlobalFilter] = React.useState('');
+    const [internalGlobalFilter, setInternalGlobalFilter] = React.useState('');
+    // When parent provides externalSearch + onExternalSearchChange, the table's
+    // built-in search input becomes a controlled passthrough to the parent
+    // (so the parent can run a server-side query). Otherwise, falls back to
+    // local client-side filtering.
+    const isControlled = typeof onExternalSearchChange === 'function';
+    const globalFilter = isControlled ? (externalSearch ?? '') : internalGlobalFilter;
+    const setGlobalFilter = isControlled ? onExternalSearchChange : setInternalGlobalFilter;
     const prevSelectedRowsDataRef = React.useRef([]);
 
     const selectColumn = {
@@ -119,14 +129,16 @@ function SelectableDataTable({
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
                 <h1 className="text-xl md:text-2xl font-semibold text-gray-800">{title}</h1>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={globalFilter}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                        className="w-full sm:w-52 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-200 shadow-sm text-sm"
-                        disabled={loading}
-                    />
+                    {!hideSearch && (
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={globalFilter}
+                            onChange={(e) => setGlobalFilter(e.target.value)}
+                            className="w-full sm:w-52 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-200 shadow-sm text-sm"
+                            disabled={loading}
+                        />
+                    )}
                     {onCreate && (
                         <button
                             onClick={onCreate}

@@ -1,8 +1,8 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import SelectableDataTable from "../../components/Table/SelectableDataTable";
-import { addGroupUsers, getInAppLeads } from "../../api-services/Modules/Leads";
+import { addGroupUsers, getAppLeadTracker } from "../../api-services/Modules/Leads";
 import { Calendar, ChevronDown, DollarSign, Filter, RotateCcw, Search, CheckSquare, Users, Copy, Check } from "lucide-react";
 
 // --- Helpers ---
@@ -54,6 +54,11 @@ export default function GroupCreate() {
     const [searchTerm, setSearchTerm] = useState('');
     const [showSelectedOnly, setShowSelectedOnly] = useState(false);
     const [filters, setFilters] = useState({ gender: '', minAge: '', maxAge: '', minIncome: '', maxIncome: '', fromDate: '', toDate: '' });
+    const [mode, setMode] = useState('pending'); // 'pending' = haven't done | 'completed' = have done
+    const [stage, setStage] = useState(''); // funnel stage filter
+
+    // StrictMode double-fire guard
+    const fetchSeqRef = useRef(0);
 
     // Dropdown States
     const [openDropdown, setOpenDropdown] = useState(null);
@@ -126,35 +131,61 @@ export default function GroupCreate() {
         } catch (err) { console.error(err); }
     };
 
-    // --- Logic 2: Fetch Leads ---
-    const fetchLeads = async () => {
+    // --- Logic 2: Fetch Leads (App Lead Tracker with Pending/Completed mode) ---
+    const fetchLeads = useCallback(async () => {
+        const seq = ++fetchSeqRef.current;
         try {
             setLoading(true);
-            const response = await getInAppLeads(pagination.pageIndex + 1, pagination.pageSize, '');
+            const apiFilters = { mode };
+            if (stage) apiFilters.stage = stage;
+            if (filters.gender) apiFilters.gender = filters.gender;
+            if (filters.fromDate) apiFilters.fromDate = filters.fromDate;
+            if (filters.toDate) apiFilters.toDate = filters.toDate;
+            if (filters.minIncome) apiFilters.minIncome = Number(filters.minIncome);
+            if (filters.maxIncome) apiFilters.maxIncome = Number(filters.maxIncome);
+            if (searchTerm) apiFilters.search = searchTerm;
+
+            const response = await getAppLeadTracker(pagination.pageIndex + 1, pagination.pageSize, apiFilters);
+            if (seq !== fetchSeqRef.current) return; // stale
+
             if (response?.data?.success) {
                 const rows = response?.data?.data?.rows || [];
+                const total = response?.data?.data?.pagination?.total || 0;
                 const formattedRows = rows.map((u) => {
-                    const dob = normalizeDOB(u.dateOfBirth);
+                    const dob = normalizeDOB(u.date_of_birth);
+                    const fullName = `${u.first_name || ''} ${u.last_name || ''}`.trim();
                     return {
-                        ...u,
-                        id: u.id || u.principal_xid,
+                        id: u.id,
+                        phoneNumber: u.phone,
+                        firstName: fullName || u.first_name || '',
+                        emailAddress: u.email,
                         gender: normalizeGender(u.gender).toUpperCase(),
                         dateOfBirth: dob || 'N/A',
                         age: calculateAge(dob),
-                        cleanIncome: u.monthlyIncome ? Number(u.monthlyIncome.toString().replace(/[^0-9.-]+/g, "")) : 0,
-                        fcmToken: u.DeviceAndBioMetric?.[0]?.FCMtoken || null
+                        monthlyIncome: u.monthly_income,
+                        cleanIncome: u.monthly_income ? Number(u.monthly_income.toString().replace(/[^0-9.-]+/g, "")) : 0,
+                        createdAt: u.created_at,
+                        fcmToken: u.fcm_token || null,
+                        // funnel flags (for filtering UI / sanity)
+                        has_otp_verified: u.has_otp_verified,
+                        has_submitted: u.has_submitted,
+                        has_offer: u.has_offer,
+                        has_lender_clicked: u.has_lender_clicked,
+                        has_credit_card_clicked: u.has_credit_card_clicked,
                     };
                 });
                 setData(formattedRows);
-                setTotalDataCount(formattedRows.length);
+                setTotalDataCount(total);
             }
-        } catch (err) { console.error(err); } finally { setLoading(false); }
-    };
+        } catch (err) {
+            console.error(err);
+        } finally {
+            if (seq === fetchSeqRef.current) setLoading(false);
+        }
+    }, [pagination.pageIndex, pagination.pageSize, mode, stage, filters.gender, filters.fromDate, filters.toDate, filters.minIncome, filters.maxIncome, searchTerm]);
 
-    useEffect(() => {
-        fetchSingleGroup();
-        fetchLeads();
-    }, [groupId]);
+    useEffect(() => { fetchSingleGroup(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [groupId]);
+    useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
     // --- Logic 3: Handle Selection ---
     const handleRowSelection = (selectedRows) => {
@@ -217,6 +248,42 @@ export default function GroupCreate() {
                 </div>
 
                 <div className="flex flex-wrap gap-3 items-center pt-4 border-t">
+                    {/* Pending / Completed mode toggle */}
+                    <div className="inline-flex items-center bg-gray-100 rounded-lg p-1 border border-gray-200">
+                        <button
+                            type="button"
+                            onClick={() => { setMode('pending'); setStage(''); }}
+                            className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'pending' ? 'bg-white text-rose-700 shadow-sm border border-rose-200' : 'text-gray-500 hover:text-gray-700'}`}
+                            title="Users who have NOT completed this step"
+                        >
+                            Pending
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setMode('completed'); setStage(''); }}
+                            className={`px-4 py-1.5 text-xs font-bold rounded-md transition-colors ${mode === 'completed' ? 'bg-white text-emerald-700 shadow-sm border border-emerald-200' : 'text-gray-500 hover:text-gray-700'}`}
+                            title="Users who HAVE completed this step"
+                        >
+                            Completed
+                        </button>
+                    </div>
+
+                    {/* Funnel Stage filter */}
+                    <select
+                        value={stage}
+                        onChange={(e) => setStage(e.target.value)}
+                        className="border border-gray-200 px-3 py-2 rounded-lg bg-white text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        title="Funnel stage"
+                    >
+                        <option value="">All Stages</option>
+                        <option value="registered_only">Registered</option>
+                        <option value="otp_verified">OTP Verified</option>
+                        <option value="form_submitted">Form Submitted</option>
+                        <option value="got_offer">Got Offer</option>
+                        <option value="lender_clicked">Lender Clicked</option>
+                        <option value="credit_card_clicked">Credit Card</option>
+                    </select>
+
                     {/* Gender Toggle */}
                     <div className="flex bg-gray-100 p-1 rounded-lg">
                         {['all', 'male', 'female'].map((g) => (
@@ -265,7 +332,7 @@ export default function GroupCreate() {
                         )}
                     </div>
 
-                    <button onClick={() => { setFilters({ gender: '', minAge: '', maxAge: '', minIncome: '', maxIncome: '', fromDate: '', toDate: '' }); setSearchTerm(''); setShowSelectedOnly(false); }} className="text-xs font-bold text-red-500 ml-auto flex items-center gap-1 hover:bg-red-50 p-2 rounded-lg transition-all">
+                    <button onClick={() => { setFilters({ gender: '', minAge: '', maxAge: '', minIncome: '', maxIncome: '', fromDate: '', toDate: '' }); setSearchTerm(''); setShowSelectedOnly(false); setStage(''); setMode('pending'); }} className="text-xs font-bold text-red-500 ml-auto flex items-center gap-1 hover:bg-red-50 p-2 rounded-lg transition-all">
                         <RotateCcw size={14} /> RESET
                     </button>
                 </div>
@@ -284,6 +351,8 @@ export default function GroupCreate() {
                     onRowSelect={handleRowSelection}
                     title="Leads Database"
                     loading={loading}
+                    externalSearch={searchTerm}
+                    onExternalSearchChange={setSearchTerm}
                 />
             </div>
         </div>

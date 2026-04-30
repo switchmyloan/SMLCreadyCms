@@ -130,6 +130,7 @@ const buildLeadTrackerParams = (pageNo = 1, limit = 10, filters = {}) => {
     if (filters.fromDate) params.append('fromDate', filters.fromDate);
     if (filters.toDate) params.append('toDate', filters.toDate);
     if (filters.stage) params.append('stage', filters.stage);
+    if (filters.mode) params.append('mode', filters.mode);
     return params.toString();
 };
 
