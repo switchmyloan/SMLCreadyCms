@@ -29,9 +29,12 @@ export const getActiveUsers = async (page = 1, limit = 20, filters = {}) => {
 };
 
 // Get activity statistics
-export const getActivityStats = async (mobileOnly = false) => {
-  const params = mobileOnly ? '?mobileOnly=true' : '';
-  return Api().get(`/active-users/stats${params}`, {
+export const getActivityStats = async (mobileOnly = false, excludeCms = false) => {
+  const qs = new URLSearchParams();
+  if (mobileOnly) qs.set('mobileOnly', 'true');
+  if (excludeCms) qs.set('excludeCms', 'true');
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  return Api().get(`/active-users/stats${suffix}`, {
     skipAdminAppend: true,
   });
 };

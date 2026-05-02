@@ -210,7 +210,8 @@ export const getInAppLeads = async (
     minAge,
     maxAge,
     jobType,
-    type
+    type,
+    exportToken
 ) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
@@ -235,9 +236,11 @@ export const getInAppLeads = async (
     if (jobType) params.append('jobType', jobType);
 
     const queryString = params.toString(); // Automatically encodes the values
+    const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
 
     return Api().get(`${baseUrl}${queryString ? `?${queryString}` : ''}`, {
         skipAdminAppend: true,
+        ...(headers ? { headers } : {}),
     });
 };
 

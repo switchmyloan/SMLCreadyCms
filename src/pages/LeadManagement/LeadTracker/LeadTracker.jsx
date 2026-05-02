@@ -538,6 +538,26 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     >
       <Toaster />
 
+      {/* Top progress bar — visible on every fetch (initial + refetches). */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            key="top-progress"
+            className="fixed top-0 left-0 right-0 z-50 h-[2px] bg-indigo-500/20 overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="h-full bg-gradient-to-r from-indigo-400 via-indigo-600 to-indigo-400"
+              initial={{ x: '-40%', width: '40%' }}
+              animate={{ x: ['-40%', '120%'] }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Page Header */}
       <motion.div
         variants={fadeUp}
@@ -632,7 +652,34 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
       </motion.div>
 
       {/* Funnel Cards */}
-      <FunnelCards summary={summary} activeStage={query.stage} onStageClick={(stage) => updateQuery({ stage })} loading={loading && !rawData.length} />
+      {/* Funnel Cards — full skeleton on every fetch (initial + refetches) */}
+      <AnimatePresence mode="wait" initial={false}>
+        {loading ? (
+          <motion.div
+            key="funnel-skel"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <FunnelSkeleton />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="funnel-real"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FunnelCards
+              summary={summary}
+              activeStage={query.stage}
+              onStageClick={(stage) => updateQuery({ stage })}
+              loading={false}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Table Card */}
       <motion.div variants={fadeUp} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -754,8 +801,8 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
           </div>
         </div>
 
-        {/* Table */}
-        {loading && !rawData.length ? (
+        {/* Table — full skeleton on every fetch (initial + refetches) */}
+        {loading ? (
           <TableSkeleton rows={query.limit || 8} />
         ) : rawData.length === 0 ? (
           <motion.div

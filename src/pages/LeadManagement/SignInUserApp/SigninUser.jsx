@@ -8,7 +8,7 @@ import { getLender } from '../../../api-services/Modules/LenderApi';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
-import ExportModal from '../../../components/ExportModal';
+import ExportOtpModal from '../../../components/ExportOtpModal';
 import { leadsColumn } from '../../../components/TableHeader';
 
 const getDateParams = (query) => {
@@ -240,7 +240,8 @@ const SignInUsers = () => {
       activeQuery.minAge,
       activeQuery.maxAge,
       activeQuery.jobType,
-      type
+      type,
+      activeQuery.exportToken,
     );
   }, []);
 
@@ -492,7 +493,7 @@ const SignInUsers = () => {
   // For today/yesterday we send filter_date so the backend resolves via
   // CURRENT_DATE (timezone-safe). YYYY-MM-DD strings get parsed as
   // midnight UTC otherwise, which silently drops IST early-morning rows.
-  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode) => {
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode, exportToken) => {
     const normalizedMode = String(mode || '').toLowerCase().trim();
     const isToday = normalizedMode.includes('today');
     const isYesterday = normalizedMode.includes('yesterday');
@@ -504,6 +505,7 @@ const SignInUsers = () => {
       filter_date: '',
       startDate: null,
       endDate: null,
+      exportToken,
     };
 
     const exportQuery = isToday
@@ -537,11 +539,11 @@ const SignInUsers = () => {
     }
   }, []);
 
-  const handleExport = async ({ startDate, endDate, mode }) => {
+  const handleExport = async ({ startDate, endDate, mode, token }) => {
     try {
       setIsExporting(true);
 
-      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode, token);
 
       if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");
@@ -575,19 +577,13 @@ const SignInUsers = () => {
     if (serverSummary) {
       return {
         totalUsers: Number(serverSummary?.totalUsers ?? totalDataCount) || 0,
-        totalLoanAmount: Number(serverSummary?.totalLoanAmount) || 0,
         totalOffers: Number(serverSummary?.totalOffers) || 0,
         usersWithOffers: Number(serverSummary?.usersWithOffers) || 0,
+        todayUsers: Number(serverSummary?.todayUsers) || 0,
       };
     }
 
     const totalUsers = totalDataCount || rawData.length;
-
-    const totalLoanAmount = rawData.reduce(
-      (sum, item) =>
-        sum + Number(item.requiredLoanAmount || item.loanAmount || 0),
-      0
-    );
 
     const totalOffers = rawData.reduce((count, item) => {
       const offers = item.lender_responses?.filter(lr => lr.isOffer)?.length || 0;
@@ -598,49 +594,75 @@ const SignInUsers = () => {
       item.lender_responses?.some(lr => lr.isOffer)
     ).length;
 
+    // Today's leads from current page (visible-rows fallback when server
+    // summary isn't available — refresh + filter to "Today" for real number).
+    const todayStr = new Date().toDateString();
+    const todayUsers = rawData.filter(
+      (item) => item.createdAt && new Date(item.createdAt).toDateString() === todayStr
+    ).length;
+
     return {
       totalUsers,
-      totalLoanAmount,
       totalOffers,
-      usersWithOffers
+      usersWithOffers,
+      todayUsers,
     };
   }, [rawData, serverSummary, totalDataCount]);
 
+  // Conversion rate = users who got at least one offer / total users.
+  // Useful health metric — tracks how well the funnel is performing.
+  const offerConversionPct = summaryMetrics.totalUsers > 0
+    ? Math.round((summaryMetrics.usersWithOffers / summaryMetrics.totalUsers) * 1000) / 10
+    : 0;
+
+  // Average offers per user (only counting users who got at least one).
+  // Tells you whether the offer-engine spreads load across many lenders
+  // or just one or two per user. Higher = richer choice for the user.
+  const avgOffersPerUser = summaryMetrics.usersWithOffers > 0
+    ? Math.round((summaryMetrics.totalOffers / summaryMetrics.usersWithOffers) * 10) / 10
+    : 0;
+
+  // Layout tells a clean funnel story:
+  //   Volume  -> Total Users
+  //   Output  -> Total Offers (count of offers given)
+  //   Reach   -> Users With Offers (distinct users who got at least one)
+  //   Quality -> Conversion Rate (Users With Offers / Total Users)
   const dynamicMetrics = useMemo(() => [
     {
       title: "Total Users",
       value: Number(summaryMetrics.totalUsers) || 0,
       icon: "Users",
       color: "text-blue-600",
-      bg: "bg-blue-50"
-    },
-    {
-      title: "Loan Amount",
-      value: Number(summaryMetrics.totalLoanAmount) || 0,
-      icon: "Wallet",
-      color: "text-green-600",
-      bg: "bg-green-50"
+      bg: "bg-blue-50",
     },
     {
       title: "Total Offers",
       value: Number(summaryMetrics.totalOffers) || 0,
       icon: "BadgePercent",
-      color: "text-green-600",
-      bg: "bg-green-50"
+      color: "text-amber-600",
+      bg: "bg-amber-50",
     },
     {
       title: "Users With Offers",
       value: Number(summaryMetrics.usersWithOffers) || 0,
       icon: "UserCheck",
       color: "text-purple-600",
-      bg: "bg-purple-50"
-    }
-  ], [summaryMetrics]);
+      bg: "bg-purple-50",
+    },
+    {
+      title: "Avg Offers / User",
+      value: Number(avgOffersPerUser) || 0,
+      icon: "TrendingUp",
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      subtitle: `${offerConversionPct}% conversion rate`,
+    },
+  ], [summaryMetrics, avgOffersPerUser, offerConversionPct]);
 
   return (
     <>
       <Toaster />
-      <ExportModal
+      <ExportOtpModal
         open={isExportModalOpen}
         onClose={handleCloseExportModal}
         onSubmit={handleExport}

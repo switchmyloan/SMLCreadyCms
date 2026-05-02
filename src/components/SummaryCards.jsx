@@ -78,7 +78,7 @@
 
 // SummaryCards.jsx
 import React from 'react';
-import { Users, CheckCircle, XCircle, TriangleAlert, ShieldOff, Clock, LineChart, BadgePercent, Wallet,IndianRupee, UserCheck} from 'lucide-react';
+import { Users, CheckCircle, XCircle, TriangleAlert, ShieldOff, Clock, LineChart, BadgePercent, Wallet, IndianRupee, UserCheck, TrendingUp, Smartphone, Globe } from 'lucide-react';
 
 // Mapping string names to actual Lucide icon components
 const iconMap = {
@@ -92,7 +92,10 @@ const iconMap = {
   Wallet,
   BadgePercent,
   IndianRupee,
-  UserCheck
+  UserCheck,
+  TrendingUp,
+  Smartphone,
+  Globe
   // Add any other Lucide icons you might use in different modules
 };
 
@@ -126,7 +129,11 @@ const SummaryCards = ({ metrics, loading }) => {
                 <p className="text-sm font-medium text-gray-500">{card.title}</p>
                 <p className="mt-1 text-2xl font-bold text-gray-900">
                   {typeof card.value === 'number' ? card.value.toLocaleString() : 'N/A'}
+                  {card.suffix ? <span className="text-base font-semibold text-gray-500 ml-1">{card.suffix}</span> : null}
                 </p>
+                {card.subtitle ? (
+                  <p className="text-xs text-gray-400 mt-1">{card.subtitle}</p>
+                ) : null}
               </div>
               <div className={`p-3 rounded-full ${card.bg}`}>
                 {IconComponent 

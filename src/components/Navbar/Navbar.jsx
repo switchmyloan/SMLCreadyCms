@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 import { CheckCircle2, Loader2, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../custom-hooks/useAuth";
@@ -5,12 +6,65 @@ import { UserService } from "../../custom-hooks";
 import { useUpload } from "../../context/UploadContext";
 import { trackLogout } from "../../services/activityTrackingService";
 
+// Pick a stable gradient based on the name so each user gets a
+// consistent colour. Light hash of the name maps to one of N palettes.
+const AVATAR_PALETTES = [
+  ["#6366f1", "#8b5cf6"], // indigo → violet
+  ["#0ea5e9", "#06b6d4"], // sky    → cyan
+  ["#10b981", "#14b8a6"], // emerald→ teal
+  ["#f59e0b", "#f97316"], // amber  → orange
+  ["#ec4899", "#f43f5e"], // pink   → rose
+  ["#8b5cf6", "#d946ef"], // violet → fuchsia
+];
+
+const hashString = (str = "") => {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = (h << 5) - h + str.charCodeAt(i);
+    h |= 0;
+  }
+  return Math.abs(h);
+};
+
+const InitialAvatar = ({ name = "", email = "", size = 40 }) => {
+  const trimmed = (name || "").trim();
+  const initials = trimmed
+    ? trimmed
+        .split(/\s+/)
+        .slice(0, 2)
+        .map((p) => p[0])
+        .join("")
+        .toUpperCase()
+    : (email || "U").charAt(0).toUpperCase();
+
+  const seed = trimmed || email || "user";
+  const [from, to] = AVATAR_PALETTES[hashString(seed) % AVATAR_PALETTES.length];
+
+  return (
+    <div
+      className="rounded-full inline-flex items-center justify-center text-white font-semibold select-none leading-none tracking-tight"
+      style={{
+        width: size,
+        height: size,
+        minWidth: size,
+        minHeight: size,
+        fontSize: Math.round(size * 0.4),
+        lineHeight: 1,
+        background: `linear-gradient(135deg, ${from}, ${to})`,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+      }}
+      title={trimmed || email || "User"}
+    >
+      <span style={{ transform: "translateY(1px)" }}>{initials}</span>
+    </div>
+  );
+};
+
 function Navbar({ onToggleSidebar }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { uploadStatus, globalProgress } = useUpload();
-  const getUser = UserService.getUser()
-  console.log(getUser, "getUser>>>>>>>>")
+  const getUser = UserService.getUser();
 
   const handleLogout = async () => {
     // Track logout before clearing data
@@ -58,14 +112,13 @@ function Navbar({ onToggleSidebar }) {
         <div
           tabIndex={0}
           role="button"
-          className="btn btn-ghost btn-circle avatar"
+          className="cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-200"
         >
-          <div className="w-10 rounded-full">
-            <img
-              src="https://avatar.iran.liara.run/public/25"
-              alt="profile"
-            />
-          </div>
+          <InitialAvatar
+            name={getUser?.name}
+            email={getUser?.email}
+            size={36}
+          />
         </div>
         <ul
           tabIndex={0}
@@ -73,12 +126,12 @@ function Navbar({ onToggleSidebar }) {
         >
           {/* User avatar */}
           <div className="flex flex-col items-center justify-center text-center">
-            <img
-              src="https://avatar.iran.liara.run/public/25"
-              alt="profile"
-              className="w-16 h-16 rounded-full mb-2"
+            <InitialAvatar
+              name={getUser?.name}
+              email={getUser?.email}
+              size={64}
             />
-            <p className="font-semibold">{getUser?.name}</p>
+            <p className="font-semibold mt-2">{getUser?.name}</p>
             <p className="text-xs text-gray-500">{getUser?.email}</p>
           </div>
 
