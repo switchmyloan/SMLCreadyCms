@@ -16,6 +16,7 @@ import toast, { Toaster } from 'react-hot-toast';
 // Permission modules for grouping (keys must match backend PermissionModule enum)
 const PERMISSION_MODULES = [
   { key: 'ACTIVE_USERS', label: 'Active Users', icon: '🟢' },
+  { key: 'FUNNEL_DASHBOARD', label: 'Funnel Dashboard', icon: '📊' },
   { key: 'EXECUTIVE_DASHBOARD', label: 'Executive Dashboard', icon: '📈' },
   { key: 'LEAD_MANAGEMENT', label: 'Lead Management', icon: '📋' },
   { key: 'APP_STATISTICS', label: 'App Statistics', icon: '📱' },

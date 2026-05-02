@@ -8,7 +8,7 @@ export const routes = [
     group: "Active Users",
     groupIcon: "Activity",
     groupOrder: -1,
-    order: 1,
+    order: 5,
     permission: "active_users.view",
   },
   {
@@ -42,6 +42,17 @@ export const routes = [
     groupIcon: "Activity",
     groupOrder: -1,
     order: 4,
+    permission: "active_users.view",
+  },
+  {
+    path: "/dashboard",
+    label: "Funnel Dashboard",
+    icon: "LayoutDashboard",
+    showInSidebar: true,
+    group: "Active Users",
+    groupIcon: "Activity",
+    groupOrder: -1,
+    order: 1,
     permission: "active_users.view",
   },
 

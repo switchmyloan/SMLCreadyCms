@@ -9,7 +9,7 @@ import { leadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
-import ExportModal from '../../../components/ExportModal';
+import ExportOtpModal from '../../../components/ExportOtpModal';
 
 const getDateParams = (query) => {
   if (query.startDate && query.endDate) {
@@ -242,7 +242,8 @@ const Leads = () => {
       activeQuery.minAge,
       activeQuery.maxAge,
       activeQuery.jobType,
-      type
+      type,
+      activeQuery.exportToken,
     );
   }, []);
 
@@ -492,10 +493,9 @@ const Leads = () => {
   // mode: 'today' | 'yesterday' | 'range' | 'custom' (any string)
   // For today/yesterday we send `filter_date` (which the backend resolves
   // via CURRENT_DATE — timezone-safe). For an explicit range we send
-  // startDate / endDate. This matches how the table view filters by date
-  // and avoids YYYY-MM-DD strings being parsed as midnight UTC, which
-  // dropped today's IST-early-morning records from the export.
-  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode) => {
+  // startDate / endDate. The OTP token from ExportOtpModal is forwarded
+  // as `X-Export-Token` so the backend can audit-log this download.
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode, exportToken) => {
     const normalizedMode = String(mode || '').toLowerCase().trim();
     const isToday = normalizedMode.includes('today');
     const isYesterday = normalizedMode.includes('yesterday');
@@ -507,6 +507,7 @@ const Leads = () => {
       filter_date: '',
       startDate: null,
       endDate: null,
+      exportToken,
     };
 
     const exportQuery = isToday
@@ -540,11 +541,11 @@ const Leads = () => {
     }
   }, []);
 
-  const handleExport = async ({ startDate, endDate, mode }) => {
+  const handleExport = async ({ startDate, endDate, mode, token }) => {
     try {
       setIsExporting(true);
 
-      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode, token);
 
       if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");
@@ -633,7 +634,7 @@ const Leads = () => {
   return (
     <>
       <Toaster />
-      <ExportModal
+      <ExportOtpModal
         open={isExportModalOpen}
         onClose={handleCloseExportModal}
         onSubmit={handleExport}

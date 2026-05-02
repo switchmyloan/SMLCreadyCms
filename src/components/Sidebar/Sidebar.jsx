@@ -382,7 +382,7 @@ const ICONS = {
 
 function Sidebar({ onClose, collapsed, onToggleCollapse }) {
   const { user } = useAuth();
-  const { hasPermission, isSuperAdmin } = usePermissions();
+  const { hasPermission, hasAnyPermission, isSuperAdmin } = usePermissions();
   const location = useLocation();
   const navigate = useNavigate();
   const [openGroup, setOpenGroup] = useState(null);
@@ -390,13 +390,15 @@ function Sidebar({ onClose, collapsed, onToggleCollapse }) {
   const buttonRefs = useRef({});
   const sidebarRef = useRef(null);
 
-  // Filter routes based on user permissions
+  // Filter routes based on user permissions.
+  // A route can declare either `permission` (single) or `anyOf` (array,
+  // matches if user has any one of them).
   const allowedRoutes = routes.filter(r => {
-    // No permission required - allow everyone
-    if (!r.permission) return true;
-    // Super admin has all permissions
     if (isSuperAdmin) return true;
-    // Check if user has the required permission
+    if (Array.isArray(r.anyOf) && r.anyOf.length) {
+      return hasAnyPermission(r.anyOf);
+    }
+    if (!r.permission) return true;
     return hasPermission(r.permission);
   });
 

@@ -29,6 +29,7 @@ import {
   getWebLeadTracker,
   getAllWebLeadTracker,
 } from '../../../api-services/Modules/Leads';
+import ExportOtpModal from '../../../components/ExportOtpModal';
 
 /* ============== Animation variants ============== */
 const containerStagger = {
@@ -355,6 +356,10 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '' });
   const datePickerRef = useRef(null);
 
+  // Export OTP modal
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
   // StrictMode double-fire guard
   const fetchSeqRef = useRef(0);
 
@@ -409,12 +414,39 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
 
   const updateQuery = (updates) => setQuery((prev) => ({ ...prev, page_no: 1, ...updates }));
 
-  const handleExport = useCallback(async () => {
+  // Build the API filter set for export, applying any date override
+  // chosen inside ExportOtpModal (today / yesterday / custom range).
+  const buildExportFilters = useCallback((startDate, endDate, mode) => {
+    const filters = { ...buildFilters() };
+    delete filters.type;
+    delete filters.fromDate;
+    delete filters.toDate;
+    const m = String(mode || '').toLowerCase().trim();
+    if (m.includes('today')) filters.type = 'today';
+    else if (m.includes('yesterday')) filters.type = 'yesterday';
+    else if (startDate && endDate) {
+      filters.fromDate = startDate;
+      filters.toDate = endDate;
+    }
+    return filters;
+  }, [buildFilters]);
+
+  // Modal submit -> verified token in hand. Run the export, write CSV.
+  const runExport = useCallback(async ({ startDate, endDate, mode, token }) => {
+    if (isExporting) return;
+    setIsExporting(true);
     try {
-      const response = await fetchAll(buildFilters());
-      if (!response?.data?.success) { ToastNotification.error('Failed to fetch data for export'); return; }
+      const exportFilters = buildExportFilters(startDate, endDate, mode);
+      const response = await fetchAll(exportFilters, token);
+      if (!response?.data?.success) {
+        ToastNotification.error('Failed to fetch data for export');
+        return;
+      }
       const rows = response.data.data.rows || [];
-      if (!rows.length) { ToastNotification.error('No data to export'); return; }
+      if (!rows.length) {
+        ToastNotification.error('No data to export');
+        return;
+      }
 
       const csvRows = [[
         'Name', 'Phone', 'Email', 'Gender', 'Income', 'Loan Amount', 'City', 'PAN',
@@ -454,8 +486,22 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
       a.download = `${isApp ? 'app' : 'web'}-lead-tracker-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
-    } catch (err) { console.error(err); ToastNotification.error('Export failed'); }
-  }, [fetchAll, buildFilters, isApp]);
+      ToastNotification.success(`Exported ${rows.length} rows`);
+      setIsExportModalOpen(false);
+    } catch (err) {
+      console.error(err);
+      ToastNotification.error(
+        err?.response?.data?.message || 'Export failed'
+      );
+    } finally {
+      setIsExporting(false);
+    }
+  }, [fetchAll, buildExportFilters, isApp, isExporting]);
+
+  // Header button: just opens the OTP modal. Actual export runs after verify.
+  const handleExport = useCallback(() => {
+    setIsExportModalOpen(true);
+  }, []);
 
   const handleDateRangeApply = () => {
     if (!dateRange.startDate || !dateRange.endDate) return;
@@ -837,6 +883,13 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
           </div>
         )}
       </motion.div>
+
+      <ExportOtpModal
+        open={isExportModalOpen}
+        onClose={() => { if (!isExporting) setIsExportModalOpen(false); }}
+        onSubmit={runExport}
+        isSubmitting={isExporting}
+      />
     </motion.div>
   );
 };

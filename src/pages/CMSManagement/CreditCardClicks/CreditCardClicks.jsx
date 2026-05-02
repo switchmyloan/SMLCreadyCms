@@ -21,6 +21,8 @@ import {
   CreditCard,
   Eye,
   Filter,
+  Calendar,
+  Building2,
 } from "lucide-react";
 
 const imageUrl = import.meta.env.VITE_IMAGE_URL;
@@ -51,6 +53,8 @@ const CreditCardClicks = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCard, setFilterCard] = useState("");
   const [filterType, setFilterType] = useState("");
+  const [filterBank, setFilterBank] = useState("");
+  const [filterDate, setFilterDate] = useState(""); // '' | 'today' | 'yesterday' | '7d'
 
   // Drawer state
   const [selectedCard, setSelectedCard] = useState(null);
@@ -109,6 +113,41 @@ const CreditCardClicks = () => {
     return { cardStats, totalClicks, uniqueUsers, anonymousUsers };
   }, [allData]);
 
+  // Most recent click in a row — used for date filtering. Falls back
+  // to row.createdAt if no card-level timestamps are present.
+  const getRowLatestClickAt = (row) => {
+    const stamps = (row.clicked_cards || [])
+      .map((c) => (c.clicked_at ? new Date(c.clicked_at).getTime() : 0))
+      .filter(Boolean);
+    if (stamps.length) return new Date(Math.max(...stamps));
+    return row.createdAt ? new Date(row.createdAt) : null;
+  };
+
+  // Date predicate based on the active quick-range filter.
+  const matchesDateFilter = (row) => {
+    if (!filterDate) return true;
+    const ts = getRowLatestClickAt(row);
+    if (!ts) return false;
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+    if (filterDate === "today") {
+      return ts >= startOfToday && ts < startOfTomorrow;
+    }
+    if (filterDate === "yesterday") {
+      const startOfYesterday = new Date(startOfToday);
+      startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+      return ts >= startOfYesterday && ts < startOfToday;
+    }
+    if (filterDate === "7d") {
+      const sevenAgo = new Date(startOfToday);
+      sevenAgo.setDate(sevenAgo.getDate() - 6); // include today + last 6 days = 7 days
+      return ts >= sevenAgo && ts < startOfTomorrow;
+    }
+    return true;
+  };
+
   // Filtered table data
   const filteredData = useMemo(() => {
     let rows = data;
@@ -125,19 +164,40 @@ const CreditCardClicks = () => {
     if (filterCard) {
       rows = rows.filter((row) => (row.clicked_cards || []).some((c) => c.card_name === filterCard));
     }
+    if (filterBank) {
+      const want = filterBank.toLowerCase();
+      rows = rows.filter((row) => (row.clicked_cards || []).some((c) => (c.bank || "").toLowerCase() === want));
+    }
     if (filterType === "logged_in") {
       rows = rows.filter((row) => row.principal_xid);
     } else if (filterType === "anonymous") {
       rows = rows.filter((row) => !row.principal_xid);
     }
+    if (filterDate) {
+      rows = rows.filter(matchesDateFilter);
+    }
     return rows;
-  }, [data, searchTerm, filterCard, filterType]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, searchTerm, filterCard, filterBank, filterType, filterDate]);
 
   const uniqueCardNames = useMemo(() => {
     const names = new Set();
     allData.forEach((row) => (row.clicked_cards || []).forEach((c) => names.add(c.card_name)));
     return [...names].sort();
   }, [allData]);
+
+  const uniqueBanks = useMemo(() => {
+    const banks = new Set();
+    allData.forEach((row) => (row.clicked_cards || []).forEach((c) => c.bank && banks.add(c.bank)));
+    return [...banks].sort();
+  }, [allData]);
+
+  const activeFilterCount =
+    (searchTerm ? 1 : 0)
+    + (filterCard ? 1 : 0)
+    + (filterBank ? 1 : 0)
+    + (filterType ? 1 : 0)
+    + (filterDate ? 1 : 0);
 
   const handleExport = () => {
     if (!allData.length) return;
@@ -194,7 +254,7 @@ const CreditCardClicks = () => {
   const formatShortDate = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short" }) : "";
   const getCardImage = (n) => { const mc = masterLookup[n?.toLowerCase()]; return mc?.cardImage ? `${imageUrl}${mc.cardImage}` : null; };
   const getCardMaster = (n) => masterLookup[n?.toLowerCase()] || null;
-  const hasActiveFilters = searchTerm || filterCard || filterType;
+  const hasActiveFilters = searchTerm || filterCard || filterBank || filterType || filterDate;
 
   useEffect(() => {
     const handleEsc = (e) => { if (e.key === "Escape") setSelectedCard(null); };
@@ -366,11 +426,21 @@ const CreditCardClicks = () => {
           {/* ═══════ User Click Details ═══════ */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             {/* Toolbar */}
-            <div className="px-5 py-4 border-b border-gray-100">
+            <div className="px-5 py-4 border-b border-gray-100 space-y-3">
+              {/* Title row */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-semibold text-gray-900">All Click Details</h2>
-                  <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full font-medium">{totalDataCount} total</span>
+                  <span className="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-full font-medium">
+                    {filteredData.length === data.length
+                      ? `${totalDataCount} total`
+                      : `${filteredData.length} of ${data.length} on this page`}
+                  </span>
+                  {activeFilterCount > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                      <Filter size={11} /> {activeFilterCount} active
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
@@ -378,47 +448,119 @@ const CreditCardClicks = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search..."
+                      placeholder="Name, email, phone, IP..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-48 pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition"
+                      className="w-56 pl-8 pr-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 transition"
                     />
                     <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
 
-                  {/* Card filter */}
+                  {hasActiveFilters && (
+                    <button
+                      onClick={() => {
+                        setSearchTerm("");
+                        setFilterCard("");
+                        setFilterBank("");
+                        setFilterType("");
+                        setFilterDate("");
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <X size={12} />
+                      Clear all
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Filter chips row */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {/* Date quick filter */}
+                <div className="inline-flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-200">
+                  <span className="px-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                    <Calendar size={11} /> Date
+                  </span>
+                  {[
+                    { key: "", label: "All" },
+                    { key: "today", label: "Today" },
+                    { key: "yesterday", label: "Yesterday" },
+                    { key: "7d", label: "7 days" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key || "all"}
+                      type="button"
+                      onClick={() => setFilterDate(opt.key)}
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                        filterDate === opt.key
+                          ? "bg-white text-indigo-700 shadow-sm border border-indigo-200"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* User type chips */}
+                <div className="inline-flex items-center bg-gray-50 rounded-lg p-0.5 border border-gray-200">
+                  <span className="px-2 text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                    <Users size={11} /> User
+                  </span>
+                  {[
+                    { key: "", label: "All" },
+                    { key: "logged_in", label: "Logged-in" },
+                    { key: "anonymous", label: "Anonymous" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.key || "all"}
+                      type="button"
+                      onClick={() => setFilterType(opt.key)}
+                      className={`px-2.5 py-1 text-xs font-semibold rounded-md transition-colors ${
+                        filterType === opt.key
+                          ? "bg-white text-indigo-700 shadow-sm border border-indigo-200"
+                          : "text-gray-500 hover:text-gray-700"
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Bank dropdown */}
+                <div className="relative">
+                  <Building2
+                    size={13}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
+                  <select
+                    value={filterBank}
+                    onChange={(e) => setFilterBank(e.target.value)}
+                    className="pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white font-semibold text-gray-600"
+                  >
+                    <option value="">All Banks</option>
+                    {uniqueBanks.map((b) => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Card dropdown */}
+                <div className="relative">
+                  <CreditCard
+                    size={13}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
                   <select
                     value={filterCard}
                     onChange={(e) => setFilterCard(e.target.value)}
-                    className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white max-w-[180px]"
+                    className="pl-7 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white max-w-[180px] font-semibold text-gray-600"
                   >
                     <option value="">All Cards</option>
                     {uniqueCardNames.map((name) => (
                       <option key={name} value={name}>{name}</option>
                     ))}
                   </select>
-
-                  {/* User type */}
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white"
-                  >
-                    <option value="">All Users</option>
-                    <option value="logged_in">Logged-in</option>
-                    <option value="anonymous">Anonymous</option>
-                  </select>
-
-                  {/* Clear */}
-                  {hasActiveFilters && (
-                    <button
-                      onClick={() => { setSearchTerm(""); setFilterCard(""); setFilterType(""); }}
-                      className="inline-flex items-center gap-1 px-2 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <X size={12} />
-                      Clear
-                    </button>
-                  )}
                 </div>
               </div>
             </div>

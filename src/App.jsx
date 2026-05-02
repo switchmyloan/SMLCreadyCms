@@ -68,6 +68,7 @@ import ActiveUsersList from './pages/ActiveUsers/ActiveUsersList';
 import ActiveUserDetail from './pages/ActiveUsers/ActiveUserDetail';
 import LiveUsersPage from './pages/ActiveUsers/LiveUsersPage';
 import FunnelAnalyticsPage from './pages/ActiveUsers/FunnelAnalyticsPage';
+import FunnelDashboard from './pages/Dashboard/FunnelDashboard';
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
             <Route path="active-user/:id" element={<PermissionGuard permission="active_users.view"><ActiveUserDetail /></PermissionGuard>} />
             <Route path="live-users" element={<PermissionGuard permission="active_users.view"><LiveUsersPage /></PermissionGuard>} />
             <Route path="funnel-analytics" element={<PermissionGuard permission="active_users.view"><FunnelAnalyticsPage /></PermissionGuard>} />
+            <Route path="dashboard" element={<PermissionGuard permission="active_users.view"><FunnelDashboard /></PermissionGuard>} />
 
             {/* Executive Dashboards */}
             <Route path="executive-dashboard" element={<PermissionGuard permission="executive_dashboard.view"><ExecutiveDashboard /></PermissionGuard>} />

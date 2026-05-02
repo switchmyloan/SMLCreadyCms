@@ -13,7 +13,8 @@ export const getLeads = async (
     minAge,
     maxAge,
     jobType,
-    type
+    type,
+    exportToken
 ) => {
     const baseUrl = `/leads/admin/in-web-leads`;
     const params = new URLSearchParams();
@@ -35,10 +36,12 @@ export const getLeads = async (
     if (jobType) params.append('jobType', jobType);
 
     const queryString = params.toString();
+    const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
 
     return Api().get(`${baseUrl}${queryString ? `?${queryString}` : ''}`,
         {
             skipAdminAppend: true,
+            ...(headers ? { headers } : {}),
         }
     )
 };
@@ -175,9 +178,10 @@ export const getAppLeadTracker = async (pageNo = 1, limit = 10, filters = {}) =>
     );
 };
 
-export const getAllAppLeadTracker = async (filters = {}) => {
+export const getAllAppLeadTracker = async (filters = {}, exportToken) => {
+    const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
     return Api().get(`/leads/admin/app-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
-        { skipAdminAppend: true }
+        { skipAdminAppend: true, ...(headers ? { headers } : {}) }
     );
 };
 
@@ -187,9 +191,10 @@ export const getWebLeadTracker = async (pageNo = 1, limit = 10, filters = {}) =>
     );
 };
 
-export const getAllWebLeadTracker = async (filters = {}) => {
+export const getAllWebLeadTracker = async (filters = {}, exportToken) => {
+    const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
     return Api().get(`/leads/admin/web-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
-        { skipAdminAppend: true }
+        { skipAdminAppend: true, ...(headers ? { headers } : {}) }
     );
 };
 
@@ -297,6 +302,45 @@ export const listPushSchedules = async (filters = {}) => {
 
 export const cancelPushSchedule = async (id) => {
     return Api().delete(`/push-notification/admin/schedules/${id}`,
+        { skipAdminAppend: true }
+    );
+};
+
+// ===== Export OTP gate =====
+export const requestExportOtp = async (mobileNumber) => {
+    return Api().post(`/admin/export/request-otp`, { mobileNumber },
+        { skipAdminAppend: true }
+    );
+};
+
+export const verifyExportOtp = async (sessionId, otp) => {
+    return Api().post(`/admin/export/verify-otp`, { sessionId, otp },
+        { skipAdminAppend: true }
+    );
+};
+
+// ===== Funnel dashboard =====
+export const getFunnelOverview = async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.type) params.append('type', filters.type);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+    const qs = params.toString();
+    return Api().get(`/dashboard/funnel-overview${qs ? `?${qs}` : ''}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const getExportAuditLogs = async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.exportType) params.append('exportType', filters.exportType);
+    if (filters.mobileNumber) params.append('mobileNumber', filters.mobileNumber);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+    if (filters.limit !== undefined) params.append('limit', filters.limit);
+    if (filters.offset !== undefined) params.append('offset', filters.offset);
+    const qs = params.toString();
+    return Api().get(`/admin/export/audit-logs${qs ? `?${qs}` : ''}`,
         { skipAdminAppend: true }
     );
 };
