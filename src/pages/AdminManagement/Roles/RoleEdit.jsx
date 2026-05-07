@@ -33,6 +33,7 @@ const PERMISSION_MODULES = [
   { key: 'PUSH_NOTIFICATION', label: 'Push Notification', icon: '🔔' },
   { key: 'UTM', label: 'UTM', icon: '🔗' },
   { key: 'FAQ', label: 'FAQ', icon: '❓' },
+  { key: 'CITY_PAGES', label: 'City Pages', icon: '🗺' },
   { key: 'MIS_RAW', label: 'MIS Raw', icon: '📑' },
   { key: 'CMS_MANAGEMENT', label: 'CMS Management', icon: '📰' },
   { key: 'ADMIN_MANAGEMENT', label: 'Admin Management', icon: '👨‍💼' },

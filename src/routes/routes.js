@@ -418,6 +418,18 @@ export const routes = [
     permission: "faq.view",
   },
 
+   {
+    path: "/city-pages",
+    label: "Manage City Pages",
+    icon: "HelpCircle",
+    showInSidebar: true,
+    order: 1,
+    group: "City Pages",
+    groupIcon: "HelpCircle",
+    groupOrder: 10,
+    permission: "city_pages.view",
+  },
+
   // --- MIS Raw ---
   {
     path: "/mis-zype-data",
