@@ -16,7 +16,12 @@ import {
 } from "../../api-services/Modules/BlogsApi";
 import { MetaKeywordsInput } from "@components/Form/MetaKeywordsInput";
 import ValidatedTextArea from "@components/Form/ValidatedTextArea";
-import { AddAuthor, AddBlogCategory, getAuthor, getBlogCategory } from "../../api-services/Modules/AuthorApi";
+import {
+  AddAuthor,
+  AddBlogCategory,
+  getAuthor,
+  getBlogCategory,
+} from "../../api-services/Modules/AuthorApi";
 import Uploader from "../../components/Form/Uploader";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -28,7 +33,6 @@ function unescapeHtml(html) {
   return txt.value;
 }
 
-
 const LiveBlogPreview = ({ formData }) => {
   const BASE_URL = import.meta.env.VITE_IMAGE_URL;
 
@@ -37,7 +41,10 @@ const LiveBlogPreview = ({ formData }) => {
     if (formData.metaImage instanceof File) {
       return URL.createObjectURL(formData.metaImage);
     }
-    if (typeof formData.metaImage === "string" && formData.metaImage.startsWith("http")) {
+    if (
+      typeof formData.metaImage === "string" &&
+      formData.metaImage.startsWith("http")
+    ) {
       return formData.metaImage;
     }
     return "https://via.placeholder.com/400x200?text=Blog+Image";
@@ -59,7 +66,11 @@ const LiveBlogPreview = ({ formData }) => {
             {formData.title || "Your Blog Title Will Appear Here"}
           </h3>
           <p className="text-gray-600 text-sm leading-relaxed line-clamp-3">
-            <div dangerouslySetInnerHTML={{ __html: unescapeHtml(formData.description) }} />
+            <div
+              dangerouslySetInnerHTML={{
+                __html: unescapeHtml(formData.description),
+              }}
+            />
           </p>
           <div className="mt-2 text-gray-400 text-sm font-medium">
             {new Date().toLocaleDateString("en-US")}
@@ -195,7 +206,7 @@ export default function BlogCreate() {
   const [openModal, setOpenModal] = useState(false);
   const [modalType, setModalType] = useState("author");
   const [keywords, setKeywords] = useState([]);
-  const [categoryData, setCategoryData] = useState([])
+  const [categoryData, setCategoryData] = useState([]);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
 
   const {
@@ -218,10 +229,11 @@ export default function BlogCreate() {
       metaDescription: "",
       metaImage: "",
       metaKeywords: "",
+      schemaMarkup: "",
       metadata: { category: "", level: "" },
       // author_xid: null,
       tags: [],
-      blog_category_xid: null
+      blog_category_xid: null,
     },
   });
 
@@ -266,7 +278,7 @@ export default function BlogCreate() {
   const fetchBlogCategory = async () => {
     try {
       const response = await getBlogCategory(1, 10, "");
-      console.log(response?.data?.data, "ddd")
+      console.log(response?.data?.data, "ddd");
       if (response?.data?.success) {
         const mapped = response?.data?.data?.rows?.map((item) => ({
           label: item?.name?.toUpperCase(),
@@ -287,7 +299,6 @@ export default function BlogCreate() {
     fetchAuthors();
 
     if (isEdit && id != undefined) {
-        
       console.log("ander aya");
       const fetchBlog = async () => {
         try {
@@ -314,19 +325,19 @@ export default function BlogCreate() {
             // setValue("metadata.level", metadata.level || "");
             // setValue("metadata.category", metadata.category || "");
             setValue("blog_category_xid", blog?.categoryId || "");
-            setValue('author_xid', blog?.author?.id || '')
+            setValue("author_xid", blog?.author?.id || "");
             // setValue("tags", blog.tags?.map((t) => t.id) || []);
             const keywordArray = blog.metaKeywords
               ? blog.metaKeywords
-                .split(",")
-                .filter((keyword) => keyword.trim() !== "")
+                  .split(",")
+                  .filter((keyword) => keyword.trim() !== "")
               : [];
             setKeywords(keywordArray);
             setValue("metaKeywords", keywordArray.join(", "), {
               shouldValidate: true,
             });
-
-            if (blog.metaImage) { 
+setValue("schemaMarkup", blog.schemaMarkup || "");
+            if (blog.metaImage) {
               const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
               console.log(fullImageUrl, "fullImageUrl");
               setValue("metaImage", fullImageUrl); // Set as string URL
@@ -435,12 +446,12 @@ export default function BlogCreate() {
 
       if (res?.data?.success) {
         ToastNotification.success(
-          isEdit ? "Blog updated successfully" : "Blog created successfully"
+          isEdit ? "Blog updated successfully" : "Blog created successfully",
         );
         navigate("/blogs");
       } else {
         ToastNotification.error(
-          isEdit ? "Failed to update blog" : "Failed to create blog"
+          isEdit ? "Failed to update blog" : "Failed to create blog",
         );
       }
     } catch (err) {
@@ -454,14 +465,12 @@ export default function BlogCreate() {
   useEffect(() => {
     fetchAuthors();
     fetchTags();
-    fetchBlogCategory()
+    fetchBlogCategory();
   }, []);
 
   return (
     <>
       <div className="">
-
-
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-1 gap-6"
@@ -510,20 +519,21 @@ export default function BlogCreate() {
                   setGlobalFilter={setGlobalFilter}
                   globalFilter={globalFilter}
                   placeholder="Select category"
-                // label="Select Blog Category"
+                  // label="Select Blog Category"
                 />
               </div>
 
               <div className="space-y-1 lg:sticky self-start">
-
                 <div className="flex justify-between items-center ">
-
                   <ValidatedLabel label="Select Author" />
-                 
+
                   <button
                     type="button"
                     className="btn btn-xs btn-outline btn-primary"
-                    onClick={() => { setModalType("author"); setOpenModal(true) }}
+                    onClick={() => {
+                      setModalType("author");
+                      setOpenModal(true);
+                    }}
                   >
                     + Create
                   </button>
@@ -536,7 +546,6 @@ export default function BlogCreate() {
                   setGlobalFilter={setGlobalFilter}
                   globalFilter={globalFilter}
                 />
-
               </div>
               <ValidatedTextField
                 name="metaTitle"
@@ -555,7 +564,7 @@ export default function BlogCreate() {
                 placeholder="Enter blog description"
                 rows={4}
               />
-              
+
               <RichTextEditor
                 name="content"
                 control={control}
@@ -622,6 +631,16 @@ export default function BlogCreate() {
                 setKeywords={setKeywords}
                 setValue={setValue}
               />
+
+              <ValidatedTextArea
+                name="schemaMarkup"
+                control={control}
+                label="Schema Markup"
+                errors={errors}
+                className="col-span-2"
+                placeholder="Paste JSON-LD schema here"
+                rows={8}
+              />
               <div>
                 <ValidatedLabel label="Upload Image" />
                 <Uploader
@@ -639,8 +658,16 @@ export default function BlogCreate() {
             <div className="bg-white shadow p-4 rounded-xl">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold">Select Author</h3>
-                <button type="button" onClick={() => { setModalType("author"); setOpenModal(true) }}
-                  className="px-3 py-1 text-sm border rounded">Create</button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setModalType("author");
+                    setOpenModal(true);
+                  }}
+                  className="px-3 py-1 text-sm border rounded"
+                >
+                  Create
+                </button>
               </div>
               <ValidatedSearchableSelectField
                 name="author_xid"
@@ -690,81 +717,76 @@ export default function BlogCreate() {
         />
       </div>
 
+      {isCategoryModalOpen && (
+        <dialog open className="modal">
+          <div className="modal-box">
+            <h3 className="font-bold text-lg">Create Blog Category</h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const name = formData.get("name");
+                const description = formData.get("description");
 
+                const categoryData = {
+                  name: name,
+                  description: description,
+                };
+                console.log(categoryData, "formadadadadada");
 
-
-      {
-        isCategoryModalOpen && (
-          <dialog open className="modal">
-            <div className="modal-box">
-              <h3 className="font-bold text-lg">Create Blog Category</h3>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const formData = new FormData(e.target);
-                  const name = formData.get('name');
-                  const description = formData.get('description');
-
-                  const categoryData = {
-                    name: name,
-                    description: description,
-                  };
-                  console.log(categoryData, 'formadadadadada');
-
-                  try {
-                    const response = await AddBlogCategory(categoryData); // API call
-                    if (response?.data?.success) {
-                      ToastNotification.success('Category created successfully!');
-                      fetchBlogCategory(); // refresh dropdown
-                      setIsCategoryModalOpen(false);
-                    } else {
-                      ToastNotification.error('Failed to create category.');
-                    }
-                  } catch (error) {
-                    console.log('err', error);
-                    ToastNotification.error('Something went wrong!');
+                try {
+                  const response = await AddBlogCategory(categoryData); // API call
+                  if (response?.data?.success) {
+                    ToastNotification.success("Category created successfully!");
+                    fetchBlogCategory(); // refresh dropdown
+                    setIsCategoryModalOpen(false);
+                  } else {
+                    ToastNotification.error("Failed to create category.");
                   }
-                }}
-                className="space-y-4 mt-4"
-              >
-                <div>
-                  <ValidatedLabel label="Category Name" />
-                  <input
-                    name="name"
-                    type="text"
-                    placeholder="Category name"
-                    className="input input-bordered w-full"
-                    required
-                  />
-                </div>
+                } catch (error) {
+                  console.log("err", error);
+                  ToastNotification.error("Something went wrong!");
+                }
+              }}
+              className="space-y-4 mt-4"
+            >
+              <div>
+                <ValidatedLabel label="Category Name" />
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Category name"
+                  className="input input-bordered w-full"
+                  required
+                />
+              </div>
 
-                <div>
-                  <ValidatedLabel label="Category Description" />
-                  <textarea
-                    name="description"
-                    placeholder="Category Description"
-                    className="textarea textarea-bordered w-full"
-                    rows={5}
-                  />
-                </div>
+              <div>
+                <ValidatedLabel label="Category Description" />
+                <textarea
+                  name="description"
+                  placeholder="Category Description"
+                  className="textarea textarea-bordered w-full"
+                  rows={5}
+                />
+              </div>
 
-                <div className="modal-action">
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={() => setIsCategoryModalOpen(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button type="submit" className="btn btn-primary">
-                    Create
-                  </button>
-                </div>
-              </form>
-            </div>
-          </dialog>
-        )
-      }
+              <div className="modal-action">
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setIsCategoryModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Create
+                </button>
+              </div>
+            </form>
+          </div>
+        </dialog>
+      )}
     </>
   );
 }

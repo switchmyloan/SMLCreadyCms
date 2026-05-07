@@ -6,6 +6,7 @@ import Blogs from '@pages/Blogs/Blogs'
 import DefaultLayout from './layouts/DefaultLayout'
 import BlogCreate from '@pages/Blogs/BlogsCreate'
 import Faq from '@pages/FAQ/Faq'
+
 import Press from '@pages/CMSManagement/PressRoom/Press'
 import LoginPage from '@pages/Auth/LoginPage'
 import ProtectedRoute from './components/ProtectedRoute';
@@ -69,6 +70,7 @@ import ActiveUserDetail from './pages/ActiveUsers/ActiveUserDetail';
 import LiveUsersPage from './pages/ActiveUsers/LiveUsersPage';
 import FunnelAnalyticsPage from './pages/ActiveUsers/FunnelAnalyticsPage';
 import FunnelDashboard from './pages/Dashboard/FunnelDashboard';
+import CityPages from './pages/CityPages/cityPages';
 
 function App() {
   return (
@@ -151,6 +153,7 @@ function App() {
 
             {/* FAQ */}
             <Route path="faq" element={<PermissionGuard permission="faq.view"><Faq /></PermissionGuard>} />
+            <Route path="city-pages" element={<PermissionGuard permission="city_pages.view"><CityPages/></PermissionGuard>} />
 
             {/* MIS Raw */}
             <Route path="mis-zype-upload" element={<PermissionGuard permission="mis_raw.create"><RawMisZypeUpload /></PermissionGuard>} />
