@@ -39,6 +39,17 @@ export const getActivityStats = async (mobileOnly = false, excludeCms = false) =
   });
 };
 
+// Get marketing-focused breakdowns (geo, device, demographics, peak hours,
+// channel performance, recommendations) — defaults to excludeCms=true.
+export const getMarketingInsights = async (excludeCms = true) => {
+  const qs = new URLSearchParams();
+  if (!excludeCms) qs.set('excludeCms', 'false');
+  const suffix = qs.toString() ? `?${qs.toString()}` : '';
+  return Api().get(`/active-users/marketing-insights${suffix}`, {
+    skipAdminAppend: true,
+  });
+};
+
 // Track user activity (for CMS tracking) - Single event
 export const trackActivity = async (payload) => {
   return Api().post(`/active-users/activity/track`, payload, {

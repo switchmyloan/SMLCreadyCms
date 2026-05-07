@@ -13,10 +13,30 @@ import {
   Target,
   Search,
   X,
-  Filter,
   Globe,
-  HelpCircle
+  HelpCircle,
+  MapPin,
+  Briefcase,
+  TrendingUp,
+  Lightbulb,
+  Calendar
 } from 'lucide-react';
+import {
+  PieChart as RPieChart,
+  Pie,
+  Cell,
+  BarChart as RBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  Legend as RLegend,
+  AreaChart,
+  Area,
+  ResponsiveContainer,
+  LabelList,
+} from 'recharts';
 
 const InfoTip = ({ text }) => (
   <span
@@ -26,15 +46,730 @@ const InfoTip = ({ text }) => (
     <HelpCircle size={13} />
   </span>
 );
+
+const formatHour = (h) => {
+  if (h === 0) return '12 AM';
+  if (h < 12) return `${h} AM`;
+  if (h === 12) return '12 PM';
+  return `${h - 12} PM`;
+};
+
+const ChartTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-xs">
+      {label && <p className="font-semibold text-gray-700 mb-1">{label}</p>}
+      {payload.map((entry, i) => (
+        <p key={i} style={{ color: entry.color || entry.payload?.fill }}>
+          <span className="font-medium">{entry.name || entry.payload?.name}:</span>{' '}
+          <span className="font-bold">
+            {Number(entry.value).toLocaleString('en-IN')}
+          </span>
+          {entry.payload?.percentage != null && (
+            <span className="text-gray-400 ml-1">({entry.payload.percentage}%)</span>
+          )}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const HorizontalBarChart = ({
+  items,
+  valueKey = 'count',
+  labelKey = 'name',
+  color = '#6366f1',
+  height = 260,
+  emptyText = 'No data',
+}) => {
+  if (!items || items.length === 0) {
+    return (
+      <div
+        style={{ height }}
+        className="flex items-center justify-center text-xs text-gray-400"
+      >
+        {emptyText}
+      </div>
+    );
+  }
+  const data = items.map((it) => ({
+    ...it,
+    name: String(it[labelKey] ?? '').slice(0, 24),
+    value: it[valueKey] || 0,
+  }));
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RBarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 4, right: 30, left: 4, bottom: 0 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" horizontal={false} />
+          <XAxis
+            type="number"
+            tick={{ fontSize: 11, fill: '#6b7280' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            type="category"
+            dataKey="name"
+            tick={{ fontSize: 11, fill: '#374151' }}
+            axisLine={false}
+            tickLine={false}
+            width={100}
+          />
+          <RTooltip content={<ChartTooltip />} cursor={{ fill: '#f9fafb' }} />
+          <Bar dataKey="value" name="Users" fill={color} radius={[0, 6, 6, 0]}>
+            <LabelList
+              dataKey="value"
+              position="right"
+              style={{ fontSize: 11, fill: '#6b7280' }}
+              formatter={(v) => Number(v).toLocaleString('en-IN')}
+            />
+          </Bar>
+        </RBarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const VerticalBarChart = ({
+  items,
+  valueKey = 'count',
+  labelKey = 'name',
+  color = '#10b981',
+  height = 240,
+  emptyText = 'No data',
+}) => {
+  if (!items || items.length === 0) {
+    return (
+      <div
+        style={{ height }}
+        className="flex items-center justify-center text-xs text-gray-400"
+      >
+        {emptyText}
+      </div>
+    );
+  }
+  const data = items.map((it) => ({
+    ...it,
+    name: String(it[labelKey] ?? ''),
+    value: it[valueKey] || 0,
+  }));
+  return (
+    <div style={{ height }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RBarChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fontSize: 11, fill: '#6b7280' }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 11, fill: '#6b7280' }}
+            axisLine={false}
+            tickLine={false}
+            allowDecimals={false}
+          />
+          <RTooltip content={<ChartTooltip />} cursor={{ fill: '#f9fafb' }} />
+          <Bar dataKey="value" name="Users" fill={color} radius={[6, 6, 0, 0]}>
+            <LabelList
+              dataKey="value"
+              position="top"
+              style={{ fontSize: 11, fill: '#6b7280' }}
+              formatter={(v) => Number(v).toLocaleString('en-IN')}
+            />
+          </Bar>
+        </RBarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+const DonutChart = ({
+  items,
+  valueKey = 'count',
+  labelKey = 'name',
+  colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#0ea5e9', '#9ca3af'],
+  height = 240,
+  emptyText = 'No data',
+  centerLabel,
+  centerValue,
+}) => {
+  const filtered = (items || []).filter((it) => (it[valueKey] || 0) > 0);
+  if (filtered.length === 0) {
+    return (
+      <div
+        style={{ height }}
+        className="flex items-center justify-center text-xs text-gray-400"
+      >
+        {emptyText}
+      </div>
+    );
+  }
+  const data = filtered.map((it) => ({
+    ...it,
+    name: it[labelKey],
+    value: it[valueKey] || 0,
+  }));
+  return (
+    <div style={{ height }} className="relative">
+      <ResponsiveContainer width="100%" height="100%">
+        <RPieChart>
+          <RTooltip content={<ChartTooltip />} />
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            innerRadius="55%"
+            outerRadius="85%"
+            paddingAngle={2}
+            stroke="#fff"
+            strokeWidth={2}
+          >
+            {data.map((_, i) => (
+              <Cell key={i} fill={colors[i % colors.length]} />
+            ))}
+          </Pie>
+          <RLegend
+            verticalAlign="bottom"
+            height={28}
+            iconSize={8}
+            wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+          />
+        </RPieChart>
+      </ResponsiveContainer>
+      {(centerLabel || centerValue != null) && (
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+          style={{ marginTop: -14 }}
+        >
+          {centerValue != null && (
+            <p className="text-2xl font-bold text-gray-800">
+              {Number(centerValue).toLocaleString('en-IN')}
+            </p>
+          )}
+          {centerLabel && (
+            <p className="text-[10px] uppercase tracking-wide text-gray-400 font-semibold">
+              {centerLabel}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const InsightCard = ({ title, icon: Icon, accent = 'indigo', tooltip, children }) => {
+  const accentText = {
+    indigo: 'text-indigo-500',
+    emerald: 'text-emerald-500',
+    amber: 'text-amber-500',
+    rose: 'text-rose-500',
+    violet: 'text-violet-500',
+    sky: 'text-sky-500',
+  }[accent] || 'text-indigo-500';
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-5">
+      <div className="flex items-center gap-2 mb-3">
+        {Icon && <Icon className={`w-4 h-4 ${accentText}`} />}
+        <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1">
+          {title}
+          {tooltip && <InfoTip text={tooltip} />}
+        </h4>
+      </div>
+      {children}
+    </div>
+  );
+};
+
+const MarketingInsights = ({ data }) => {
+  const {
+    totalUsers,
+    topCities,
+    topStates,
+    deviceTypes,
+    genderSplit,
+    ageGroups,
+    incomeRanges,
+    jobTypes,
+    peakHours,
+    engagementBySource,
+    topEntryPages,
+    recommendations,
+  } = data;
+
+  const peakSorted = [...(peakHours || [])]
+    .filter((p) => p.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  const genderTotal =
+    (genderSplit?.male || 0) +
+    (genderSplit?.female || 0) +
+    (genderSplit?.other || 0) +
+    (genderSplit?.unknown || 0);
+
+  const genderRows = [
+    { label: 'Male', count: genderSplit?.male || 0, color: '#6366f1' },
+    { label: 'Female', count: genderSplit?.female || 0, color: '#ec4899' },
+    { label: 'Other', count: genderSplit?.other || 0, color: '#f59e0b' },
+    { label: 'Unknown', count: genderSplit?.unknown || 0, color: '#9ca3af' },
+  ].filter((r) => r.count > 0);
+
+  return (
+    <div className="space-y-4">
+      {/* Marketing recommendations banner */}
+      {recommendations && recommendations.length > 0 && (
+        <div className="bg-gradient-to-br from-indigo-50 via-violet-50 to-pink-50 rounded-xl border border-indigo-100 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="w-5 h-5 text-amber-500" />
+            <h3 className="text-base font-semibold text-gray-800">
+              Marketing Playbook
+            </h3>
+            <InfoTip text="Auto-generated recommendations based on the active user data. Use these as starting hypotheses for ad campaigns — not absolute truth. Refresh to recompute." />
+            <span className="ml-auto text-[11px] uppercase tracking-wide text-indigo-500 font-semibold bg-white/60 px-2 py-1 rounded-full">
+              For Ads Team
+            </span>
+          </div>
+          <ul className="space-y-2">
+            {recommendations.map((r, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-gray-700"
+              >
+                <TrendingUp size={14} className="mt-0.5 text-emerald-500 flex-shrink-0" />
+                <span>{r}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Peak hours callout + 24h heatmap */}
+      {peakSorted.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Calendar className="w-5 h-5 text-amber-500" />
+            <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1">
+              Typical Engagement by Hour
+              <InfoTip text="This is a LIFETIME pattern, not today's activity. Each bar shows total activities ever recorded at that hour-of-day across all currently-active users. Future hours can show counts because they reflect prior days' activity at that hour. Use this as your ad/push scheduling baseline — when do users typically engage." />
+            </h4>
+            <span
+              className="ml-auto text-[11px] text-amber-600 font-semibold bg-amber-50 px-2 py-0.5 rounded"
+              title="The y-axis aggregates activity across all days, not just today. A future hour can show data because users have engaged in that hour on previous days."
+            >
+              Lifetime pattern
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            {peakSorted.map((p, i) => (
+              <div
+                key={p.hour}
+                className="flex items-center gap-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg p-3 border border-amber-100"
+                title={`${p.count.toLocaleString('en-IN')} activities recorded around ${formatHour(p.hour)} IST`}
+              >
+                <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm">
+                  #{i + 1}
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-gray-800">
+                    {formatHour(p.hour)}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {p.count.toLocaleString('en-IN')} activities
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{ height: 200 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={(peakHours || []).map((p) => ({
+                  hour: formatHour(p.hour),
+                  rawHour: p.hour,
+                  activities: p.count || 0,
+                  isPeak: p.isPeak,
+                }))}
+                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="peakGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                <XAxis
+                  dataKey="hour"
+                  tick={{ fontSize: 10, fill: '#6b7280' }}
+                  interval={2}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11, fill: '#6b7280' }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <RTooltip content={<ChartTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="activities"
+                  name="Activities"
+                  stroke="#f59e0b"
+                  strokeWidth={2}
+                  fill="url(#peakGradient)"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Geo + Device row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <InsightCard
+          title="Top Cities"
+          icon={MapPin}
+          accent="rose"
+          tooltip="Cities with the most active users in the last 24h. Use for geo-targeted ad campaigns (Google Geo, Meta location targeting). Higher count = lower CPC for that city."
+        >
+          <HorizontalBarChart
+            items={(topCities || []).slice(0, 8).map((c) => ({
+              name: c.city,
+              count: c.count,
+              percentage: c.percentage,
+            }))}
+            color="#f43f5e"
+            emptyText="No city data — most users haven't filled their profile."
+          />
+        </InsightCard>
+
+        <InsightCard
+          title="Top States"
+          icon={MapPin}
+          accent="violet"
+          tooltip="State-level breakdown — useful for region-specific creatives (language, festivals) and to set up region-based ad sets in Meta / Google."
+        >
+          <HorizontalBarChart
+            items={(topStates || []).slice(0, 8).map((s) => ({
+              name: s.state,
+              count: s.count,
+              percentage: s.percentage,
+            }))}
+            color="#8b5cf6"
+            emptyText="No state data."
+          />
+        </InsightCard>
+
+        <InsightCard
+          title="Device Types"
+          icon={Smartphone}
+          accent="sky"
+          tooltip="Active users split by device. iOS-heavy = Apple Search Ads + premium creative. Android-heavy = Google UAC + value-led creative. Web-heavy = invest in SEO and retargeting."
+        >
+          <DonutChart
+            items={(deviceTypes || []).map((d) => ({
+              name: d.type,
+              count: d.count,
+              percentage: d.percentage,
+            }))}
+            colors={['#0ea5e9', '#6366f1', '#10b981', '#f59e0b', '#ec4899', '#9ca3af']}
+            centerLabel="Devices"
+            centerValue={(deviceTypes || []).reduce((s, d) => s + (d.count || 0), 0)}
+            emptyText="No device data."
+          />
+        </InsightCard>
+      </div>
+
+      {/* Demographics row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <InsightCard
+          title="Gender Split"
+          icon={Users}
+          accent="indigo"
+          tooltip="Audience gender mix from registered profiles. Use to tune ad creative and Meta audience targeting (gender filter)."
+        >
+          {genderTotal > 0 ? (
+            <DonutChart
+              items={genderRows.map((r) => ({
+                name: r.label,
+                count: r.count,
+                percentage: Math.round((r.count / genderTotal) * 100),
+              }))}
+              colors={genderRows.map((r) => r.color)}
+              centerLabel="Total"
+              centerValue={genderTotal}
+            />
+          ) : (
+            <div
+              style={{ height: 240 }}
+              className="flex items-center justify-center text-xs text-gray-400"
+            >
+              No gender data.
+            </div>
+          )}
+        </InsightCard>
+
+        <InsightCard
+          title="Age Groups"
+          icon={Users}
+          accent="emerald"
+          tooltip="Active users grouped by age (computed from dateOfBirth). Use for age-targeted ad sets and to pick creative tone (Gen Z vs Millennial vs older)."
+        >
+          <VerticalBarChart
+            items={(ageGroups || []).map((a) => ({
+              name: a.range,
+              count: a.count,
+              percentage: a.percentage,
+            }))}
+            color="#10b981"
+            emptyText="No age data."
+          />
+        </InsightCard>
+
+        <InsightCard
+          title="Income Ranges"
+          icon={Briefcase}
+          accent="amber"
+          tooltip="Self-reported monthly income. High-income clusters are good for premium offers, low-income for instant-loan / small-ticket creatives."
+        >
+          <HorizontalBarChart
+            items={(incomeRanges || []).slice(0, 6).map((i) => ({
+              name: i.range,
+              count: i.count,
+              percentage: i.percentage,
+            }))}
+            color="#f59e0b"
+            emptyText="No income data."
+          />
+        </InsightCard>
+      </div>
+
+      {/* Job types + entry pages row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <InsightCard
+          title="Job Types"
+          icon={Briefcase}
+          accent="violet"
+          tooltip="Salaried vs self-employed split. Use to pick the right loan-product creative (PL for salaried, business loan for self-employed)."
+        >
+          <HorizontalBarChart
+            items={(jobTypes || []).slice(0, 6).map((j) => ({
+              name: j.type,
+              count: j.count,
+              percentage: j.percentage,
+            }))}
+            color="#8b5cf6"
+            emptyText="No job data."
+          />
+        </InsightCard>
+
+        <InsightCard
+          title="Top Entry Pages"
+          icon={Eye}
+          accent="sky"
+          tooltip="The first page users land on in their session. Make sure your ad landing pages match what users are actually entering on — mismatch kills conversion."
+        >
+          <HorizontalBarChart
+            items={(topEntryPages || []).map((p) => ({
+              name: p.path,
+              count: p.count,
+              percentage: p.percentage,
+            }))}
+            color="#0ea5e9"
+            emptyText="No entry page data."
+          />
+        </InsightCard>
+      </div>
+
+      {/* Acquisition channel performance */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="w-5 h-5 text-emerald-500" />
+          <h4 className="text-sm font-semibold text-gray-800 flex items-center gap-1">
+            Acquisition Channel Performance
+            <InfoTip text="Engagement metrics by acquisition source. Higher avg page views and session minutes = stickier channel — invest more there. Avg actions = how interactive the user is (button clicks, form submits)." />
+          </h4>
+          <span className="ml-auto text-[11px] text-gray-400">
+            Compare App vs Web stickiness
+          </span>
+        </div>
+        {(() => {
+          const app = engagementBySource?.app || {
+            users: 0,
+            avgPageViews: 0,
+            avgActions: 0,
+            avgSessionMinutes: 0,
+          };
+          const web = engagementBySource?.web || {
+            users: 0,
+            avgPageViews: 0,
+            avgActions: 0,
+            avgSessionMinutes: 0,
+          };
+          const compareData = [
+            {
+              metric: 'Avg Page Views',
+              App: Number(app.avgPageViews || 0),
+              Web: Number(web.avgPageViews || 0),
+            },
+            {
+              metric: 'Avg Actions',
+              App: Number(app.avgActions || 0),
+              Web: Number(web.avgActions || 0),
+            },
+            {
+              metric: 'Avg Session (min)',
+              App: Number(app.avgSessionMinutes || 0),
+              Web: Number(web.avgSessionMinutes || 0),
+            },
+          ];
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2" style={{ height: 280 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <RBarChart
+                    data={compareData}
+                    margin={{ top: 16, right: 16, left: 0, bottom: 0 }}
+                    barGap={8}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                    <XAxis
+                      dataKey="metric"
+                      tick={{ fontSize: 11, fill: '#6b7280' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: '#6b7280' }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <RTooltip content={<ChartTooltip />} cursor={{ fill: '#f9fafb' }} />
+                    <RLegend wrapperStyle={{ fontSize: 11 }} iconSize={10} />
+                    <Bar dataKey="App" fill="#6366f1" radius={[6, 6, 0, 0]}>
+                      <LabelList
+                        dataKey="App"
+                        position="top"
+                        style={{ fontSize: 10, fill: '#6366f1', fontWeight: 600 }}
+                        formatter={(v) => Number(v).toFixed(1)}
+                      />
+                    </Bar>
+                    <Bar dataKey="Web" fill="#10b981" radius={[6, 6, 0, 0]}>
+                      <LabelList
+                        dataKey="Web"
+                        position="top"
+                        style={{ fontSize: 10, fill: '#10b981', fontWeight: 600 }}
+                        formatter={(v) => Number(v).toFixed(1)}
+                      />
+                    </Bar>
+                  </RBarChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: 'App',
+                    icon: Smartphone,
+                    color: '#6366f1',
+                    bg: 'bg-indigo-50',
+                    data: app,
+                  },
+                  {
+                    label: 'Web',
+                    icon: Globe,
+                    color: '#10b981',
+                    bg: 'bg-emerald-50',
+                    data: web,
+                  },
+                ].map((row) => {
+                  const RowIcon = row.icon;
+                  return (
+                    <div
+                      key={row.label}
+                      className={`${row.bg} rounded-lg p-3 border border-gray-100`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div
+                          className="w-7 h-7 rounded-md flex items-center justify-center"
+                          style={{ backgroundColor: `${row.color}26` }}
+                        >
+                          <RowIcon size={14} style={{ color: row.color }} />
+                        </div>
+                        <span className="font-semibold text-gray-800 text-sm">
+                          {row.label}
+                        </span>
+                        <span className="ml-auto text-xs text-gray-500 font-semibold">
+                          {(row.data.users || 0).toLocaleString('en-IN')} users
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div title="Avg page views per user — content stickiness.">
+                          <p
+                            className="text-base font-bold"
+                            style={{ color: row.color }}
+                          >
+                            {Number(row.data.avgPageViews || 0).toFixed(1)}
+                          </p>
+                          <p className="text-[10px] text-gray-500">views</p>
+                        </div>
+                        <div title="Avg actions per user — interactivity.">
+                          <p
+                            className="text-base font-bold"
+                            style={{ color: row.color }}
+                          >
+                            {Number(row.data.avgActions || 0).toFixed(1)}
+                          </p>
+                          <p className="text-[10px] text-gray-500">actions</p>
+                        </div>
+                        <div title="Avg session length in minutes.">
+                          <p
+                            className="text-base font-bold"
+                            style={{ color: row.color }}
+                          >
+                            {Number(row.data.avgSessionMinutes || 0).toFixed(0)}
+                          </p>
+                          <p className="text-[10px] text-gray-500">min</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
+        <p className="text-[11px] text-gray-400 mt-3 italic">
+          Tip: pair the channel with the highest avg-views with the city/age/device leaders above for the strongest ad set.
+        </p>
+      </div>
+
+      <div className="text-[11px] text-gray-400 text-right">
+        Marketing insights computed from {totalUsers.toLocaleString('en-IN')} active users in the last 24h. Refreshes every 30 sec.
+      </div>
+    </div>
+  );
+};
 import StatCard from '../../components/dashboard-pro/StatCard';
 import TrendChart from '../../components/dashboard-pro/TrendChart';
 import SkeletonLoader from '../../components/dashboard-pro/SkeletonLoader';
-import { getActivityStats, getLiveUsers } from '../../api-services/Modules/ActiveUsersApi';
+import { getActivityStats, getLiveUsers, getMarketingInsights } from '../../api-services/Modules/ActiveUsersApi';
 import { Link } from 'react-router-dom';
 
 const ActiveUsersDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentUsers, setRecentUsers] = useState([]);
+  const [insights, setInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mobileOnly, setMobileOnly] = useState(false);
@@ -56,9 +791,10 @@ const ActiveUsersDashboard = () => {
     setError(null);
     const errors = [];
     try {
-      const [statsRes, usersRes] = await Promise.allSettled([
+      const [statsRes, usersRes, insightsRes] = await Promise.allSettled([
         getActivityStats(mobileOnly, true),
         getLiveUsers(mobileOnly),
+        getMarketingInsights(true),
       ]);
 
       if (statsRes.status === 'fulfilled') {
@@ -87,6 +823,25 @@ const ActiveUsersDashboard = () => {
         );
         setRecentUsers(onlyAppWeb);
       } else {
+        // fall through — usersRes errors handled below
+      }
+
+      if (insightsRes.status === 'fulfilled') {
+        const data = unwrap(insightsRes.value);
+        if (data && typeof data === 'object') {
+          setInsights(data);
+        } else {
+          setInsights(null);
+        }
+      } else {
+        console.error(
+          '[ActiveUsersDashboard] /marketing-insights failed:',
+          insightsRes.reason
+        );
+        setInsights(null);
+      }
+
+      if (usersRes.status === 'rejected') {
         const reason =
           usersRes.reason?.response?.data?.message ||
           usersRes.reason?.message ||
@@ -161,48 +916,6 @@ const ActiveUsersDashboard = () => {
         page: item.path?.split('/').pop() || item.path || 'Unknown',
         visits: item.count || 0,
       }));
-  }, [stats]);
-
-  const STAGE_DESCRIPTIONS = {
-    'Active (24h)':
-      'Unique App + Web users with any activity in the last 24 hours.',
-    'Active (12h)':
-      'Of the 24h-active users, how many were active in the last 12 hours.',
-    'Active (1h)':
-      'Of the 24h-active users, how many were active in the last 1 hour.',
-    'Online Now':
-      'Of the 24h-active users, how many are still on the app/website right now (heartbeat in last 5 min).',
-  };
-
-  const funnelData = useMemo(() => {
-    const stages = stats?.engagementFunnel;
-    if (!Array.isArray(stages) || stages.length === 0) return [];
-    const STAGE_COLORS = ['#6366f1', '#8b5cf6', '#f59e0b', '#10b981'];
-    const top = Math.max(...stages.map((s) => s.count || 0), 1);
-    return stages.map((s, i) => {
-      const count = s.count || 0;
-      const prev = i === 0 ? null : stages[i - 1]?.count || 0;
-      const widthPct = Math.max(8, Math.round((count / top) * 100));
-      const dropFromPrev =
-        prev != null && prev > 0
-          ? Math.round(((prev - count) / prev) * 100)
-          : null;
-      const conversionFromTop =
-        i === 0
-          ? 100
-          : top > 0
-            ? Math.round((count / top) * 100)
-            : 0;
-      return {
-        stage: s.stage,
-        count,
-        widthPct,
-        dropFromPrev,
-        conversionFromTop,
-        color: STAGE_COLORS[i % STAGE_COLORS.length],
-        description: STAGE_DESCRIPTIONS[s.stage] || '',
-      };
-    });
   }, [stats]);
 
   const sourceBreakdown = stats?.sourceBreakdown || { app: 0, web: 0, unknown: 0 };
@@ -320,142 +1033,160 @@ const ActiveUsersDashboard = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div title="App + Web users with a heartbeat in the last 5 minutes. Reflects who is actively on the app/website right now (CMS sessions excluded).">
-          <StatCard
-            title="Online Now"
-            value={stats?.onlineUsersNow || 0}
-            icon={Wifi}
-            color="success"
-            format="number"
-            subtitle="Active in last 5 min"
-            to="/live-users"
-          />
-        </div>
-        <div title="Unique App + Web users with at least one activity in the last 24 hours. Each user counted once. CMS-only admins excluded.">
-          <StatCard
-            title="Active Users (24h)"
-            value={stats?.totalActiveUsers24h || 0}
-            icon={Users}
-            color="primary"
-            format="number"
-            subtitle="Unique users today"
-            to="/active-users-list"
-          />
-        </div>
-        <div title="Sum of all activities (page views + API calls + heartbeats + actions) by App + Web users in the last 24 hours.">
-          <StatCard
-            title="Total Activities (24h)"
-            value={stats?.totalActivities24h || 0}
-            icon={Activity}
-            color="purple"
-            format="number"
-            subtitle="All activity types"
-            to="/active-users-list"
-          />
-        </div>
-        <div title="Total screen / page views by App + Web users in the last 24 hours. Heartbeats and API calls are not counted here.">
-          <StatCard
-            title="Page Views (24h)"
-            value={stats?.activityBreakdown?.pageViews || 0}
-            icon={Eye}
-            color="cyan"
-            format="number"
-            subtitle="Screen visits"
-            to="/funnel-analytics"
-          />
-        </div>
-      </div>
+      {/* KPI Cards — actionable, marketing-focused */}
+      {(() => {
+        // Reconcile two truth sources:
+        //   - stats endpoint  → user_activity_summary (DB writes only)
+        //   - live endpoint   → Redis presence ∪ DB (matches what user sees
+        //                       in "Recently Active Users" table)
+        // Mobile-app heartbeats only hit Redis, so they raise the live count
+        // without touching the DB. Always trust the larger of the two.
+        const dbActive = stats?.totalActiveUsers24h || 0;
+        const liveActive = recentUsers.length;
+        const totalActive = Math.max(dbActive, liveActive);
 
-      {/* Engagement Funnel + Source Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-indigo-500" />
-              <div>
-                <h3 className="text-base font-semibold text-gray-800 flex items-center gap-1">
-                  Engagement Funnel (App + Web)
-                  <InfoTip text="Recency funnel: starting from users active in the last 24h, the bars show how many of them were also active in the last 12h, last 1h, and right now (online in last 5 min). Bigger drop = users tailing off; small drop = high stickiness." />
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Recency funnel — last 24h users narrowing to those still online
-                </p>
-              </div>
+        const dbOnline = stats?.onlineUsersNow || 0;
+        const liveOnline = recentUsers.filter((u) => u.isOnline).length;
+        const onlineNow = Math.max(dbOnline, liveOnline);
+
+        // App / Web split — prefer live users (deviceType-based, matches table).
+        // Fallback to stats.sourceBreakdown if live count is empty.
+        const liveAppUsers = recentUsers.filter((u) => {
+          const dt = String(u.deviceType || '').toLowerCase();
+          return dt === 'mobile' || dt === 'ios' || dt === 'android';
+        }).length;
+        const liveWebUsers = recentUsers.filter(
+          (u) => String(u.deviceType || '').toLowerCase() === 'web'
+        ).length;
+        const appUsers =
+          liveActive > 0 ? liveAppUsers : stats?.sourceBreakdown?.app || 0;
+        const webUsers =
+          liveActive > 0 ? liveWebUsers : stats?.sourceBreakdown?.web || 0;
+
+        const totalPV = stats?.activityBreakdown?.pageViews || 0;
+        const activeLast1h =
+          stats?.engagementFunnel?.find((s) => s.stage === 'Active (1h)')
+            ?.count || 0;
+        const avgPagesPerUser =
+          totalActive > 0 ? (totalPV / totalActive).toFixed(1) : '0';
+
+        // Weighted avg session minutes across app + web (from insights endpoint)
+        const eng = insights?.engagementBySource;
+        const appU = eng?.app?.users || 0;
+        const webU = eng?.web?.users || 0;
+        const totalEngU = appU + webU;
+        const avgSessionMin =
+          totalEngU > 0
+            ? (
+                ((eng?.app?.avgSessionMinutes || 0) * appU +
+                  (eng?.web?.avgSessionMinutes || 0) * webU) /
+                totalEngU
+              ).toFixed(0)
+            : '0';
+
+        const appPct =
+          totalActive > 0 ? Math.round((appUsers / totalActive) * 100) : 0;
+        const webPct =
+          totalActive > 0 ? Math.round((webUsers / totalActive) * 100) : 0;
+        const onlinePct =
+          totalActive > 0
+            ? Math.round(((stats?.onlineUsersNow || 0) / totalActive) * 100)
+            : 0;
+        const last1hPct =
+          totalActive > 0
+            ? Math.round((activeLast1h / totalActive) * 100)
+            : 0;
+
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div title="App + Web users with a heartbeat in the last 5 minutes. Counted from Redis presence (real-time) — the same source as the live users table below. Use this as your real-time engagement gauge during campaigns / pushes.">
+              <StatCard
+                title="Online Now"
+                value={onlineNow}
+                icon={Wifi}
+                color="success"
+                format="number"
+                subtitle={
+                  totalActive > 0
+                    ? `${onlinePct}% of today's users still active`
+                    : 'Active in last 5 min'
+                }
+                to="/live-users"
+              />
             </div>
-            <span
-              className="text-[11px] uppercase tracking-wide text-gray-400 font-semibold"
-              title="All numbers exclude CMS-only admin browsing. Backend filters by principalSource_xid + non-CMS pageviews."
-            >
-              CMS excluded
-            </span>
+            <div title="Unique App + Web users with any activity in the last 24 hours — your DAU. Counted as the larger of (DB user_activity_summary) and (live Redis ∪ DB), so heartbeat-only mobile users still register.">
+              <StatCard
+                title="Active Users (24h)"
+                value={totalActive}
+                icon={Users}
+                color="primary"
+                format="number"
+                subtitle={`${appUsers} app · ${webUsers} web`}
+                to="/active-users-list"
+              />
+            </div>
+            <div title="Users active in the last hour. Spike here = ad campaign or push working. Drop here vs Active 24h = users not engaging continuously.">
+              <StatCard
+                title="Active Last 1h"
+                value={activeLast1h}
+                icon={Clock}
+                color="warning"
+                format="number"
+                subtitle={
+                  totalActive > 0
+                    ? `${last1hPct}% of today's users in last hour`
+                    : 'Users active in last hour'
+                }
+                to="/active-users-list"
+              />
+            </div>
+            <div title="Users acquired via the mobile app (iam_sources.source IS NULL or not 'web'). Same definition as /app-lead-tracker.">
+              <StatCard
+                title="App Users (24h)"
+                value={appUsers}
+                icon={Smartphone}
+                color="primary"
+                format="number"
+                subtitle={
+                  totalActive > 0
+                    ? `${appPct}% of active users`
+                    : 'Mobile app users'
+                }
+                to="/app-lead-tracker"
+              />
+            </div>
+            <div title="Users acquired via the website (iam_sources.source = 'web'). Same definition as /web-lead-tracker.">
+              <StatCard
+                title="Web Users (24h)"
+                value={webUsers}
+                icon={Globe}
+                color="success"
+                format="number"
+                subtitle={
+                  totalActive > 0
+                    ? `${webPct}% of active users`
+                    : 'Website users'
+                }
+                to="/web-lead-tracker"
+              />
+            </div>
+            <div title="Average page views per active user (Page Views ÷ Active Users 24h). Higher = stickier content. Low number with high traffic = users bouncing.">
+              <StatCard
+                title="Avg Pages / User"
+                value={Number(avgPagesPerUser)}
+                icon={Eye}
+                color="cyan"
+                format="number"
+                subtitle={`Avg session ~${avgSessionMin} min`}
+                to="/funnel-analytics"
+              />
+            </div>
           </div>
+        );
+      })()}
 
-          {funnelData.length > 0 ? (
-            <div className="space-y-3">
-              {funnelData.map((s, i) => (
-                <div key={s.stage} className="group" title={s.description}>
-                  <div className="flex items-center justify-between text-sm mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: s.color }}
-                      />
-                      <span className="font-medium text-gray-700">{s.stage}</span>
-                      <InfoTip text={s.description} />
-                      {i > 0 && s.dropFromPrev !== null && s.dropFromPrev > 0 && (
-                        <span
-                          className="text-[10px] font-semibold text-rose-500 bg-rose-50 px-1.5 py-0.5 rounded"
-                          title={`${s.dropFromPrev}% drop from "${funnelData[i - 1].stage}"`}
-                        >
-                          -{s.dropFromPrev}%
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-lg font-bold text-gray-800">
-                        {s.count.toLocaleString('en-IN')}
-                      </span>
-                      <span
-                        className="text-xs text-gray-400"
-                        title={`${s.conversionFromTop}% of "Active (24h)"`}
-                      >
-                        ({s.conversionFromTop}%)
-                      </span>
-                    </div>
-                  </div>
-                  <div className="w-full h-8 bg-gray-50 rounded-lg overflow-hidden relative">
-                    <div
-                      className="h-full transition-all duration-500 ease-out"
-                      style={{
-                        width: `${s.widthPct}%`,
-                        background: `linear-gradient(90deg, ${s.color}, ${s.color}cc)`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="text-xs text-gray-500 pt-2 border-t border-gray-100">
-                Overall retention: <span className="font-semibold text-gray-700">
-                  {funnelData[0]?.count > 0
-                    ? Math.round(
-                        ((funnelData[funnelData.length - 1]?.count || 0) /
-                          funnelData[0].count) *
-                          100
-                      )
-                    : 0}%
-                </span>{' '}
-                of 24h-active users are still online
-              </div>
-            </div>
-          ) : (
-            <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-              No funnel data yet
-            </div>
-          )}
-        </div>
-
+      {/* Source Split */}
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 mb-4">
             <Globe className="w-5 h-5 text-emerald-500" />
@@ -469,84 +1200,98 @@ const ActiveUsersDashboard = () => {
           </div>
 
           {sourceTotal > 0 ? (
-            <div className="space-y-4">
-              {[
-                {
-                  label: 'App',
-                  count: sourceBreakdown.app || 0,
-                  icon: Smartphone,
-                  color: '#6366f1',
-                  tip: 'Users who signed up via the mobile app (principalSource_xid = 1).',
-                },
-                {
-                  label: 'Web',
-                  count: sourceBreakdown.web || 0,
-                  icon: Globe,
-                  color: '#10b981',
-                  tip: 'Users who signed up via the website (principalSource_xid = 2).',
-                },
-                {
-                  label: 'Unknown',
-                  count: sourceBreakdown.unknown || 0,
-                  icon: HelpCircle,
-                  color: '#9ca3af',
-                  tip: 'Users without a recorded principalSource_xid (NULL or other). Often older accounts or admin users.',
-                },
-              ]
-                .filter((row) => row.count > 0)
-                .map((row) => {
-                  const pct = Math.round(((row.count || 0) / sourceTotal) * 100);
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+              <DonutChart
+                items={[
+                  {
+                    name: 'App',
+                    count: sourceBreakdown.app || 0,
+                    percentage: Math.round(
+                      ((sourceBreakdown.app || 0) / sourceTotal) * 100
+                    ),
+                  },
+                  {
+                    name: 'Web',
+                    count: sourceBreakdown.web || 0,
+                    percentage: Math.round(
+                      ((sourceBreakdown.web || 0) / sourceTotal) * 100
+                    ),
+                  },
+                  {
+                    name: 'Unknown',
+                    count: sourceBreakdown.unknown || 0,
+                    percentage: Math.round(
+                      ((sourceBreakdown.unknown || 0) / sourceTotal) * 100
+                    ),
+                  },
+                ].filter((d) => d.count > 0)}
+                colors={['#6366f1', '#10b981', '#9ca3af']}
+                centerLabel="24h Users"
+                centerValue={sourceTotal}
+                height={260}
+              />
+              <div className="grid grid-cols-1 gap-3">
+                {[
+                  {
+                    label: 'App',
+                    count: sourceBreakdown.app || 0,
+                    icon: Smartphone,
+                    color: '#6366f1',
+                    bg: 'bg-indigo-50',
+                    text: 'text-indigo-600',
+                    tip: 'Users who signed up via the mobile app (principalSource_xid = 1).',
+                  },
+                  {
+                    label: 'Web',
+                    count: sourceBreakdown.web || 0,
+                    icon: Globe,
+                    color: '#10b981',
+                    bg: 'bg-emerald-50',
+                    text: 'text-emerald-600',
+                    tip: 'Users who signed up via the website (principalSource_xid = 2).',
+                  },
+                  {
+                    label: 'Unknown',
+                    count: sourceBreakdown.unknown || 0,
+                    icon: HelpCircle,
+                    color: '#9ca3af',
+                    bg: 'bg-gray-50',
+                    text: 'text-gray-600',
+                    tip: 'Users without a recorded principalSource_xid (NULL or other). Often older accounts or admin users.',
+                  },
+                ].map((row) => {
+                  const pct = Math.round(
+                    ((row.count || 0) / sourceTotal) * 100
+                  );
                   const RowIcon = row.icon;
                   return (
-                    <div key={row.label} title={row.tip}>
-                      <div className="flex items-center justify-between text-sm mb-1">
-                        <span className="font-medium text-gray-700 flex items-center gap-2">
-                          <RowIcon size={14} style={{ color: row.color }} />
-                          {row.label}
-                          <InfoTip text={row.tip} />
-                        </span>
-                        <span className="text-gray-500">
-                          {row.count.toLocaleString('en-IN')}{' '}
-                          <span className="text-gray-400">({pct}%)</span>
-                        </span>
+                    <div
+                      key={row.label}
+                      className={`flex items-center gap-3 ${row.bg} rounded-lg p-3 border border-gray-100`}
+                      title={row.tip}
+                    >
+                      <div
+                        className="w-10 h-10 rounded-lg flex items-center justify-center"
+                        style={{ backgroundColor: `${row.color}26` }}
+                      >
+                        <RowIcon size={18} style={{ color: row.color }} />
                       </div>
-                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{ width: `${pct}%`, backgroundColor: row.color }}
-                        />
+                      <div className="flex-1">
+                        <div className="flex items-baseline justify-between">
+                          <p className={`text-xl font-bold ${row.text}`}>
+                            {row.count.toLocaleString('en-IN')}
+                          </p>
+                          <span className="text-xs text-gray-500 font-semibold">
+                            {pct}%
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {row.label} users
+                        </p>
                       </div>
                     </div>
                   );
                 })}
-              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-gray-100">
-                <div
-                  className="text-center"
-                  title="App: signed up via mobile app"
-                >
-                  <p className="text-2xl font-bold text-indigo-600">
-                    {(sourceBreakdown.app || 0).toLocaleString('en-IN')}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">App</p>
-                </div>
-                <div
-                  className="text-center"
-                  title="Web: signed up via website"
-                >
-                  <p className="text-2xl font-bold text-emerald-600">
-                    {(sourceBreakdown.web || 0).toLocaleString('en-IN')}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">Web</p>
-                </div>
-                <div
-                  className="text-center"
-                  title="Unknown: no source tagged on principal"
-                >
-                  <p className="text-2xl font-bold text-gray-500">
-                    {(sourceBreakdown.unknown || 0).toLocaleString('en-IN')}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">Unknown</p>
-                </div>
               </div>
             </div>
           ) : (
@@ -557,12 +1302,17 @@ const ActiveUsersDashboard = () => {
         </div>
       </div>
 
+      {/* Marketing Insights */}
+      {insights && insights.totalUsers > 0 && (
+        <MarketingInsights data={insights} />
+      )}
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div title="Total non-CMS activities (page views, API calls, heartbeats, actions) bucketed by hour-of-day. Sourced from the recentActivities log of users active in the last 24h.">
+        <div title="Lifetime hour-of-day pattern across all currently-active users. Cumulative — a future hour can show data because users have engaged in that hour on previous days. Use as a scheduling baseline, not today's actuals.">
           <TrendChart
-            title={`Activity by Hour (Now: ${currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })})`}
-            subtitle="User activity distribution throughout the day (24h view)"
+            title={`Hourly Engagement Pattern (Now: ${currentTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })})`}
+            subtitle="Typical hour-of-day distribution (lifetime) — for ad / push scheduling"
             type="bar"
             data={activityByHourData}
             xAxisKey="hour"
