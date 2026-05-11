@@ -226,7 +226,7 @@ const FunnelDashboard = () => {
       </div>
 
       {/* Funnel — chart + per-source tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 items-start">
         <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
           <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
             <TrendingUp size={16} className="text-indigo-600" /> Funnel — Combined / App / Web
@@ -247,10 +247,11 @@ const FunnelDashboard = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          <FunnelTable title="App"      counts={data?.funnel?.app}      />
-          <FunnelTable title="Web"      counts={data?.funnel?.web}      />
-          <FunnelTable title="Combined" counts={data?.funnel?.combined} />
+        <FunnelTable title="Combined" counts={data?.funnel?.combined} />
+
+        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <FunnelTable title="App" counts={data?.funnel?.app} />
+          <FunnelTable title="Web" counts={data?.funnel?.web} />
         </div>
       </div>
 
