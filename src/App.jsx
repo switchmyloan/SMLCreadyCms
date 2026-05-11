@@ -70,7 +70,7 @@ import ActiveUserDetail from './pages/ActiveUsers/ActiveUserDetail';
 import LiveUsersPage from './pages/ActiveUsers/LiveUsersPage';
 import FunnelAnalyticsPage from './pages/ActiveUsers/FunnelAnalyticsPage';
 import FunnelDashboard from './pages/Dashboard/FunnelDashboard';
-import CityPages from './pages/CityPages/cityPages';
+import CityPages from './pages/CityPages/CityPages';
 
 function App() {
   return (
