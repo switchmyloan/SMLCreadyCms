@@ -329,7 +329,7 @@ export const getFunnelOverview = async (filters = {}) => {
     if (filters.fromDate) params.append('fromDate', filters.fromDate);
     if (filters.toDate) params.append('toDate', filters.toDate);
     const qs = params.toString();
-    return Api().get(`/summary/admin/funnel-overview${qs ? `?${qs}` : ''}`,
+    return Api().get(`/dashboard/funnel-overview${qs ? `?${qs}` : ''}`,
         { skipAdminAppend: true }
     );
 };
