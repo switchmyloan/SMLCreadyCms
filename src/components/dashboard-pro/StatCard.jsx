@@ -103,7 +103,7 @@ const StatCard = ({
     </>
   );
 
-  const cardClassName = `bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow ${to ? 'cursor-pointer' : ''}`;
+  const cardClassName = `block bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md transition-shadow ${to ? 'cursor-pointer' : ''}`;
 
   if (to) {
     return (
