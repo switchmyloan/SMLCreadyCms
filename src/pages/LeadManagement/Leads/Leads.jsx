@@ -219,6 +219,7 @@ const Leads = () => {
     minAge: undefined,
     maxAge: undefined,
     jobType: '',
+    disbursement: '',
   });
 
   const resetToFirstPage = useCallback(() => {
@@ -244,6 +245,7 @@ const Leads = () => {
       activeQuery.jobType,
       type,
       activeQuery.exportToken,
+      activeQuery.disbursement,
     );
   }, []);
 
@@ -410,6 +412,16 @@ const Leads = () => {
     }));
   }, [resetToFirstPage]);
 
+  const handleDisbursementFilter = useCallback((value) => {
+    resetToFirstPage();
+
+    setQuery(prev => ({
+      ...prev,
+      disbursement: value,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
+
   const genderOptions = useMemo(() => [
     { label: 'Male', value: 'male' },
     { label: 'Female', value: 'female' },
@@ -439,6 +451,12 @@ const Leads = () => {
     { label: '45+', value: '45-200' },
   ];
 
+  const disbursementOptions = useMemo(() => [
+    { label: 'All', value: '' },
+    { label: 'Disbursed', value: 'yes' },
+    { label: 'Not Disbursed', value: 'no' },
+  ], []);
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -462,18 +480,28 @@ const Leads = () => {
         : '',
       options: dobRanges,
       onChange: handleDobFilter
-    }
+    },
+    {
+      key: 'disbursement',
+      label: 'Disbursement',
+      activeValue: query.disbursement,
+      options: disbursementOptions,
+      onChange: handleDisbursementFilter,
+    },
   ], [
     dobRanges,
     genderOptions,
     handleDobFilter,
     handleGenderFilter,
     handleJobTypeFilter,
+    handleDisbursementFilter,
     jobTypeOptions,
+    disbursementOptions,
     query.gender,
     query.jobType,
     query.maxAge,
     query.minAge,
+    query.disbursement,
   ]);
 
   const handleOpenExportModal = useCallback(() => {

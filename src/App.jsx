@@ -46,6 +46,7 @@ import AppLeadTracker from './pages/LeadManagement/LeadTracker/AppLeadTracker';
 import WebLeadTracker from './pages/LeadManagement/LeadTracker/WebLeadTracker';
 import PartnersLeads from './pages/LeadManagement/PartnersLead/PartnersLead';
 import PartnerDetail from './pages/LeadManagement/PartnersLead/PartnerDetail';
+import DisbursementLeads from './pages/LeadManagement/Disbursement/DisbursementLeads';
 import GetKycStageStatistics from './pages/AppStatstics/KycStageDashboard';
 import MFAllUsers from './pages/MutalFund/MFAllUsers';
 import MFAllLoans from './pages/MutalFund/MFAllLoans';
@@ -109,6 +110,7 @@ function App() {
             <Route path="web-lead-tracker" element={<PermissionGuard permission="lead_management.view"><WebLeadTracker /></PermissionGuard>} />
             <Route path="partner-leads" element={<PermissionGuard permission="lead_management.view"><PartnersLeads /></PermissionGuard>} />
             <Route path="partner-detail/:id" element={<PermissionGuard permission="lead_management.view"><PartnerDetail /></PermissionGuard>} />
+            <Route path="disbursement-leads" element={<PermissionGuard permission="lead_management.view"><DisbursementLeads /></PermissionGuard>} />
             <Route path="archive-users" element={<PermissionGuard permission="lead_management.delete"><ArchiveUsers /></PermissionGuard>} />
             <Route path="contact" element={<PermissionGuard permission="lead_management.view"><Contact /></PermissionGuard>} />
 

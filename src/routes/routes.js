@@ -180,6 +180,17 @@ export const routes = [
     permission: "lead_management.view",
   },
   {
+    path: "/disbursement-leads",
+    label: "Disbursements",
+    icon: "Wallet",
+    showInSidebar: true,
+    group: "Lead Management",
+    groupIcon: "Users",
+    groupOrder: 1,
+    order: 6,
+    permission: "lead_management.view",
+  },
+  {
     path: "/app-lead-tracker",
     label: "App Lead Tracker",
     icon: "Smartphone",
@@ -187,7 +198,7 @@ export const routes = [
     group: "Lead Management",
     groupIcon: "Users",
     groupOrder: 1,
-    order: 6,
+    order: 7,
     permission: "lead_management.view",
   },
   {
@@ -198,7 +209,7 @@ export const routes = [
     group: "Lead Management",
     groupIcon: "Users",
     groupOrder: 1,
-    order: 7,
+    order: 8,
     permission: "lead_management.view",
   },
   {

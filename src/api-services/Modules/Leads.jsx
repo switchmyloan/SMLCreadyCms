@@ -1,6 +1,23 @@
 import Api from "../api";
 
 
+export const getDisbursements = async (pageNo = 1, limit = 10, filters = {}) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', pageNo);
+    params.append('perPage', limit);
+
+    if (filters.search) params.append('search', filters.search);
+    if (filters.type) params.append('type', filters.type);
+    if (filters.lender) params.append('lender', filters.lender);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+    if (filters.attribution) params.append('attribution', filters.attribution);
+
+    return Api().get(`/leads/admin/disbursements?${params.toString()}`,
+        { skipAdminAppend: true }
+    );
+};
+
 export const getLeads = async (
     pageNo,
     limit,
@@ -14,7 +31,8 @@ export const getLeads = async (
     maxAge,
     jobType,
     type,
-    exportToken
+    exportToken,
+    disbursement
 ) => {
     const baseUrl = `/leads/admin/in-web-leads`;
     const params = new URLSearchParams();
@@ -34,6 +52,7 @@ export const getLeads = async (
     if (minAge !== undefined && minAge !== null) params.append('minAge', Number(minAge));
     if (maxAge !== undefined && maxAge !== null) params.append('maxAge', Number(maxAge));
     if (jobType) params.append('jobType', jobType);
+    if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
 
     const queryString = params.toString();
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
@@ -211,7 +230,8 @@ export const getInAppLeads = async (
     maxAge,
     jobType,
     type,
-    exportToken
+    exportToken,
+    disbursement
 ) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
@@ -234,6 +254,7 @@ export const getInAppLeads = async (
     if (minAge !== undefined && minAge !== null) params.append('minAge', Number(minAge));
     if (maxAge !== undefined && maxAge !== null) params.append('maxAge', Number(maxAge));
     if (jobType) params.append('jobType', jobType);
+    if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
 
     const queryString = params.toString(); // Automatically encodes the values
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;

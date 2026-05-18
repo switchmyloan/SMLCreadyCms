@@ -665,6 +665,54 @@ export const leadsColumn = ({ handleEdit, handleDelete }) => [
     },
   },
   {
+    header: 'Disbursement',
+    accessorKey: 'disbursement',
+    size: 160,
+    cell: ({ row }) => {
+      const disb = row.original?.disbursement;
+      const amount = disb?.amount;
+
+      if (amount === null || amount === undefined || Number(amount) <= 0) {
+        return <span className="text-gray-400 text-xs">N/A</span>;
+      }
+
+      const formatted = new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0,
+      }).format(Number(amount));
+
+      const dateStr = disb?.date
+        ? new Date(disb.date).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
+        : null;
+
+      const tooltipParts = [
+        `Amount: ${formatted}`,
+        disb?.lender ? `Lender: ${disb.lender}` : null,
+        disb?.status ? `Status: ${disb.status}` : null,
+        dateStr ? `Date: ${dateStr}` : null,
+      ].filter(Boolean);
+
+      return (
+        <div
+          className="flex flex-col gap-0.5"
+          title={tooltipParts.join('\n')}
+        >
+          <span className="px-2 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 w-fit">
+            {formatted}
+          </span>
+          {dateStr && (
+            <span className="text-[10px] text-gray-500">{dateStr}</span>
+          )}
+        </div>
+      );
+    },
+  },
+  {
     header: 'Created At',
     accessorKey: 'createdAt',
     cell: ({ getValue }) => {
