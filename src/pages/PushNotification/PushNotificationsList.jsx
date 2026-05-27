@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   sendPushNotification,
   schedulePushNotification,
+  testSendPushToToken,
 } from "../../api-services/Modules/Leads";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "../../components/Notification/ToastNotification";
@@ -21,6 +22,11 @@ import {
   AlertCircle,
   Clock,
   Calendar,
+  Smartphone,
+  Globe,
+  TestTube2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 export default function PushNotificationList() {
@@ -37,6 +43,68 @@ export default function PushNotificationList() {
   const [sendMode, setSendMode] = useState("now"); // 'now' | 'schedule'
   const [scheduleAt, setScheduleAt] = useState(""); // datetime-local string
   const [scheduling, setScheduling] = useState(false);
+
+  // Channel filter chips
+  const [channelFilter, setChannelFilter] = useState("all"); // 'all' | 'mobile' | 'web'
+
+  // Test push panel (debug helper)
+  const [testOpen, setTestOpen] = useState(false);
+  const [testToken, setTestToken] = useState("");
+  const [testTitle, setTestTitle] = useState("Test push from Cready CMS");
+  const [testBody, setTestBody] = useState(
+    "If you can see this, the push pipe is working end-to-end."
+  );
+  const [testImage, setTestImage] = useState("");
+  const [testSending, setTestSending] = useState(false);
+  const [testResult, setTestResult] = useState(null);
+
+  const sendTestPush = async () => {
+    if (!testToken.trim()) {
+      ToastNotification.error("Paste the FCM token first");
+      return;
+    }
+    setTestSending(true);
+    setTestResult(null);
+    try {
+      const res = await testSendPushToToken({
+        token: testToken.trim(),
+        title: testTitle,
+        body: testBody,
+        ...(testImage.trim() && { imageUrl: testImage.trim() }),
+      });
+      const data = res?.data?.data || res?.data;
+      const success = (data?.successCount ?? 0) > 0;
+      setTestResult({
+        success,
+        successCount: data?.successCount ?? 0,
+        failureCount: data?.failureCount ?? 0,
+      });
+      if (success) {
+        ToastNotification.success(
+          `Push delivered! Open the browser tab where this token was minted — you should see it within 5 seconds.`
+        );
+      } else {
+        ToastNotification.error(
+          "Push dispatched but FCM rejected it. Token may be expired or unregistered."
+        );
+      }
+    } catch (err) {
+      const status = err?.response?.status;
+      const isBackendMissing = status === 404;
+      setTestResult({
+        success: false,
+        backendMissing: isBackendMissing,
+        status,
+        error: err?.message || String(err),
+      });
+      ToastNotification.error(
+        isBackendMissing
+          ? "Backend doesn't have /test-send-token yet — redeploy Cready_New_Backend"
+          : err?.response?.data?.message || `Test push failed (HTTP ${status || "??"})`
+      );
+    }
+    setTestSending(false);
+  };
 
   async function fetchTemplates() {
     setLoading(true);
@@ -185,12 +253,20 @@ export default function PushNotificationList() {
     fetchTemplates();
   }, []);
 
-  // Stats
+  // Stats — counted across ALL templates regardless of current filter.
   const totalTemplates = templates.length;
+  const mobileCount = templates.filter((t) => (t.channel || "mobile") === "mobile").length;
+  const webCount = templates.filter((t) => t.channel === "web").length;
   const totalAudience = templates.reduce(
     (sum, t) => sum + (t.group?.members?.length || 0),
     0
   );
+
+  const visibleTemplates = templates.filter((t) => {
+    if (channelFilter === "all") return true;
+    if (channelFilter === "web") return t.channel === "web";
+    return (t.channel || "mobile") === "mobile";
+  });
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -265,6 +341,171 @@ export default function PushNotificationList() {
         </div>
       </div>
 
+      {/* Debug: send a push directly to a raw FCM token */}
+      <div className="bg-white rounded-xl border border-amber-200 mb-4 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setTestOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-4 py-3 hover:bg-amber-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-amber-100 rounded-md">
+              <TestTube2 className="w-4 h-4 text-amber-700" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-gray-800">
+                Test push to a raw token
+              </p>
+              <p className="text-xs text-gray-500">
+                Bypass groups/templates — verify the FCM pipe works for a
+                specific browser/device.
+              </p>
+            </div>
+          </div>
+          {testOpen ? (
+            <ChevronUp className="w-4 h-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          )}
+        </button>
+
+        {testOpen && (
+          <div className="px-4 pb-4 pt-2 border-t border-amber-100 space-y-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                FCM Token
+              </label>
+              <textarea
+                value={testToken}
+                onChange={(e) => setTestToken(e.target.value)}
+                placeholder="Paste the @creddy_fcm_token value from the browser's localStorage…"
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-amber-300"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                On creadyweb: DevTools → Application → Local Storage →{" "}
+                <code className="bg-gray-100 px-1 rounded">
+                  @creddy_fcm_token
+                </code>
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={testTitle}
+                  onChange={(e) => setTestTitle(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-amber-300"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                  Image URL (optional)
+                </label>
+                <input
+                  type="text"
+                  value={testImage}
+                  onChange={(e) => setTestImage(e.target.value)}
+                  placeholder="https://…"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-amber-300"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                Body
+              </label>
+              <textarea
+                value={testBody}
+                onChange={(e) => setTestBody(e.target.value)}
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-100 focus:border-amber-300"
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={sendTestPush}
+                disabled={testSending || !testToken.trim()}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+              >
+                {testSending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                {testSending ? "Sending…" : "Send Test Push"}
+              </button>
+              {testResult && (
+                <span
+                  className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                    testResult.success
+                      ? "bg-green-100 text-green-700"
+                      : testResult.backendMissing
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {testResult.success
+                    ? `✓ FCM accepted (${testResult.successCount} success / ${testResult.failureCount} failed)`
+                    : testResult.backendMissing
+                      ? `⚠ Backend endpoint missing (404) — redeploy needed`
+                      : `✗ ${testResult.status ? `HTTP ${testResult.status}` : "Request failed"} — ${testResult.error || "unknown"}`}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Channel filter chips */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider mr-1">
+          Channel:
+        </span>
+        <button
+          type="button"
+          onClick={() => setChannelFilter("all")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+            channelFilter === "all"
+              ? "bg-gray-800 text-white border-gray-800"
+              : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+          }`}
+        >
+          All ({totalTemplates})
+        </button>
+        <button
+          type="button"
+          onClick={() => setChannelFilter("mobile")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+            channelFilter === "mobile"
+              ? "bg-indigo-600 text-white border-indigo-600"
+              : "bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50"
+          }`}
+        >
+          <Smartphone className="w-3.5 h-3.5" />
+          Mobile ({mobileCount})
+        </button>
+        <button
+          type="button"
+          onClick={() => setChannelFilter("web")}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+            channelFilter === "web"
+              ? "bg-emerald-600 text-white border-emerald-600"
+              : "bg-white text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+          }`}
+        >
+          <Globe className="w-3.5 h-3.5" />
+          Web ({webCount})
+        </button>
+      </div>
+
       {/* Templates Grid */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
@@ -288,9 +529,36 @@ export default function PushNotificationList() {
             Create Template
           </button>
         </div>
+      ) : visibleTemplates.length === 0 ? (
+        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+          {channelFilter === "web" ? (
+            <Globe className="w-16 h-16 text-emerald-200 mx-auto mb-4" />
+          ) : (
+            <Smartphone className="w-16 h-16 text-indigo-200 mx-auto mb-4" />
+          )}
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            No {channelFilter === "web" ? "Web" : "Mobile"} Templates
+          </h3>
+          <p className="text-gray-500 mb-4 max-w-md mx-auto">
+            {channelFilter === "web"
+              ? "Create a template and pick the \"Web Browser\" channel to push notifications to creadyweb users who have granted browser permission."
+              : "Create a template with the \"Mobile App\" channel to push to Cready mobile app users."}
+          </p>
+          <button
+            onClick={() => navigate("/push-notification/create")}
+            className={`inline-flex items-center gap-2 px-4 py-2 text-white rounded-lg ${
+              channelFilter === "web"
+                ? "bg-emerald-600 hover:bg-emerald-700"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
+          >
+            <Plus className="w-4 h-4" />
+            Create {channelFilter === "web" ? "Web" : "Mobile"} Template
+          </button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {templates.map((template) => (
+          {visibleTemplates.map((template) => (
             <div
               key={template.id}
               className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
@@ -315,21 +583,34 @@ export default function PushNotificationList() {
 
               {/* Template Content */}
               <div className="p-4">
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between mb-2 gap-2">
                   <h3 className="font-semibold text-gray-800 line-clamp-1">
                     {template.title}
                   </h3>
-                  {lastSendResult?.templateId === template.id && (
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        lastSendResult.success
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {lastSendResult.success ? "Sent" : "Failed"}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {template.channel === "web" ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold uppercase tracking-wider">
+                        <Globe className="w-3 h-3" />
+                        Web
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold uppercase tracking-wider">
+                        <Smartphone className="w-3 h-3" />
+                        Mobile
+                      </span>
+                    )}
+                    {lastSendResult?.templateId === template.id && (
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          lastSendResult.success
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {lastSendResult.success ? "Sent" : "Failed"}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <p className="text-sm text-gray-500 line-clamp-2 mb-3 min-h-[40px]">
