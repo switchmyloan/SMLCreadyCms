@@ -144,11 +144,15 @@ const exportToExcel = async (rawData, lenderNames = []) => {
     { header: "Phone", key: "phone", width: 15 },
     { header: "Income", key: "income", width: 15 },
     { header: "Created At", key: "createdAt", width: 15 },
+    // Per-lender offer status. Metadata column is appended afterwards
+    // so the existing per-lender columns keep their positions; it holds
+    // a JSON blob keyed by lender name with each response's metadata.
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
       width: 20,
     })),
+    { header: "Metadata", key: "metadata", width: 60 },
   ];
 
   worksheet.getRow(1).font = { bold: true };
@@ -160,11 +164,19 @@ const exportToExcel = async (rawData, lenderNames = []) => {
       lenderStatusMap[lender] = "N";
     });
 
+    // Aggregate lender_responses metadata into a single object keyed by
+    // lender name. Skips entries without metadata so the JSON stays
+    // small for leads where no lender returned a payload.
+    const metadataByLender = {};
+
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
       if (!lenderName) return;
       if (lr.isOffer) {
         lenderStatusMap[lenderName] = extractLenderLeadId(lr) ?? "Y";
+      }
+      if (lr?.metadata) {
+        metadataByLender[lenderName] = lr.metadata;
       }
     });
 
@@ -180,6 +192,9 @@ const exportToExcel = async (rawData, lenderNames = []) => {
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
       ...lenderStatusMap,
+      metadata: Object.keys(metadataByLender).length
+        ? JSON.stringify(metadataByLender)
+        : "",
     });
   });
 
@@ -566,7 +581,10 @@ const Leads = () => {
     const baseQuery = {
       ...query,
       page_no: 1,
-      limit: 10000,
+      // 1 lakh cap for a single-shot export — comfortably covers current
+      // dataset size with headroom. Switch to paginated export if we ever
+      // cross this.
+      limit: 100000,
       filter_date: '',
       startDate: null,
       endDate: null,

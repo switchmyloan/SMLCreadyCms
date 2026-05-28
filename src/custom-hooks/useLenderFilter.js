@@ -12,24 +12,35 @@ const fetchLendersOnce = () => {
   if (inFlight) return inFlight;
   inFlight = getLender(1, 10000, '')
     .then((response) => {
-      const rows = response?.data?.data?.rows || [];
+      const payload = response?.data?.data;
+      // /lender admin endpoint historically returns either { rows: [...] }
+      // (paginated shape) or a bare array. Handle both so the dropdown
+      // doesn't silently come up empty.
+      const rows = Array.isArray(payload)
+        ? payload
+        : Array.isArray(payload?.rows)
+          ? payload.rows
+          : Array.isArray(payload?.data)
+            ? payload.data
+            : [];
       cachedLenders = rows
         .filter((r) => r?.id && r?.name)
         .map((r) => ({ id: r.id, name: r.name }))
         .sort((a, b) => a.name.localeCompare(b.name));
       return cachedLenders;
     })
-    .catch(() => [])
+    .catch((err) => {
+      console.error('useLenderFilter: failed to load lenders', err);
+      return [];
+    })
     .finally(() => {
       inFlight = null;
     });
   return inFlight;
 };
 
-const toFilterOptions = (lenders) => [
-  { label: 'All Lenders', value: '' },
-  ...lenders.map((l) => ({ label: l.name, value: String(l.id) })),
-];
+const toFilterOptions = (lenders) =>
+  lenders.map((l) => ({ label: l.name, value: String(l.id) }));
 
 // Shared lender filter state + dropdown options for the leads pages.
 // Pass `onChange(lenderId)` and it'll fire whenever the user picks a
@@ -37,18 +48,22 @@ const toFilterOptions = (lenders) => [
 //   - lender (current selected lender id as string, '' when "All")
 //   - filterEntry to splice into `dynamicFilters`
 export const useLenderFilter = ({ onChange }) => {
+  // Seed from module cache so navigating back to a leads page paints
+  // the dropdown immediately instead of waiting for the fetch.
   const [lender, setLender] = useState('');
-  const [lenders, setLenders] = useState([]);
+  const [lenders, setLenders] = useState(() => cachedLenders || []);
 
-  const fetchedRef = useRef(false);
+  // No `fetchedRef` guard: the module-level cache + inFlight promise
+  // already de-dupes the network call, and StrictMode's double-mount
+  // would otherwise leave the second mount unable to populate state
+  // (the first closure's `cancelled` flag gets flipped on its cleanup
+  // before the promise resolves).
   useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
-    let active = true;
+    let cancelled = false;
     fetchLendersOnce().then((opts) => {
-      if (active) setLenders(opts);
+      if (!cancelled) setLenders(opts);
     });
-    return () => { active = false; };
+    return () => { cancelled = true; };
   }, []);
 
   const onChangeRef = useRef(onChange);

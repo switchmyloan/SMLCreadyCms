@@ -263,11 +263,19 @@ const KbSuccessLeads = () => {
 
       const csvRows = [[
         'Name', 'Phone', 'Email', 'PAN', 'Gender', 'Income',
-        'Outcome', 'Status', 'Message', 'Partner Lead Id', 'Submitted',
+        'Outcome', 'Status',
+        // 'Message',  // temporarily disabled — re-enable when needed
+        'Metadata', 'Partner Lead Id', 'Submitted',
       ]];
       rows.forEach((row) => {
         const lead = row.lead || {};
         const metaReq = row?.metadata?.requestBody || {};
+        // Stringify the full lender_response metadata blob so it survives
+        // the CSV escape. JSON.stringify of {} returns "{}", null/undefined
+        // becomes "" so empty cells stay empty.
+        const metadataStr = row?.metadata
+          ? JSON.stringify(row.metadata)
+          : '';
         csvRows.push([
           `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
           lead.phoneNumber || '',
@@ -277,7 +285,8 @@ const KbSuccessLeads = () => {
           lead.monthlyIncome || '',
           outcomeLabel(classifyMessage(row.message)),
           row.status || '',
-          row.message || '',
+          // row.message || '',  // temporarily disabled with the column above
+          metadataStr,
           metaReq.partnerLeadId || '',
           formatDate(row.createdAt) || '',
         ]);

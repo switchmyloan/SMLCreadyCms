@@ -564,7 +564,9 @@ const SignInUsers = () => {
     const baseQuery = {
       ...query,
       page_no: 1,
-      limit: 10000,
+      // 1 lakh cap for single-shot export — covers current dataset with
+      // headroom; switch to paginated export if we cross this.
+      limit: 100000,
       filter_date: '',
       startDate: null,
       endDate: null,

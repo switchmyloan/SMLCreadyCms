@@ -5,12 +5,12 @@ import DataTable from '@components/Table/MainTable';
 import { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import ToastNotification from '@components/Notification/ToastNotification';
-import { getAllLeads, getLeads } from '../../../api-services/Modules/Leads';
+import { getAllLeads } from '../../../api-services/Modules/Leads';
 import { leadsColumn } from '../../../components/TableHeader';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
-import ExportModal from '../../../components/ExportModal';
+import ExportOtpModal from '../../../components/ExportOtpModal';
 import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
 import { useLenderFilter } from '../../../custom-hooks/useLenderFilter';
 
@@ -52,11 +52,16 @@ const exportToExcel = async (rawData) => {
     { header: "ipAddress", key: "ipAddress", width: 15 },
     { header: "creditConsentText", key: "creditConsentText", width: 15 },
     { header: "communicationConsentText", key: "communicationConsentText", width: 15 },
+    // Per-lender offer status (existing). Metadata column is appended
+    // afterwards so the offer columns stay in their original positions
+    // and a single "Metadata" column holds the JSON blob for every
+    // lender's response on that lead.
     ...allLenders.map(lender => ({
       header: lender,
       key: lender,
       width: 20,
     })),
+    { header: "Metadata", key: "metadata", width: 60 },
   ];
 
   worksheet.getRow(1).font = { bold: true };
@@ -68,11 +73,19 @@ const exportToExcel = async (rawData) => {
       lenderStatusMap[lender] = "No";
     });
 
+    // Aggregate lender_responses metadata into a single object keyed by
+    // lender name. Skips entries without metadata so the JSON stays
+    // small for leads where no lender returned a payload.
+    const metadataByLender = {};
+
     item.lender_responses?.forEach(lr => {
       const lenderName = lr?.lender?.name;
       if (!lenderName) return;
       if (lr.isOffer) {
         lenderStatusMap[lenderName] = lr?.leadId || "Yes";
+      }
+      if (lr?.metadata) {
+        metadataByLender[lenderName] = lr.metadata;
       }
     });
 
@@ -88,6 +101,9 @@ const exportToExcel = async (rawData) => {
         ? new Date(item.createdAt).toLocaleDateString("en-IN")
         : "N/A",
       ...lenderStatusMap,
+      metadata: Object.keys(metadataByLender).length
+        ? JSON.stringify(metadataByLender)
+        : "",
     });
   });
 
@@ -433,35 +449,55 @@ const AllLeads = () => {
     lenderFilterEntry,
   ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, utmFilterEntries, lenderFilterEntry]);
 
-  const filterDataByDate = (data, startDate, endDate) => {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+  // Server-side fetch for export. Carries every active table filter
+  // (gender, income, search, utm, lender) plus the date range/mode the
+  // user picked in ExportOtpModal. The OTP token is forwarded as
+  // `X-Export-Token` so the backend can audit-log this download.
+  const fetchAllLeadsForExport = useCallback(async (startDate, endDate, mode, exportToken) => {
+    const normalizedMode = String(mode || '').toLowerCase().trim();
+    const isToday = normalizedMode.includes('today');
+    const isYesterday = normalizedMode.includes('yesterday');
 
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    const filters = {};
+    if (query.search) filters.search = query.search;
+    if (query.gender) filters.gender = query.gender;
+    if (query.minIncome !== undefined) filters.minIncome = query.minIncome;
+    if (query.maxIncome !== undefined) filters.maxIncome = query.maxIncome;
+    if (query.utmSource) filters.utmSource = query.utmSource;
+    if (query.utmMedium) filters.utmMedium = query.utmMedium;
+    if (query.lender) filters.lender = query.lender;
 
-    return data.filter(item => {
-      if (!item.createdAt) return false;
-      const created = new Date(item.createdAt);
-      return created >= start && created <= end;
-    });
-  };
+    if (isToday) {
+      filters.type = 'today';
+    } else if (isYesterday) {
+      filters.type = 'yesterday';
+    } else {
+      if (startDate) filters.fromDate = startDate;
+      if (endDate) filters.toDate = endDate;
+    }
 
+    // 1 lakh row cap for a single-shot export — comfortably covers
+    // current dataset size with headroom. If we ever cross this we'll
+    // need to switch to a paginated export.
+    const response = await getAllLeads(1, 100000, filters, exportToken);
+    if (!response?.data?.success) {
+      throw new Error('Failed to fetch export data');
+    }
+    return response?.data?.data?.rows || [];
+  }, [query]);
 
-  const handleExport = async ({ startDate, endDate, mode }) => {
+  const handleExport = async ({ startDate, endDate, mode, token }) => {
     try {
       setIsExporting(true);
 
-      // 🔥 STEP 1: FILTER FRONTEND DATA
-      const filteredData = filterDataByDate(rawData, startDate, endDate);
+      const exportRows = await fetchAllLeadsForExport(startDate, endDate, mode, token);
 
-      if (!filteredData.length) {
+      if (!exportRows.length) {
         ToastNotification.error("No data found for selected date range");
         return;
       }
 
-      // 🔥 STEP 2: EXCEL EXPORT (tumhara existing code)
-      await exportToExcel(filteredData);
+      await exportToExcel(exportRows);
 
       ToastNotification.success("Excel exported successfully");
       setIsExportModalOpen(false);
@@ -515,7 +551,7 @@ const AllLeads = () => {
   return (
     <>
       <Toaster />
-      <ExportModal
+      <ExportOtpModal
         open={isExportModalOpen}
         onClose={handleCloseExportModal}
         onSubmit={handleExport}

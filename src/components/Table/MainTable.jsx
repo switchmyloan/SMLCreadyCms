@@ -41,10 +41,10 @@ useEffect(() => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-full border border-gray-300 px-5 py-2.5 pr-12 text-sm text-gray-700 placeholder-gray-400 focus:border-[#6232FF] focus:ring-1 focus:ring-[#6232FF] outline-none transition"
+        className="h-8 w-full rounded-full border border-gray-300 px-4 pr-9 text-sm text-gray-700 placeholder-gray-400 focus:border-[#6232FF] focus:ring-1 focus:ring-[#6232FF] outline-none transition"
       />
-      <span className="absolute right-3 text-gray-500">
-        <Search size={20} />
+      <span className="absolute right-2.5 text-gray-500">
+        <Search size={16} />
       </span>
     </div>
   );
@@ -318,20 +318,29 @@ function DataTable({
   
 
   return (
-    <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm  pt-0 pb-0 ">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
-        <h1 className="text-lg md:text-lg font-semibold text-gray-800">{title}</h1>
-        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1 w-full sm:w-auto justify-between">
-          <span className="text-gray-600 text-sm">
+    <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+      <style>{`
+        .main-table-scroll::-webkit-scrollbar { height: 6px; }
+        .main-table-scroll::-webkit-scrollbar-track { background: #f9fafb; }
+        .main-table-scroll::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .main-table-scroll::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+      `}</style>
+      <div className="px-4 py-3 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 min-w-0">
+        <h1 className="text-lg md:text-lg font-semibold text-gray-800 shrink-0">{title}</h1>
+        {/* Filter bar wraps to multiple lines if it overflows — no
+            horizontal scrollbar on the filter row itself, and `min-w-0` on
+            the parent stops this flex item from forcing the page wider. */}
+        <div className="flex flex-row flex-wrap items-center gap-2 w-full md:w-auto min-w-0">
+          <span className="text-gray-600 text-sm whitespace-nowrap h-8 inline-flex items-center shrink-0">
             {totalDataCount} entries
           </span>
           {/* Income Dropdown */}
           {incomeRanges && incomeRanges.length > 0 && (
-            <div className="z-20 flex flex-col w-20">
+            <div className="z-20 shrink-0">
               <select
                 onChange={(e) => onFilterByIncome(e.target.value)}
                 value={activeIncomeFilter || ''}
-                className="p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                className="h-8 px-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-purple-400"
               >
                 {incomeRanges.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -346,12 +355,12 @@ function DataTable({
           {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
           {dynamicFilters && dynamicFilters.length > 0 && (
             dynamicFilters.map((filter) => (
-              <div key={filter.key} className="z-20 flex flex-col">
+              <div key={filter.key} className="z-20 shrink-0">
                 <select
                   onChange={(e) => filter.onChange(e.target.value)}
                   value={filter.activeValue}
                   title={filter.label || 'Select Filter'}
-                  className="min-w-[110px] max-w-[160px] p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400 truncate"
+                  className="h-8 min-w-[110px] max-w-[160px] px-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-purple-400 truncate"
                 >
                   <option value="">{filter.label || 'Select Filter'}</option>
 
@@ -368,11 +377,11 @@ function DataTable({
           {/* END NEW DYNAMIC DROPDOWN FILTER UI */}
 
           {onFilterChange && (
-            <div className="z-20 flex flex-col w-38">
+            <div className="z-20 shrink-0">
               <select
                 onChange={(e) => onFilterChange(e.target.value)}
                 value={activeStatusFilter}
-                className="p-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                className="h-8 px-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-1 focus:ring-purple-400"
               >
                 <option value="">All Status</option>
                 <option value="success">✅ Success</option>
@@ -386,13 +395,13 @@ function DataTable({
 
           {/* DATE RANGE FILTER UI (FIXED) */}
           {onFilterByRange && (
-            <div className="relative inline-block" ref={dropdownRef}>
+            <div className="relative inline-block shrink-0" ref={dropdownRef}>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowDateRangeInputs(!showDateRangeInputs);
                 }}
-                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-md border transition ${activeDateRange.startDate
+                className={`h-8 inline-flex items-center gap-1 px-3 text-xs font-medium rounded-md border transition ${activeDateRange.startDate
                   ? 'bg-purple-600 text-white border-purple-600'
                   : 'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400'
                   } disabled:opacity-50`}
@@ -452,13 +461,13 @@ function DataTable({
 
           {/* TODAY / YESTERDAY BUTTONS */}
           {onFilterByDate && (
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
               {['today', 'yesterday'].map((type) => (
                 <button
                   key={type}
                   onClick={() => onFilterByDate(type)}
                   disabled={loading}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md border transition
+                  className={`h-8 px-3 text-xs font-medium rounded-md border transition inline-flex items-center
           ${activeFilter === type
                       ? 'bg-purple-600 text-white border-purple-600'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-purple-50 hover:border-purple-400'
@@ -470,17 +479,17 @@ function DataTable({
             </div>
           )}
 
-          <div className="relative group inline-block">
-            <button className="p-2 rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()} title='Refresh'>
+          <div className="relative group inline-block shrink-0">
+            <button className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-300 transition" onClick={() => onRefresh()} title='Refresh'>
               <RefreshCcw size={14} />
             </button>
           </div>
 
           {/* EXPORT Button */}
           {onExport && (
-            <div className="relative group inline-block cursor-pointer">
+            <div className="relative group inline-block cursor-pointer shrink-0">
               <button
-                className="p-2 rounded-md hover:bg-gray-300 transition cursor-pointer"
+                className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-gray-300 transition cursor-pointer"
                 onClick={onExport}
                 title='Export Data'
               >
@@ -488,16 +497,18 @@ function DataTable({
               </button>
             </div>
           )}
-          <DebouncedInput
-            value={globalFilter}
-            onChange={setGlobalFilter}
-            onSearch={handleSearch}
-            placeholder="Search..."
-          />
+          <div className="shrink-0 w-48">
+            <DebouncedInput
+              value={globalFilter}
+              onChange={setGlobalFilter}
+              onSearch={handleSearch}
+              placeholder="Search..."
+            />
+          </div>
           {onCreate && (
             <button
               onClick={onCreate}
-              className="flex items-center gap-2 px-4 py-[6px] bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg shadow-md hover:from-purple-700 hover:to-purple-800 
+              className="shrink-0 flex items-center gap-2 px-4 py-[6px] bg-gradient-to-r from-purple-600 to-purple-700 text-white font-medium rounded-lg shadow-md hover:from-purple-700 hover:to-purple-800
              hover:shadow-lg transition-all duration-300"
               disabled={loading}
             >
@@ -507,8 +518,9 @@ function DataTable({
         </div>
       </div>
 
-      {/* Table */}
-      <table className="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden" >
+      {/* Table — horizontal overflow scrolls inside the parent card */}
+      <div className="main-table-scroll w-full overflow-x-auto">
+      <table className="min-w-full">
         <thead className="bg-gray-100 text-gray-700 text-sm font-semibold uppercase tracking-wide border-b border-gray-200">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
@@ -567,6 +579,7 @@ function DataTable({
               )}
         </tbody>
       </table>
+      </div>
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-1 p-1 bg-white border-gray-200 rounded-lg shadow-sm ">

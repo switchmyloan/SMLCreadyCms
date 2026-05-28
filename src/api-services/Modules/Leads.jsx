@@ -125,7 +125,7 @@ export const getAllPartnerLeads = async (filters = {}) => {
         { skipAdminAppend: true }
     );
 };
-export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
+export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}, exportToken) => {
     const params = new URLSearchParams();
     params.append('currentPage', pageNo);
     params.append('perPage', limit);
@@ -141,9 +141,12 @@ export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
     if (filters.utmMedium) params.append('utmMedium', filters.utmMedium);
     if (filters.lender) params.append('lender', filters.lender);
 
+    const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
+
     return Api().get(`/leads/admin/all-leads?${params.toString()}`,
         {
             skipAdminAppend: true,
+            ...(headers ? { headers } : {}),
         }
     )
 };
@@ -151,7 +154,7 @@ export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
 export const getAllGoldLoanLeads = async (filters = {}) => {
     const params = new URLSearchParams();
     params.append('currentPage', 1);
-    params.append('perPage', 10000);
+    params.append('perPage', 100000);
 
     if (filters.type) params.append('type', filters.type);
     if (filters.search) params.append('search', filters.search);
@@ -192,7 +195,7 @@ export const getKbSuccessLeads = async (pageNo = 1, limit = 10, filters = {}) =>
 };
 
 export const getAllKbSuccessLeads = async (filters = {}) => {
-    return Api().get(`/leads/admin/kb-success-leads?${buildKbLeadsParams(1, 10000, filters)}`,
+    return Api().get(`/leads/admin/kb-success-leads?${buildKbLeadsParams(1, 100000, filters)}`,
         { skipAdminAppend: true }
     );
 };
@@ -244,7 +247,7 @@ export const getAppLeadTracker = async (pageNo = 1, limit = 10, filters = {}) =>
 
 export const getAllAppLeadTracker = async (filters = {}, exportToken) => {
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
-    return Api().get(`/leads/admin/app-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
+    return Api().get(`/leads/admin/app-lead-tracker?${buildLeadTrackerParams(1, 100000, filters)}`,
         { skipAdminAppend: true, ...(headers ? { headers } : {}) }
     );
 };
@@ -257,7 +260,7 @@ export const getWebLeadTracker = async (pageNo = 1, limit = 10, filters = {}) =>
 
 export const getAllWebLeadTracker = async (filters = {}, exportToken) => {
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
-    return Api().get(`/leads/admin/web-lead-tracker?${buildLeadTrackerParams(1, 10000, filters)}`,
+    return Api().get(`/leads/admin/web-lead-tracker?${buildLeadTrackerParams(1, 100000, filters)}`,
         { skipAdminAppend: true, ...(headers ? { headers } : {}) }
     );
 };

@@ -53,7 +53,7 @@ function DefaultLayout({ children }) {
       {/* Main content area */}
       {/* <div className="flex-1 flex flex-col sx:ml-64 md:ml-64"> */}
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
+        className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ${
           isSidebarCollapsed ? "md:ml-20" : "md:ml-64"
         }`}
       >
@@ -78,9 +78,9 @@ function DefaultLayout({ children }) {
         >
           <Breadcrumb />
         </div>
-        <main className="flex-1 p-4 mt-24 overflow-y-auto">
+        <main className="flex-1 min-w-0 p-4 mt-24 overflow-y-auto overflow-x-hidden">
           {/* {children} */}
-          <Outlet /> 
+          <Outlet />
         </main>
       </div>
         </UploadProvider>
