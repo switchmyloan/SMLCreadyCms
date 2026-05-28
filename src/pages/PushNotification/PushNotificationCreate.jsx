@@ -7,6 +7,7 @@ import ValidatedSingleSelect from "../../components/Form/ValidatedSingleSelect";
 import { useNavigate, useParams } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ToastNotification from "../../components/Notification/ToastNotification";
+import { Smartphone, Globe } from "lucide-react";
 
 export default function PushNotificationCreate() {
 
@@ -24,13 +25,19 @@ export default function PushNotificationCreate() {
     reset,
     control,
     setValue,
+    watch,
     formState: { errors }
   } = useForm({
-    imageUrl: null,
-    group_xid: null,
-    title: '',
-    message: ''
+    defaultValues: {
+      imageUrl: null,
+      group_xid: null,
+      title: '',
+      message: '',
+      channel: 'mobile',
+    }
   });
+
+  const channel = watch('channel') || 'mobile';
 
   const fetchGroups = async () => {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/push-notification/admin/group`);
@@ -69,6 +76,7 @@ export default function PushNotificationCreate() {
     setValue('group_xid', list?.group_xid)
     setValue('message', list?.message)
     setValue('imageUrl', list?.imageUrl || '')
+    setValue('channel', list?.channel || 'mobile')
   };
 
 
@@ -91,6 +99,7 @@ export default function PushNotificationCreate() {
         title: data.title,
         message: data.message,
         group_xid: data.group_xid,
+        channel: data.channel || 'mobile',
         ...(imageUrl && { imageUrl }),
       };
 
@@ -136,6 +145,45 @@ export default function PushNotificationCreate() {
             </button>
           </div>
           <hr />
+
+          {/* Channel selector — picks the FCM token column the backend dispatches to. */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Channel <span className="text-red-500">*</span>
+            </label>
+            <div className="grid grid-cols-2 gap-3 max-w-md">
+              <button
+                type="button"
+                onClick={() => setValue('channel', 'mobile', { shouldDirty: true })}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border text-sm font-semibold transition-colors ${
+                  channel === 'mobile'
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                <Smartphone className="w-4 h-4" />
+                Mobile App
+              </button>
+              <button
+                type="button"
+                onClick={() => setValue('channel', 'web', { shouldDirty: true })}
+                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border text-sm font-semibold transition-colors ${
+                  channel === 'web'
+                    ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                    : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                Web Browser
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              {channel === 'web'
+                ? 'Delivers to creadyweb users who granted browser notification permission (uses webFCMtoken).'
+                : 'Delivers to Cready mobile app users (uses native FCMtoken).'}
+            </p>
+          </div>
+
           <div className="flex gap-4">
             <div className="flex-1">
               <ValidatedTextField

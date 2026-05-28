@@ -326,6 +326,14 @@ export const sendPushNotification = async (payload) => {
     )
 };
 
+// Admin debug: send a push directly to a raw FCM token (no group, no template).
+// payload: { token: string, title: string, body: string, imageUrl?: string }
+export const testSendPushToToken = async (payload) => {
+    return Api().post(`/push-notification/admin/test-send-token`, payload,
+        { skipAdminAppend: true }
+    );
+};
+
 export const schedulePushNotification = async (payload) => {
     return Api().post(`/push-notification/admin/schedule`, payload,
         { skipAdminAppend: true }

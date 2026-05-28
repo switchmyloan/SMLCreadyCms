@@ -22,6 +22,7 @@ import {
   ChevronRight,
   X,
   Smartphone,
+  Globe,
 } from "lucide-react";
 
 // System groups with icons and colors
@@ -30,6 +31,7 @@ const SYSTEM_GROUPS = [
   { label: "Active Users", type: "active-users", groupName: "Active Users", icon: Activity, color: "green", description: "Users active in last 30 days" },
   { label: "Live Users", type: "live-users", groupName: "Live Users", icon: Zap, color: "yellow", description: "Currently online users" },
   { label: "Mobile Registered", type: "mobile-registered", groupName: "Mobile Registered", icon: Smartphone, color: "teal", description: "Users who completed mobile registration" },
+  { label: "Web Subscribers", type: "web-subscribers", groupName: "Web Subscribers", icon: Globe, color: "emerald", description: "Users who enabled browser push on creadyweb" },
 ];
 
 const LOAN_GROUPS = [
@@ -50,6 +52,7 @@ const COLOR_CLASSES = {
   orange: { bg: "bg-orange-50", icon: "bg-orange-100 text-orange-600", border: "border-orange-200", text: "text-orange-700" },
   red: { bg: "bg-red-50", icon: "bg-red-100 text-red-600", border: "border-red-200", text: "text-red-700" },
   teal: { bg: "bg-teal-50", icon: "bg-teal-100 text-teal-600", border: "border-teal-200", text: "text-teal-700" },
+  emerald: { bg: "bg-emerald-50", icon: "bg-emerald-100 text-emerald-600", border: "border-emerald-200", text: "text-emerald-700" },
 };
 
 export default function GroupList() {
@@ -223,6 +226,7 @@ export default function GroupList() {
   const activeUsers = getGroupCount("Active Users");
   const liveUsers = getGroupCount("Live Users");
   const mobileRegistered = getGroupCount("Mobile Registered");
+  const webSubscribers = getGroupCount("Web Subscribers");
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -275,7 +279,7 @@ export default function GroupList() {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
@@ -306,6 +310,17 @@ export default function GroupList() {
             </div>
             <div className="p-3 bg-yellow-50 rounded-xl">
               <Zap className="w-6 h-6 text-yellow-600" />
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-3xl font-bold text-emerald-700">{webSubscribers.toLocaleString()}</p>
+              <p className="text-sm text-gray-500">Web Subscribers</p>
+            </div>
+            <div className="p-3 bg-emerald-50 rounded-xl">
+              <Globe className="w-6 h-6 text-emerald-600" />
             </div>
           </div>
         </div>
