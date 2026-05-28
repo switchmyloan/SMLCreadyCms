@@ -42,6 +42,7 @@ import Contact from './pages/LeadManagement/Contact/Contact';
 import UTMGenerator from './pages/UTM/UtmLinkGenerate';
 import AllLeads from './pages/LeadManagement/AllLeads/AllLeads';
 import GoldLoanLeads from './pages/LeadManagement/GoldLoanLeads/GoldLoanLeads';
+import KbSuccessLeads from './pages/LeadManagement/KbSuccessLeads/KbSuccessLeads';
 import AppLeadTracker from './pages/LeadManagement/LeadTracker/AppLeadTracker';
 import WebLeadTracker from './pages/LeadManagement/LeadTracker/WebLeadTracker';
 import PartnersLeads from './pages/LeadManagement/PartnersLead/PartnersLead';
@@ -106,6 +107,7 @@ function App() {
             <Route path="lead-detail/:id" element={<PermissionGuard permission="lead_management.view"><LeadDetail /></PermissionGuard>} />
             <Route path="all-leads" element={<PermissionGuard permission="lead_management.view"><AllLeads /></PermissionGuard>} />
             <Route path="gold-loan-leads" element={<PermissionGuard permission="lead_management.view"><GoldLoanLeads /></PermissionGuard>} />
+            <Route path="kb-success-leads" element={<PermissionGuard permission="lead_management.view"><KbSuccessLeads /></PermissionGuard>} />
             <Route path="app-lead-tracker" element={<PermissionGuard permission="lead_management.view"><AppLeadTracker /></PermissionGuard>} />
             <Route path="web-lead-tracker" element={<PermissionGuard permission="lead_management.view"><WebLeadTracker /></PermissionGuard>} />
             <Route path="partner-leads" element={<PermissionGuard permission="lead_management.view"><PartnersLeads /></PermissionGuard>} />

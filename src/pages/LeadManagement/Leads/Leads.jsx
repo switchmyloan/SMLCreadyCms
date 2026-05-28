@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportOtpModal from '../../../components/ExportOtpModal';
 import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
+import { useLenderFilter } from '../../../custom-hooks/useLenderFilter';
 
 const getDateParams = (query) => {
   if (query.startDate && query.endDate) {
@@ -223,6 +224,7 @@ const Leads = () => {
     disbursement: '',
     utmSource: '',
     utmMedium: '',
+    lender: '',
   });
 
   const resetToFirstPage = useCallback(() => {
@@ -251,6 +253,7 @@ const Leads = () => {
       activeQuery.disbursement,
       activeQuery.utmSource,
       activeQuery.utmMedium,
+      activeQuery.lender,
     );
   }, []);
 
@@ -476,6 +479,15 @@ const Leads = () => {
     onChange: handleUtmChange,
   });
 
+  const handleLenderChange = useCallback((value) => {
+    resetToFirstPage();
+    setQuery((prev) => ({ ...prev, lender: value, page_no: 1 }));
+  }, [resetToFirstPage]);
+
+  const { filterEntry: lenderFilterEntry } = useLenderFilter({
+    onChange: handleLenderChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -508,6 +520,7 @@ const Leads = () => {
       onChange: handleDisbursementFilter,
     },
     ...utmFilterEntries,
+    lenderFilterEntry,
   ], [
     dobRanges,
     genderOptions,
@@ -518,6 +531,7 @@ const Leads = () => {
     jobTypeOptions,
     disbursementOptions,
     utmFilterEntries,
+    lenderFilterEntry,
     query.gender,
     query.jobType,
     query.maxAge,

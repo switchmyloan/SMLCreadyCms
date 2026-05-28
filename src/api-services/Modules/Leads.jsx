@@ -40,7 +40,8 @@ export const getLeads = async (
     exportToken,
     disbursement,
     utmSource,
-    utmMedium
+    utmMedium,
+    lender
 ) => {
     const baseUrl = `/leads/admin/in-web-leads`;
     const params = new URLSearchParams();
@@ -63,6 +64,7 @@ export const getLeads = async (
     if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
     if (utmSource) params.append('utmSource', utmSource);
     if (utmMedium) params.append('utmMedium', utmMedium);
+    if (lender) params.append('lender', lender);
 
     const queryString = params.toString();
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
@@ -137,6 +139,7 @@ export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
     if (filters.toDate) params.append('toDate', filters.toDate);
     if (filters.utmSource) params.append('utmSource', filters.utmSource);
     if (filters.utmMedium) params.append('utmMedium', filters.utmMedium);
+    if (filters.lender) params.append('lender', filters.lender);
 
     return Api().get(`/leads/admin/all-leads?${params.toString()}`,
         {
@@ -164,6 +167,34 @@ export const getAllGoldLoanLeads = async (filters = {}) => {
             skipAdminAppend: true,
         }
     )
+};
+
+const buildKbLeadsParams = (pageNo = 1, limit = 10, filters = {}) => {
+    const params = new URLSearchParams();
+    params.append('currentPage', pageNo);
+    params.append('perPage', limit);
+
+    if (filters.type) params.append('type', filters.type);
+    if (filters.search) params.append('search', filters.search);
+    if (filters.gender) params.append('gender', filters.gender);
+    if (filters.minIncome !== undefined && filters.minIncome !== null) params.append('minIncome', filters.minIncome);
+    if (filters.maxIncome !== undefined && filters.maxIncome !== null) params.append('maxIncome', filters.maxIncome);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);
+    if (filters.toDate) params.append('toDate', filters.toDate);
+    if (filters.bucket) params.append('bucket', filters.bucket);
+    return params.toString();
+};
+
+export const getKbSuccessLeads = async (pageNo = 1, limit = 10, filters = {}) => {
+    return Api().get(`/leads/admin/kb-success-leads?${buildKbLeadsParams(pageNo, limit, filters)}`,
+        { skipAdminAppend: true }
+    );
+};
+
+export const getAllKbSuccessLeads = async (filters = {}) => {
+    return Api().get(`/leads/admin/kb-success-leads?${buildKbLeadsParams(1, 10000, filters)}`,
+        { skipAdminAppend: true }
+    );
 };
 
 export const getGoldLoanLeads = async (pageNo = 1, limit = 10, filters = {}) => {
@@ -247,7 +278,8 @@ export const getInAppLeads = async (
     exportToken,
     disbursement,
     utmSource,
-    utmMedium
+    utmMedium,
+    lender
 ) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
@@ -273,6 +305,7 @@ export const getInAppLeads = async (
     if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
     if (utmSource) params.append('utmSource', utmSource);
     if (utmMedium) params.append('utmMedium', utmMedium);
+    if (lender) params.append('lender', lender);
 
     const queryString = params.toString(); // Automatically encodes the values
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;

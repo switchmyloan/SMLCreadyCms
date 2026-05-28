@@ -180,6 +180,17 @@ export const routes = [
     permission: "lead_management.view",
   },
   {
+    path: "/kb-success-leads",
+    label: "KB Success Leads",
+    icon: "ShieldCheck",
+    showInSidebar: true,
+    group: "Lead Management",
+    groupIcon: "Users",
+    groupOrder: 1,
+    order: 5,
+    permission: "lead_management.view",
+  },
+  {
     path: "/disbursement-leads",
     label: "Disbursements",
     icon: "Wallet",

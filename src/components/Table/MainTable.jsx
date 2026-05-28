@@ -321,7 +321,7 @@ function DataTable({
     <div className="p-3 md:p-4 md:pb-2 md:pt-2 bg-gray-50 rounded-lg shadow-sm  pt-0 pb-0 ">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-1">
         <h1 className="text-lg md:text-lg font-semibold text-gray-800">{title}</h1>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 w-full sm:w-auto justify-between">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-1 w-full sm:w-auto justify-between">
           <span className="text-gray-600 text-sm">
             {totalDataCount} entries
           </span>
@@ -346,11 +346,12 @@ function DataTable({
           {/* 💡 NEW DYNAMIC DROPDOWN FILTER UI 💡 */}
           {dynamicFilters && dynamicFilters.length > 0 && (
             dynamicFilters.map((filter) => (
-              <div key={filter.key} className="z-20 flex flex-col w-[80px]">
+              <div key={filter.key} className="z-20 flex flex-col">
                 <select
                   onChange={(e) => filter.onChange(e.target.value)}
                   value={filter.activeValue}
-                  className="p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400"
+                  title={filter.label || 'Select Filter'}
+                  className="min-w-[110px] max-w-[160px] p-1.5 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-purple-400 truncate"
                 >
                   <option value="">{filter.label || 'Select Filter'}</option>
 

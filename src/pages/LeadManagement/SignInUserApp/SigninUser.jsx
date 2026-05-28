@@ -11,6 +11,7 @@ import SummaryCards from '../../../components/SummaryCards';
 import ExportOtpModal from '../../../components/ExportOtpModal';
 import { leadsColumn } from '../../../components/TableHeader';
 import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
+import { useLenderFilter } from '../../../custom-hooks/useLenderFilter';
 
 const getDateParams = (query) => {
   if (query.startDate && query.endDate) {
@@ -221,6 +222,7 @@ const SignInUsers = () => {
     disbursement: '',
     utmSource: '',
     utmMedium: '',
+    lender: '',
   });
 
   const resetToFirstPage = useCallback(() => {
@@ -249,6 +251,7 @@ const SignInUsers = () => {
       activeQuery.disbursement,
       activeQuery.utmSource,
       activeQuery.utmMedium,
+      activeQuery.lender,
     );
   }, []);
 
@@ -475,6 +478,15 @@ const SignInUsers = () => {
     onChange: handleUtmChange,
   });
 
+  const handleLenderChange = useCallback((value) => {
+    resetToFirstPage();
+    setQuery((prev) => ({ ...prev, lender: value, page_no: 1 }));
+  }, [resetToFirstPage]);
+
+  const { filterEntry: lenderFilterEntry } = useLenderFilter({
+    onChange: handleLenderChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -507,6 +519,7 @@ const SignInUsers = () => {
       onChange: handleDisbursementFilter,
     },
     ...utmFilterEntries,
+    lenderFilterEntry,
   ], [
     dobRanges,
     genderOptions,
@@ -517,6 +530,7 @@ const SignInUsers = () => {
     jobTypeOptions,
     disbursementOptions,
     utmFilterEntries,
+    lenderFilterEntry,
     query.gender,
     query.jobType,
     query.maxAge,

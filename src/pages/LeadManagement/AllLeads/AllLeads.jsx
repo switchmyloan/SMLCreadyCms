@@ -12,6 +12,7 @@ import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportModal from '../../../components/ExportModal';
 import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
+import { useLenderFilter } from '../../../custom-hooks/useLenderFilter';
 
 
 
@@ -133,6 +134,7 @@ const AllLeads = () => {
     jobType: '',
     utmSource: '',
     utmMedium: '',
+    lender: '',
   });
 
   /* ========================= OPTIONS ========================= */
@@ -211,6 +213,7 @@ const AllLeads = () => {
       if (query.endDate) filters.toDate = query.endDate;
       if (query.utmSource) filters.utmSource = query.utmSource;
       if (query.utmMedium) filters.utmMedium = query.utmMedium;
+      if (query.lender) filters.lender = query.lender;
 
       const response = await getAllLeads(query.page_no, query.limit, filters);
 
@@ -237,7 +240,7 @@ const AllLeads = () => {
     } finally {
       setLoading(false);
     }
-  }, [query.page_no, query.limit, query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate]);
+  }, [query.page_no, query.limit, query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate, query.utmSource, query.utmMedium, query.lender]);
 
   useEffect(() => {
     fetchLeads();
@@ -393,6 +396,15 @@ const AllLeads = () => {
     onChange: handleUtmChange,
   });
 
+  const handleLenderChange = useCallback((value) => {
+    resetToFirstPage();
+    setQuery((prev) => ({ ...prev, lender: value, page_no: 1 }));
+  }, [resetToFirstPage]);
+
+  const { filterEntry: lenderFilterEntry } = useLenderFilter({
+    onChange: handleLenderChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -418,7 +430,8 @@ const AllLeads = () => {
       onChange: handleDobFilter
     },
     ...utmFilterEntries,
-  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, utmFilterEntries]);
+    lenderFilterEntry,
+  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, utmFilterEntries, lenderFilterEntry]);
 
   const filterDataByDate = (data, startDate, endDate) => {
     const start = new Date(startDate);
