@@ -30,6 +30,7 @@ import {
   getAllWebLeadTracker,
 } from '../../../api-services/Modules/Leads';
 import ExportOtpModal from '../../../components/ExportOtpModal';
+import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
 
 /* ============== Animation variants ============== */
 const containerStagger = {
@@ -348,6 +349,7 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     page_no: 1, limit: 10,
     search: '', filter_date: '', startDate: null, endDate: null,
     gender: '', minIncome: undefined, maxIncome: undefined, stage: '',
+    utmSource: '', utmMedium: '',
     mode: 'pending', // 'pending' = haven't done | 'completed' = have done
   });
 
@@ -376,8 +378,10 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     if (query.endDate) filters.toDate = query.endDate;
     if (query.stage) filters.stage = query.stage;
     if (query.mode) filters.mode = query.mode;
+    if (query.utmSource) filters.utmSource = query.utmSource;
+    if (query.utmMedium) filters.utmMedium = query.utmMedium;
     return filters;
-  }, [query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate, query.stage, query.mode]);
+  }, [query.filter_date, query.search, query.gender, query.minIncome, query.maxIncome, query.startDate, query.endDate, query.stage, query.mode, query.utmSource, query.utmMedium]);
 
   const fetchLeads = useCallback(async () => {
     const seq = ++fetchSeqRef.current;
@@ -514,12 +518,21 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
     setShowDatePicker(false);
   };
 
-  const hasActiveFilters = query.search || query.gender || query.stage || query.filter_date || query.startDate || (query.minIncome !== undefined);
+  const hasActiveFilters = query.search || query.gender || query.stage || query.filter_date || query.startDate || (query.minIncome !== undefined) || query.utmSource || query.utmMedium;
 
   const clearAllFilters = () => {
-    setQuery((p) => ({ page_no: 1, limit: 10, search: '', filter_date: '', startDate: null, endDate: null, gender: '', minIncome: undefined, maxIncome: undefined, stage: '', mode: p.mode }));
+    setQuery((p) => ({ page_no: 1, limit: 10, search: '', filter_date: '', startDate: null, endDate: null, gender: '', minIncome: undefined, maxIncome: undefined, stage: '', utmSource: '', utmMedium: '', mode: p.mode }));
     setDateRange({ startDate: '', endDate: '' });
   };
+
+  // Pulls distinct UTM source/medium values from the backend once.
+  // We deliberately ignore the hook's onChange callback and read the
+  // `options` field via the entries it returns — this keeps the hook
+  // generic across pages that use either DataTable's filter array or
+  // (like this one) bespoke <select> elements.
+  const { filterEntries: utmFilterEntries } = useUtmFilters({ onChange: () => {} });
+  const utmSourceOptions = utmFilterEntries.find((e) => e.key === 'utmSource')?.options || [];
+  const utmMediumOptions = utmFilterEntries.find((e) => e.key === 'utmMedium')?.options || [];
 
   const getPageNumbers = () => {
     const pages = [];
@@ -767,6 +780,40 @@ const LeadTracker = ({ source = 'mobile', title, subtitle, partnerLabel }) => {
                   </div>
                 )}
               </div>
+
+              {/* UTM Source */}
+              <select
+                value={query.utmSource}
+                onChange={(e) => updateQuery({ utmSource: e.target.value })}
+                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white font-medium text-gray-600 max-w-[140px]"
+                title="UTM Source"
+              >
+                <option value="">UTM Source</option>
+                {utmSourceOptions
+                  .filter((o) => o.value)
+                  .map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+              </select>
+
+              {/* UTM Medium */}
+              <select
+                value={query.utmMedium}
+                onChange={(e) => updateQuery({ utmMedium: e.target.value })}
+                className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-300 bg-white font-medium text-gray-600 max-w-[140px]"
+                title="UTM Medium"
+              >
+                <option value="">UTM Medium</option>
+                {utmMediumOptions
+                  .filter((o) => o.value)
+                  .map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+              </select>
 
               {/* Quick date filters */}
               {['today', 'yesterday'].map((type) => (

@@ -10,6 +10,7 @@ import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportOtpModal from '../../../components/ExportOtpModal';
 import { leadsColumn } from '../../../components/TableHeader';
+import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
 
 const getDateParams = (query) => {
   if (query.startDate && query.endDate) {
@@ -218,6 +219,8 @@ const SignInUsers = () => {
     maxAge: undefined,
     jobType: '',
     disbursement: '',
+    utmSource: '',
+    utmMedium: '',
   });
 
   const resetToFirstPage = useCallback(() => {
@@ -244,6 +247,8 @@ const SignInUsers = () => {
       type,
       activeQuery.exportToken,
       activeQuery.disbursement,
+      activeQuery.utmSource,
+      activeQuery.utmMedium,
     );
   }, []);
 
@@ -456,6 +461,20 @@ const SignInUsers = () => {
     { label: 'Not Disbursed', value: 'no' },
   ], []);
 
+  const handleUtmChange = useCallback(({ utmSource, utmMedium }) => {
+    resetToFirstPage();
+    setQuery((prev) => ({
+      ...prev,
+      utmSource,
+      utmMedium,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
+
+  const { filterEntries: utmFilterEntries } = useUtmFilters({
+    onChange: handleUtmChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -487,6 +506,7 @@ const SignInUsers = () => {
       options: disbursementOptions,
       onChange: handleDisbursementFilter,
     },
+    ...utmFilterEntries,
   ], [
     dobRanges,
     genderOptions,
@@ -496,6 +516,7 @@ const SignInUsers = () => {
     handleDisbursementFilter,
     jobTypeOptions,
     disbursementOptions,
+    utmFilterEntries,
     query.gender,
     query.jobType,
     query.maxAge,

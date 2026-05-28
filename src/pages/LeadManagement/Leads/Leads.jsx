@@ -10,6 +10,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportOtpModal from '../../../components/ExportOtpModal';
+import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
 
 const getDateParams = (query) => {
   if (query.startDate && query.endDate) {
@@ -220,6 +221,8 @@ const Leads = () => {
     maxAge: undefined,
     jobType: '',
     disbursement: '',
+    utmSource: '',
+    utmMedium: '',
   });
 
   const resetToFirstPage = useCallback(() => {
@@ -246,6 +249,8 @@ const Leads = () => {
       type,
       activeQuery.exportToken,
       activeQuery.disbursement,
+      activeQuery.utmSource,
+      activeQuery.utmMedium,
     );
   }, []);
 
@@ -457,6 +462,20 @@ const Leads = () => {
     { label: 'Not Disbursed', value: 'no' },
   ], []);
 
+  const handleUtmChange = useCallback(({ utmSource, utmMedium }) => {
+    resetToFirstPage();
+    setQuery((prev) => ({
+      ...prev,
+      utmSource,
+      utmMedium,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
+
+  const { filterEntries: utmFilterEntries } = useUtmFilters({
+    onChange: handleUtmChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -488,6 +507,7 @@ const Leads = () => {
       options: disbursementOptions,
       onChange: handleDisbursementFilter,
     },
+    ...utmFilterEntries,
   ], [
     dobRanges,
     genderOptions,
@@ -497,6 +517,7 @@ const Leads = () => {
     handleDisbursementFilter,
     jobTypeOptions,
     disbursementOptions,
+    utmFilterEntries,
     query.gender,
     query.jobType,
     query.maxAge,

@@ -11,6 +11,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import SummaryCards from '../../../components/SummaryCards';
 import ExportModal from '../../../components/ExportModal';
+import { useUtmFilters } from '../../../custom-hooks/useUtmFilters';
 
 
 
@@ -130,6 +131,8 @@ const AllLeads = () => {
     minAge: undefined,
     maxAge: undefined,
     jobType: '',
+    utmSource: '',
+    utmMedium: '',
   });
 
   /* ========================= OPTIONS ========================= */
@@ -206,6 +209,8 @@ const AllLeads = () => {
       if (query.maxIncome !== undefined) filters.maxIncome = query.maxIncome;
       if (query.startDate) filters.fromDate = query.startDate;
       if (query.endDate) filters.toDate = query.endDate;
+      if (query.utmSource) filters.utmSource = query.utmSource;
+      if (query.utmMedium) filters.utmMedium = query.utmMedium;
 
       const response = await getAllLeads(query.page_no, query.limit, filters);
 
@@ -374,6 +379,20 @@ const AllLeads = () => {
     }));
   }, [resetToFirstPage]);
 
+  const handleUtmChange = useCallback(({ utmSource, utmMedium }) => {
+    resetToFirstPage();
+    setQuery((prev) => ({
+      ...prev,
+      utmSource,
+      utmMedium,
+      page_no: 1,
+    }));
+  }, [resetToFirstPage]);
+
+  const { filterEntries: utmFilterEntries } = useUtmFilters({
+    onChange: handleUtmChange,
+  });
+
   const dynamicFiltersArray = useMemo(() => [
     {
       key: 'gender',
@@ -397,8 +416,9 @@ const AllLeads = () => {
         : '',
       options: dobRanges,
       onChange: handleDobFilter
-    }
-  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter]);
+    },
+    ...utmFilterEntries,
+  ], [query.gender, query.minAge, query.maxAge, query.jobType, handleJobTypeFilter, utmFilterEntries]);
 
   const filterDataByDate = (data, startDate, endDate) => {
     const start = new Date(startDate);

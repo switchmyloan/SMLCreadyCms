@@ -1,6 +1,12 @@
 import Api from "../api";
 
 
+export const getUtmOptions = async () => {
+    return Api().get(`/leads/admin/utm-options`,
+        { skipAdminAppend: true }
+    );
+};
+
 export const getDisbursements = async (pageNo = 1, limit = 10, filters = {}) => {
     const params = new URLSearchParams();
     params.append('currentPage', pageNo);
@@ -32,7 +38,9 @@ export const getLeads = async (
     jobType,
     type,
     exportToken,
-    disbursement
+    disbursement,
+    utmSource,
+    utmMedium
 ) => {
     const baseUrl = `/leads/admin/in-web-leads`;
     const params = new URLSearchParams();
@@ -53,6 +61,8 @@ export const getLeads = async (
     if (maxAge !== undefined && maxAge !== null) params.append('maxAge', Number(maxAge));
     if (jobType) params.append('jobType', jobType);
     if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
+    if (utmSource) params.append('utmSource', utmSource);
+    if (utmMedium) params.append('utmMedium', utmMedium);
 
     const queryString = params.toString();
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
@@ -125,6 +135,8 @@ export const getAllLeads = async (pageNo = 1, limit = 10, filters = {}) => {
     if (filters.maxIncome !== undefined) params.append('maxIncome', filters.maxIncome);
     if (filters.fromDate) params.append('fromDate', filters.fromDate);
     if (filters.toDate) params.append('toDate', filters.toDate);
+    if (filters.utmSource) params.append('utmSource', filters.utmSource);
+    if (filters.utmMedium) params.append('utmMedium', filters.utmMedium);
 
     return Api().get(`/leads/admin/all-leads?${params.toString()}`,
         {
@@ -188,6 +200,8 @@ const buildLeadTrackerParams = (pageNo = 1, limit = 10, filters = {}) => {
     if (filters.toDate) params.append('toDate', filters.toDate);
     if (filters.stage) params.append('stage', filters.stage);
     if (filters.mode) params.append('mode', filters.mode);
+    if (filters.utmSource) params.append('utmSource', filters.utmSource);
+    if (filters.utmMedium) params.append('utmMedium', filters.utmMedium);
     return params.toString();
 };
 
@@ -231,7 +245,9 @@ export const getInAppLeads = async (
     jobType,
     type,
     exportToken,
-    disbursement
+    disbursement,
+    utmSource,
+    utmMedium
 ) => {
     // Base URL
     const baseUrl = `/leads/admin/in-app-leads`;
@@ -255,6 +271,8 @@ export const getInAppLeads = async (
     if (maxAge !== undefined && maxAge !== null) params.append('maxAge', Number(maxAge));
     if (jobType) params.append('jobType', jobType);
     if (disbursement === 'yes' || disbursement === 'no') params.append('disbursement', disbursement);
+    if (utmSource) params.append('utmSource', utmSource);
+    if (utmMedium) params.append('utmMedium', utmMedium);
 
     const queryString = params.toString(); // Automatically encodes the values
     const headers = exportToken ? { 'X-Export-Token': exportToken } : undefined;
