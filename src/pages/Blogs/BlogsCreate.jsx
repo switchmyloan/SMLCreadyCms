@@ -120,6 +120,19 @@ const validationSchema = Yup.object().shape({
   //   .min(1, 'At least one tag is required')
   //   .required('Tags are required'),
   metaKeywords: Yup.string().notRequired().default("").trim(),
+  schemaMarkup: Yup.string()
+    .notRequired()
+    .default("")
+    .trim()
+    .test("is-valid-json", "Schema markup must be valid JSON-LD", (value) => {
+      if (!value || value.trim() === "") return true; // Allow empty
+      try {
+        JSON.parse(value);
+        return true;
+      } catch {
+        return false;
+      }
+    }),
   metaImage: Yup.mixed()
     .required("Image is required")
     .test("is-valid-image", "Image must be a valid file or URL", (value) => {
@@ -336,7 +349,8 @@ export default function BlogCreate() {
             setValue("metaKeywords", keywordArray.join(", "), {
               shouldValidate: true,
             });
-setValue("schemaMarkup", blog.schemaMarkup || "");
+console.log("schemaMarkup from API:", blog.schemaMarkup);
+            setValue("schemaMarkup", blog.schemaMarkup || "");
             if (blog.metaImage) {
               const fullImageUrl = `${imageUrl}${blog.metaImage}`; // Ensure no double slashes
               console.log(fullImageUrl, "fullImageUrl");
