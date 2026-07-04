@@ -74,7 +74,7 @@ const Faq = () => {
     { label: "Other", value: "other" },
 
     { label: "Debt Consolidation Loan Bangalore", value: "debt_consolidation_loan_bangalore" },
-    { label: "Debt Consolidation Loan Chennai", value: "debt_consolidation_loan_chennai" },
+    { label: "Debt Consolidatio n Loan Chennai", value: "debt_consolidation_loan_chennai" },
     { label: "Debt Consolidation Loan Delhi", value: "debt_consolidation_loan_delhi" },
     { label: "Debt Consolidation Loan Hyderabad", value: "debt_consolidation_loan_hyderabad" },
     { label: "Debt Consolidation Loan Mumbai", value: "debt_consolidation_loan_mumbai" },
@@ -95,6 +95,12 @@ const Faq = () => {
     { label: "Instant Personal Loan Pune", value: "instant_personal_loan_pune" },
     { label: "Instant Personal Loan Surat", value: "instant_personal_loan_surat" },
     { label: "Instant Personal Loan Kolkata", value: "instant_personal_loan_kolkata" },
+    { label: "Instant Personal Loan Lucknow", value: "instant_personal_loan_lucknow" },
+    { label: "Instant Personal Loan Nagpur", value: "instant_personal_loan_nagpur" },
+    { label: "Instant Personal Loan Indore", value: "instant_personal_loan_indore" },
+    { label: "Instant Personal Loan Coimbatore", value: "instant_personal_loan_coimbatore" },
+    { label: "Instant Personal Loan Kochi", value: "instant_personal_loan_kochi" },
+    { label: "Instant Personal Loan Chandigarh", value: "instant_personal_loan_chandigarh" },
 
     { label: "Personal Loan Bangalore", value: "personal_loan_bangalore" },
     { label: "Personal Loan Chennai", value: "personal_loan_chennai" },

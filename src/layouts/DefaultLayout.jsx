@@ -1,17 +1,34 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "../components/Navbar/Navbar";
 import Breadcrumb from "../components/BreadCrumb/BreadCrumb";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { UploadProvider } from "../context/UploadContext";
-import { useActivityTracking } from "../custom-hooks/useActivityTracking";
+import { useActivityTracking, trackLogout } from "../custom-hooks/useActivityTracking";
+import { useAuth } from "../custom-hooks/useAuth";
+import { useIdleTimeout } from "../custom-hooks/useIdleTimeout";
+
+// Auto-logout after this much inactivity. Keep 2 minutes for now.
+const SESSION_IDLE_TIMEOUT = 2 * 60 * 1000;
 
 function DefaultLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   // Track user activity (daily heartbeat + page views)
-  useActivityTracking(); 
+  useActivityTracking();
+
+  // Log the user out after a period of inactivity (mirrors Navbar logout).
+  // `replace: true` => protected page history se hat jaaye, back button se wapas na aaye.
+  const handleIdleLogout = useCallback(async () => {
+    await trackLogout();
+    logout();
+    navigate("/login", { replace: true });
+  }, [logout, navigate]);
+
+  useIdleTimeout(handleIdleLogout, SESSION_IDLE_TIMEOUT);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
